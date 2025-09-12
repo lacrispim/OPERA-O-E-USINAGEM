@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, History, WandSparkles, Database } from 'lucide-react';
+import { LayoutDashboard, History, WandSparkles, Database, FileJson } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -20,6 +20,7 @@ const navItems = [
   { href: '/registros', icon: History, label: 'Registros Históricos' },
   { href: '/production-line', icon: Database, label: 'Linha de Produção' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
+  { href: '/registros-firebase', icon: FileJson, label: 'Registros Firebase' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -42,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label }}
                 >
                   <Link href={item.href}>
