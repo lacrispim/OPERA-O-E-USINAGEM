@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronsUpDown } from 'lucide-react';
 import { RequisicaoList } from './requisicao-list';
 
 const PREFERRED_COLUMN_ORDER = [
@@ -295,30 +295,30 @@ export function ProductionLineTable() {
                 <Table>
                     <TableHeader>
                     <TableRow className="bg-[#2E8555] hover:bg-[#2E8555]/90">
-                        <TableHead className="text-white">ID</TableHead>
-                        {headers.map((header) => (
-                        <TableHead key={header} className="text-white">{header}</TableHead>
+                        <TableHead className="text-white sticky left-0 bg-[#2E8555] z-10">Campo</TableHead>
+                        {data.map((item) => (
+                          <TableHead key={item.id} className="text-white">{item.id}</TableHead>
                         ))}
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {data.map((item) => (
-                        <TableRow key={item.id}>
-                        <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
-                        {headers.map((header) => (
-                            <TableCell key={header}>
-                                {renderCellContent(item, header)}
-                            </TableCell>
-                        ))}
+                      {headers.map((header) => (
+                        <TableRow key={header}>
+                          <TableHead className="font-medium text-muted-foreground sticky left-0 bg-background z-10">{header}</TableHead>
+                          {data.map((item) => (
+                              <TableCell key={`${item.id}-${header}`}>
+                                  {renderCellContent(item, header)}
+                              </TableCell>
+                          ))}
                         </TableRow>
-                    ))}
-                    {data.length === 0 && (
-                        <TableRow>
-                        <TableCell colSpan={headers.length + 1} className="h-24 text-center">
-                            Nenhum dado encontrado para o nó "{selectedNode}".
-                        </TableCell>
-                        </TableRow>
-                    )}
+                      ))}
+                      {data.length === 0 && (
+                          <TableRow>
+                          <TableCell colSpan={headers.length + 1} className="h-24 text-center">
+                              Nenhum dado encontrado para o nó "{selectedNode}".
+                          </TableCell>
+                          </TableRow>
+                      )}
                     </TableBody>
                 </Table>
                 </div>
