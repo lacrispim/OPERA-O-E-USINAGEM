@@ -13,6 +13,7 @@ import { ProductionRecord } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, getMonth, getYear } from "date-fns";
 import { ptBR } from 'date-fns/locale';
+import { SiteProductionChart } from "./components/site-production-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -99,13 +100,17 @@ export default function DashboardPage() {
         ) : (
             <>
                 <StatsCards records={filteredRecords} />
+                <div className="grid gap-8 lg:grid-cols-2">
+                  <ProductionChart records={filteredRecords} />
+                  <SiteProductionChart records={filteredRecords} />
+                </div>
                 <div className="grid gap-8 lg:grid-cols-5">
-                <div className="lg:col-span-3">
-                    <ProductionChart records={filteredRecords} />
-                </div>
-                <div className="lg:col-span-2">
-                    <RecentProductions records={recentRecords} />
-                </div>
+                  <div className="lg:col-span-3">
+                    {/* Placeholder for future content if needed */}
+                  </div>
+                  <div className="lg:col-span-2">
+                      <RecentProductions records={recentRecords} />
+                  </div>
                 </div>
             </>
         )}
