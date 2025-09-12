@@ -36,10 +36,11 @@ const PREFERRED_COLUMN_ORDER = [
     "Centro (minutos)",
     "Torno (minutos)",
     "Programação (minutos)",
+    "Observação"
 ];
 
-const SITE_OPTIONS = ["Vinhedo", "Valinhos", "Campinas"];
-const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente"];
+const SITE_OPTIONS = ["Vinhedo", "Valinhos", "Campinas", "Site A"];
+const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente", "Em produção"];
 
 
 export function ProductionLineTable() {
@@ -104,10 +105,16 @@ export function ProductionLineTable() {
             const allHeaders = new Set<string>();
             dataArray.forEach(item => {
                 Object.keys(item).forEach(key => {
-                    if(key !== 'id') allHeaders.add(key === 'Centro' ? 'Centro (minutos)' : key);
+                    if(key !== 'id') {
+                      let header = key;
+                      if (header === 'Centro') header = 'Centro (minutos)';
+                      if (header === 'Torno') header = 'Torno (minutos)';
+                      if (header === 'Programação') header = 'Programação (minutos)';
+                      allHeaders.add(header);
+                    }
                 })
             });
-
+            
             // Reorder headers based on preferred order
              const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
              const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h));
@@ -144,7 +151,12 @@ export function ProductionLineTable() {
 
     const { rowId, column } = editingCell;
     const valueToSave = newValue !== undefined ? newValue : editValue;
-    const originalColumn = column === 'Centro (minutos)' ? 'Centro' : column;
+    
+    let originalColumn = column;
+    if (column.endsWith(' (minutos)')) {
+        originalColumn = column.replace(' (minutos)', '');
+    }
+
 
     try {
       await update(ref(database, `${selectedNode}/${rowId}`), { [originalColumn]: valueToSave });
@@ -169,10 +181,18 @@ export function ProductionLineTable() {
     setEditingCell(null);
     setEditValue('');
   };
+  
+  const getOriginalColumnName = (header: string) => {
+    if (header.endsWith(' (minutos)')) {
+        return header.replace(' (minutos)', '');
+    }
+    return header;
+  }
 
   const renderCellContent = (item: any, header: string) => {
     const isEditing = editingCell?.rowId === item.id && editingCell?.column === header;
-    const value = item[header] ?? (header === 'Centro (minutos)' ? item['Centro'] : undefined);
+    const originalColumn = getOriginalColumnName(header);
+    const value = item[originalColumn];
 
     if (isEditing) {
         if (header === "Site") {
@@ -292,35 +312,34 @@ export function ProductionLineTable() {
                 </div>
             ) : (
                 <div className="overflow-x-auto">
-                <Table>
+                  <Table>
                     <TableHeader>
-                    <TableRow className="bg-[#2E8555] hover:bg-[#2E8555]/90">
-                        <TableHead className="text-white sticky left-0 bg-[#2E8555] z-10">Campo</TableHead>
-                        {data.map((item) => (
-                          <TableHead key={item.id} className="text-white">{item.id}</TableHead>
+                      <TableRow className="bg-[#2E8555] hover:bg-[#2E8555]/90">
+                        {headers.map((header) => (
+                          <TableHead key={header} className="text-white">{header}</TableHead>
                         ))}
-                    </TableRow>
+                      </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {headers.map((header) => (
-                        <TableRow key={header}>
-                          <TableHead className="font-medium text-muted-foreground sticky left-0 bg-background z-10">{header}</TableHead>
-                          {data.map((item) => (
+                      {data.length > 0 ? (
+                        data.map((item) => (
+                          <TableRow key={item.id}>
+                            {headers.map((header) => (
                               <TableCell key={`${item.id}-${header}`}>
-                                  {renderCellContent(item, header)}
+                                {renderCellContent(item, header)}
                               </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                      {data.length === 0 && (
-                          <TableRow>
-                          <TableCell colSpan={headers.length + 1} className="h-24 text-center">
-                              Nenhum dado encontrado para o nó "{selectedNode}".
-                          </TableCell>
+                            ))}
                           </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={headers.length} className="h-24 text-center">
+                            Nenhum dado encontrado para o nó "{selectedNode}".
+                          </TableCell>
+                        </TableRow>
                       )}
                     </TableBody>
-                </Table>
+                  </Table>
                 </div>
             )}
           </CardContent>
