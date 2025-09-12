@@ -127,7 +127,7 @@ export function FirebaseRecordsTable() {
               {data.map((item) => (
                 <TableRow key={item.id}>
                   {headers.map((header) => (
-                    <TableCell key={`${item.id}-${header}`}>
+                    <TableCell key={`${item.id}-${header}`} className="py-2 px-4">
                       {getColumnValue(item, header)}
                     </TableCell>
                   ))}
