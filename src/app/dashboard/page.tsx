@@ -5,7 +5,6 @@ import { getFirebaseProductionRecords } from "@/lib/firebase-data";
 import { PageHeader } from "@/components/page-header";
 import { StatsCards } from "./components/stats-cards";
 import { ProductionChart } from "./components/production-chart";
-import { RecentProductions } from "./components/recent-productions";
 import { RegisterProductionSheet } from "./components/register-production-sheet";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
@@ -55,8 +54,6 @@ export default function DashboardPage() {
     setFilteredRecords(filtered);
   }, [allRecords, selectedMonth, selectedYear]);
 
-  const recentRecords = filteredRecords.slice(0, 5);
-  
   return (
     <>
       <PageHeader
@@ -105,13 +102,8 @@ export default function DashboardPage() {
                   <ProductionChart records={filteredRecords} />
                   <SiteProductionChart records={filteredRecords} />
                 </div>
-                <div className="grid gap-8 lg:grid-cols-5">
-                  <div className="lg:col-span-3">
-                    <ProcessTimeChart records={filteredRecords} />
-                  </div>
-                  <div className="lg:col-span-2">
-                      <RecentProductions records={recentRecords} />
-                  </div>
+                <div className="grid gap-8">
+                  <ProcessTimeChart records={filteredRecords} />
                 </div>
             </>
         )}
