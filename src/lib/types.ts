@@ -6,6 +6,9 @@ export type ProductionRecord = {
   manufacturingTime: number; // in hours
   date: string; // ISO string
   quantity: number;
+  centroTime: number; // in hours
+  tornoTime: number; // in hours
+  programacaoTime: number; // in hours
 };
 
 export type FirebaseProductionRecord = {

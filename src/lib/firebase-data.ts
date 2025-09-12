@@ -26,10 +26,11 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       recordDate = new Date();
     }
 
-    const centro = parseFloat(item['Centro'] || 0);
-    const torno = parseFloat(item['Torno (minutos)'] || 0);
-    const programacao = parseFloat(item['Programação (minutos)'] || 0);
-    const manufacturingTimeHours = (centro + torno + programacao) / 60;
+    const centroMin = parseFloat(item['Centro'] || 0);
+    const tornoMin = parseFloat(item['Torno (minutos)'] || 0);
+    const programacaoMin = parseFloat(item['Programação (minutos)'] || 0);
+    
+    const manufacturingTimeHours = (centroMin + tornoMin + programacaoMin) / 60;
     const quantity = parseInt(item['Quantidade'] || '0', 10);
 
     return {
@@ -40,6 +41,9 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       manufacturingTime: isNaN(manufacturingTimeHours) ? 0 : manufacturingTimeHours,
       date: recordDate.toISOString(),
       quantity: isNaN(quantity) ? 0 : quantity,
+      centroTime: isNaN(centroMin) ? 0 : centroMin / 60,
+      tornoTime: isNaN(tornoMin) ? 0 : tornoMin / 60,
+      programacaoTime: isNaN(programacaoMin) ? 0 : programacaoMin / 60,
     };
   });
   

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format, getMonth, getYear } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { SiteProductionChart } from "./components/site-production-chart";
+import { ProcessTimeChart } from "./components/process-time-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -106,7 +107,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="grid gap-8 lg:grid-cols-5">
                   <div className="lg:col-span-3">
-                    {/* Placeholder for future content if needed */}
+                    <ProcessTimeChart records={filteredRecords} />
                   </div>
                   <div className="lg:col-span-2">
                       <RecentProductions records={recentRecords} />
