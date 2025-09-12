@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductionRecord } from "@/lib/types";
-import { BarChart, Clock, Hash, Package } from "lucide-react";
+import { BarChart, Clock, Hash, Package, Boxes } from "lucide-react";
 
 type StatsCardsProps = {
   records: ProductionRecord[];
@@ -13,12 +13,18 @@ export function StatsCards({ records }: StatsCardsProps) {
     (totalProductions || 1);
   const uniqueParts = new Set(records.map((r) => r.partName)).size;
   const uniqueMaterials = new Set(records.map((r) => r.material)).size;
+  const totalQuantity = records.reduce((acc, r) => acc + (r.quantity || 0), 0);
 
   const stats = [
     {
       title: "Total de Produções",
       value: totalProductions.toLocaleString(),
       icon: BarChart,
+    },
+    {
+        title: "Total de Peças",
+        value: totalQuantity.toLocaleString(),
+        icon: Boxes,
     },
     {
       title: "Tempo Médio (h)",
@@ -38,7 +44,7 @@ export function StatsCards({ records }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

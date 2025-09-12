@@ -5,6 +5,7 @@ export type ProductionRecord = {
   material: string;
   manufacturingTime: number; // in hours
   date: string; // ISO string
+  quantity: number;
 };
 
 export type FirebaseProductionRecord = {

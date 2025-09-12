@@ -30,6 +30,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
     const torno = parseFloat(item['Torno (minutos)'] || 0);
     const programacao = parseFloat(item['Programação (minutos)'] || 0);
     const manufacturingTimeHours = (centro + torno + programacao) / 60;
+    const quantity = parseInt(item['Quantidade'] || '0', 10);
 
     return {
       id: item.id || String(index),
@@ -38,6 +39,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       material: item.Material || 'N/A',
       manufacturingTime: isNaN(manufacturingTimeHours) ? 0 : manufacturingTimeHours,
       date: recordDate.toISOString(),
+      quantity: isNaN(quantity) ? 0 : quantity,
     };
   });
   
