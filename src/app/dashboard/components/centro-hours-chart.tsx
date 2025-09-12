@@ -11,8 +11,6 @@ import {
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
-import { format, startOfMonth } from "date-fns";
-import { ptBR } from 'date-fns/locale';
 
 type CentroHoursChartProps = {
   records: ProductionRecord[];
@@ -26,40 +24,31 @@ const chartConfig = {
 };
 
 export function CentroHoursChart({ records }: CentroHoursChartProps) {
-  const chartData = useMemo(() => {
-    const monthlyData = records.reduce((acc, record) => {
-      const month = format(startOfMonth(new Date(record.date)), "MMM/yy", { locale: ptBR });
-      if (!acc[month]) {
-        acc[month] = { month, centroHours: 0 };
-      }
-      acc[month].centroHours += record.centroTime || 0;
-      return acc;
-    }, {} as Record<string, { month: string; centroHours: number }>);
-
-    return Object.values(monthlyData).reverse();
+  const totalCentroHours = useMemo(() => {
+    return records.reduce((acc, record) => acc + (record.centroTime || 0), 0);
   }, [records]);
+
+  const chartData = [{ name: "Total", centroHours: totalCentroHours }];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas Totais de Centro por Mês</CardTitle>
+        <CardTitle>Horas Totais de Centro</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer>
+          <BarChart data={chartData} accessibilityLayer layout="vertical">
             <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              fontSize={12}
+              type="number"
+              hide
             />
             <YAxis
+              dataKey="name"
+              type="category"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               fontSize={12}
-              tickFormatter={(value) => `${value.toFixed(1)}h`}
             />
             <ChartTooltip
               cursor={false}
@@ -70,6 +59,7 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               dataKey="centroHours"
               fill="var(--color-centroHours)"
               radius={4}
+              layout="vertical"
             />
           </BarChart>
         </ChartContainer>
