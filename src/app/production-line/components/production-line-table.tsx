@@ -327,8 +327,7 @@ export function ProductionLineTable() {
                             {headers.map((header) => (
                               <TableCell key={`${item.id}-${header}`}>
                                 {renderCellContent(item, header)}
-                              </TableCell>
-                            ))}
+                              </TableCell>))}
                           </TableRow>
                         ))
                       ) : (
