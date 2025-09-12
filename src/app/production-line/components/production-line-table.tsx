@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { database } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 import { FirebaseProductionRecord } from '@/lib/types';
@@ -12,13 +12,15 @@ import {
   TableHead,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 export function ProductionLineTable() {
   const [data, setData] = useState<FirebaseProductionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRequisitions, setSelectedRequisitions] = useState<string[]>([]);
 
   useEffect(() => {
     const dbRef = ref(database, 'Página 1');
@@ -27,10 +29,9 @@ export function ProductionLineTable() {
       (snapshot) => {
         if (snapshot.exists()) {
           const rawData = snapshot.val();
-          // Firebase returns an array-like object, convert it to a proper array
-           const dataArray = Object.keys(rawData)
+          const dataArray = Object.keys(rawData)
             .map(key => ({'#': key, ...rawData[key]}))
-            .filter(item => item['#'] && item.Data); // Filter out invalid entries
+            .filter(item => item['#'] && item.Data);
           setData(dataArray);
         } else {
           setData([]);
@@ -44,9 +45,21 @@ export function ProductionLineTable() {
       }
     );
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
+
+  const requisitionOptions = useMemo(() => {
+    const allRequisitions = data.map(item => item.Requisição?.toString()).filter(Boolean);
+    const uniqueRequisitions = [...new Set(allRequisitions)];
+    return uniqueRequisitions.map(req => ({ label: req, value: req }));
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    if (selectedRequisitions.length === 0) {
+      return data;
+    }
+    return data.filter(item => selectedRequisitions.includes(item.Requisição?.toString()));
+  }, [data, selectedRequisitions]);
 
   if (loading) {
     return (
@@ -70,6 +83,18 @@ export function ProductionLineTable() {
 
   return (
     <Card>
+       <CardHeader>
+        <CardTitle>Filtros</CardTitle>
+         <div className="w-full md:w-1/3">
+            <MultiSelect
+                options={requisitionOptions}
+                onValueChange={setSelectedRequisitions}
+                defaultValue={selectedRequisitions}
+                placeholder="Filtrar por Requisição..."
+                className="w-full"
+            />
+        </div>
+      </CardHeader>
       <CardContent className="p-4 md:p-6">
         <div className="overflow-x-auto">
           <Table>
@@ -88,7 +113,7 @@ export function ProductionLineTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((item) => (
+              {filteredData.map((item) => (
                 <TableRow key={item['#']}>
                   <TableCell>
                      <Badge variant={
@@ -112,10 +137,10 @@ export function ProductionLineTable() {
                   <TableCell className="text-right font-mono">{item['Programação (minutos)'] || '-'}</TableCell>
                 </TableRow>
               ))}
-              {data.length === 0 && (
+              {filteredData.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={10} className="h-24 text-center">
-                    Nenhum dado encontrado no nó 'Página 1'.
+                    Nenhum dado encontrado para os filtros selecionados.
                   </TableCell>
                 </TableRow>
               )}
