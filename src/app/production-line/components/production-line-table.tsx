@@ -24,6 +24,19 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
+const PREFERRED_COLUMN_ORDER = [
+    "Site",
+    "Data",
+    "Requisição",
+    "Material",
+    "Nome da peça",
+    "Status",
+    "Quantidade",
+    "Centro (minutos)",
+    "Torno (minutos)",
+    "Programação (minutos)",
+];
+
 export function ProductionLineTable() {
   const [nodes, setNodes] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string>('');
@@ -86,12 +99,15 @@ export function ProductionLineTable() {
             const allHeaders = new Set<string>();
             dataArray.forEach(item => {
                 Object.keys(item).forEach(key => {
-                    if(key !== 'id') allHeaders.add(key);
+                    if(key !== 'id') allHeaders.add(key === 'Centro' ? 'Centro (minutos)' : key);
                 })
             });
-            const sortedHeaders = Array.from(allHeaders).sort();
+
+            // Reorder headers based on preferred order
+             const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
+             const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h));
             
-            setHeaders(sortedHeaders);
+            setHeaders([...sortedHeaders, ...remainingHeaders]);
             setData(dataArray);
           } else {
              setData([]);
@@ -122,10 +138,10 @@ export function ProductionLineTable() {
     if (!editingCell || !selectedNode) return;
 
     const { rowId, column } = editingCell;
-    const updateRef = ref(database, `${selectedNode}/${rowId}/${column}`);
-    
+    const originalColumn = column === 'Centro (minutos)' ? 'Centro' : column;
+
     try {
-      await update(ref(database, `${selectedNode}/${rowId}`), { [column]: editValue });
+      await update(ref(database, `${selectedNode}/${rowId}`), { [originalColumn]: editValue });
       toast({
         title: 'Sucesso',
         description: 'Valor atualizado com sucesso.',
@@ -170,7 +186,7 @@ export function ProductionLineTable() {
       );
     }
     
-    const value = item[header];
+    const value = item[header] ?? (header === 'Centro (minutos)' ? item['Centro'] : undefined);
 
     return (
         <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
