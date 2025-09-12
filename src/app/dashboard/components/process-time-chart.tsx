@@ -57,7 +57,7 @@ export function ProcessTimeChart({ records }: ProcessTimeChartProps) {
       <CardHeader>
         <CardTitle>Horas Totais por Processo</CardTitle>
         <CardDescription>
-          Soma das horas gastas em cada etapa da produção.
+          Soma das horas gastas em cada etapa da produção para o período selecionado.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -65,16 +65,20 @@ export function ProcessTimeChart({ records }: ProcessTimeChartProps) {
           <BarChart
             data={chartData}
             accessibilityLayer
+            layout="vertical"
           >
-            <CartesianGrid vertical={false} />
-            <XAxis
+            <CartesianGrid horizontal={false} />
+            <YAxis
               dataKey="name"
+              type="category"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+              width={80}
             />
-            <YAxis
+            <XAxis
+              type="number"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -85,7 +89,7 @@ export function ProcessTimeChart({ records }: ProcessTimeChartProps) {
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
             />
-            <Bar dataKey="hours" radius={4} />
+            <Bar dataKey="hours" radius={4} layout="vertical" />
           </BarChart>
         </ChartContainer>
       </CardContent>
