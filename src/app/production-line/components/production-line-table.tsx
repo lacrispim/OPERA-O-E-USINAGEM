@@ -26,9 +26,9 @@ import { Loader2, ChevronsUpDown } from 'lucide-react';
 import { RequisicaoList } from './requisicao-list';
 
 const PREFERRED_COLUMN_ORDER = [
+    "Requisição",
     "Site",
     "Data",
-    "Requisição",
     "Material",
     "Nome da peça",
     "Status",
