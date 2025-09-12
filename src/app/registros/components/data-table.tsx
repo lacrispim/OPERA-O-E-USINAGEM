@@ -149,11 +149,11 @@ export function DataTable({ data }: { data: ProductionRecord[] }) {
             <TableBody>
               {filteredAndSortedData.map(item => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.partName}</TableCell>
-                  <TableCell><Badge variant="secondary">{item.material}</Badge></TableCell>
-                  <TableCell className="text-muted-foreground">{item.requestingFactory}</TableCell>
-                  <TableCell>{new Date(item.date).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell className="text-right font-mono">{item.manufacturingTime.toFixed(1)}</TableCell>
+                  <TableCell className="font-medium py-2 px-4">{item.partName}</TableCell>
+                  <TableCell className="py-2 px-4"><Badge variant="secondary">{item.material}</Badge></TableCell>
+                  <TableCell className="text-muted-foreground py-2 px-4">{item.requestingFactory}</TableCell>
+                  <TableCell className="py-2 px-4">{new Date(item.date).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell className="text-right font-mono py-2 px-4">{item.manufacturingTime.toFixed(1)}</TableCell>
                 </TableRow>
               ))}
               {filteredAndSortedData.length === 0 && (
