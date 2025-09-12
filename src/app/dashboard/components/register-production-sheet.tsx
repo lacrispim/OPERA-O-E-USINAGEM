@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useState, useRef, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import {
   Sheet,
   SheetContent,
@@ -35,7 +35,7 @@ export function RegisterProductionSheet({ children }: { children: React.ReactNod
   const { toast } = useToast();
 
   const initialState: FormState = undefined;
-  const [state, formAction] = useFormState(createProductionRecordAction, initialState);
+  const [state, formAction] = useActionState(createProductionRecordAction, initialState);
 
   useEffect(() => {
     if (state?.message && !state.errors) {
