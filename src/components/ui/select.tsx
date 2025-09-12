@@ -158,3 +158,4 @@ export {
   SelectScrollUpButton,
   SelectScrollDownButton,
 }
+export { ChevronsUpDown } from 'lucide-react';

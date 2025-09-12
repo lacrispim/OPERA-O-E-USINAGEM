@@ -38,6 +38,10 @@ const PREFERRED_COLUMN_ORDER = [
     "Programação (minutos)",
 ];
 
+const SITE_OPTIONS = ["Vinhedo", "Valinhos", "Campinas"];
+const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente"];
+
+
 export function ProductionLineTable() {
   const [nodes, setNodes] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string>('');
@@ -134,15 +138,16 @@ export function ProductionLineTable() {
     setEditingCell({ rowId, column });
     setEditValue(String(value ?? ''));
   };
-
-  const handleSave = async () => {
+  
+  const handleSave = async (newValue?: string) => {
     if (!editingCell || !selectedNode) return;
 
     const { rowId, column } = editingCell;
+    const valueToSave = newValue !== undefined ? newValue : editValue;
     const originalColumn = column === 'Centro (minutos)' ? 'Centro' : column;
 
     try {
-      await update(ref(database, `${selectedNode}/${rowId}`), { [originalColumn]: editValue });
+      await update(ref(database, `${selectedNode}/${rowId}`), { [originalColumn]: valueToSave });
       toast({
         title: 'Sucesso',
         description: 'Valor atualizado com sucesso.',
@@ -167,8 +172,33 @@ export function ProductionLineTable() {
 
   const renderCellContent = (item: any, header: string) => {
     const isEditing = editingCell?.rowId === item.id && editingCell?.column === header;
+    const value = item[header] ?? (header === 'Centro (minutos)' ? item['Centro'] : undefined);
 
     if (isEditing) {
+        if (header === "Site") {
+            return (
+                <Select value={editValue} onValueChange={(val) => { setEditValue(val); handleSave(val); }}>
+                    <SelectTrigger className="h-8 bg-background">
+                        <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {SITE_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            )
+        }
+        if (header === "Status") {
+            return (
+                <Select value={editValue} onValueChange={(val) => { setEditValue(val); handleSave(val); }}>
+                    <SelectTrigger className="h-8 bg-background">
+                        <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {STATUS_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            )
+        }
       return (
         <div className="flex items-center gap-2">
             <Input
@@ -181,16 +211,27 @@ export function ProductionLineTable() {
                 }}
                 className="h-8"
             />
-            <Button size="sm" onClick={handleSave}>Salvar</Button>
+            <Button size="sm" onClick={() => handleSave()}>Salvar</Button>
             <Button size="sm" variant="outline" onClick={handleCancel}>Cancelar</Button>
         </div>
       );
     }
     
-    const value = item[header] ?? (header === 'Centro (minutos)' ? item['Centro'] : undefined);
+    if(header === "Site" || header === "Status"){
+        const displayValue = String(value ?? '-');
+        return (
+            <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
+                <div className="flex items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-sm h-8">
+                   {displayValue}
+                   <ChevronsUpDown className="h-4 w-4 opacity-50"/>
+                </div>
+            </div>
+        )
+    }
+
 
     return (
-        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
+        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer flex items-center">
             {typeof value === 'object' && value !== null
             ? JSON.stringify(value)
             : String(value ?? '-')}
@@ -253,10 +294,10 @@ export function ProductionLineTable() {
                 <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                    <TableRow>
-                        <TableHead>ID</TableHead>
+                    <TableRow className="bg-[#2E8555] hover:bg-[#2E8555]/90">
+                        <TableHead className="text-white">ID</TableHead>
                         {headers.map((header) => (
-                        <TableHead key={header}>{header}</TableHead>
+                        <TableHead key={header} className="text-white">{header}</TableHead>
                         ))}
                     </TableRow>
                     </TableHeader>
