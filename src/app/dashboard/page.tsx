@@ -1,4 +1,4 @@
-import { getProductionRecords } from "@/lib/data";
+import { getFirebaseProductionRecords } from "@/lib/firebase-data";
 import { PageHeader } from "@/components/page-header";
 import { StatsCards } from "./components/stats-cards";
 import { ProductionChart } from "./components/production-chart";
@@ -7,8 +7,8 @@ import { RegisterProductionSheet } from "./components/register-production-sheet"
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-export default function DashboardPage() {
-  const records = getProductionRecords();
+export default async function DashboardPage() {
+  const records = await getFirebaseProductionRecords();
   const recentRecords = records.slice(0, 5);
 
   return (

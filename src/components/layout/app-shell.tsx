@@ -20,7 +20,7 @@ const navItems = [
   { href: '/registros', icon: History, label: 'Registros Históricos' },
   { href: '/production-line', icon: Database, label: 'Linha de Produção' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
-  { href: '/registros-firebase', icon: FileJson, label: 'Registros Firebase' },
+  { href: '/registros-firebase', icon: FileJson, label: 'Visualização de Dados' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
