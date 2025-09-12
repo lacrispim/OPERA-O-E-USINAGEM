@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { getFirebaseProductionRecords } from "@/lib/firebase-data";
 import { PageHeader } from "@/components/page-header";
 import { StatsCards } from "./components/stats-cards";
-import { ProductionChart } from "./components/production-chart";
 import { RegisterProductionSheet } from "./components/register-production-sheet";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
@@ -100,8 +99,7 @@ export default function DashboardPage() {
         ) : (
             <>
                 <StatsCards records={filteredRecords} />
-                <div className="grid gap-8 lg:grid-cols-2">
-                  <ProductionChart records={filteredRecords} />
+                <div className="grid gap-8">
                   <SiteProductionChart records={filteredRecords} />
                 </div>
                 <div className="grid gap-8 lg:grid-cols-3">
