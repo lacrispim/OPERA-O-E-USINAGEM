@@ -5,8 +5,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
@@ -17,6 +15,9 @@ type ProcessTimeChartProps = {
 };
 
 const chartConfig = {
+  hours: {
+    label: "Horas",
+  },
   centro: {
     label: "Centro (h)",
     color: "hsl(var(--chart-1))",
@@ -78,6 +79,7 @@ export function ProcessTimeChart({ records }: ProcessTimeChartProps) {
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+              unit="h"
             />
             <ChartTooltip
               cursor={false}
