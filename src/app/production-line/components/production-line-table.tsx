@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { database } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
-import { FirebaseProductionRecord } from '@/lib/types';
+import { ref, onValue, off, update } from 'firebase/database';
 import {
   Table,
   TableBody,
@@ -12,66 +11,188 @@ import {
   TableHead,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MultiSelect } from '@/components/ui/multi-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export function ProductionLineTable() {
-  const [data, setData] = useState<FirebaseProductionRecord[]>([]);
+  const [nodes, setNodes] = useState<string[]>([]);
+  const [selectedNode, setSelectedNode] = useState<string>('');
+  const [data, setData] = useState<any[]>([]);
+  const [headers, setHeaders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingNode, setLoadingNode] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedRequisitions, setSelectedRequisitions] = useState<string[]>([]);
+  const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   useEffect(() => {
-    const dbRef = ref(database, 'Página 1');
+    const rootRef = ref(database);
     const unsubscribe = onValue(
-      dbRef,
+      rootRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          const rawData = snapshot.val();
-          const dataArray = Object.keys(rawData)
-            .map(key => ({'#': key, ...rawData[key]}))
-            .filter(item => item['#'] && item.Data);
-          setData(dataArray);
+          const allNodes = Object.keys(snapshot.val());
+          setNodes(allNodes);
+          if (allNodes.length > 0 && !selectedNode) {
+            // Pre-select 'Página 1' if it exists, otherwise the first node.
+            const defaultNode = allNodes.includes('Página 1') ? 'Página 1' : allNodes[0];
+            setSelectedNode(defaultNode);
+          }
         } else {
-          setData([]);
+          setNodes([]);
         }
         setLoading(false);
       },
       (error) => {
         console.error('Firebase error:', error);
-        setError('Falha ao carregar dados do Firebase.');
+        setError('Falha ao carregar a lista de nós do Firebase.');
         setLoading(false);
       }
     );
 
-    return () => unsubscribe();
-  }, []);
+    return () => off(rootRef);
+  }, [selectedNode]);
 
-  const requisitionOptions = useMemo(() => {
-    const allRequisitions = data.map(item => item.Requisição?.toString()).filter(Boolean);
-    const uniqueRequisitions = [...new Set(allRequisitions)];
-    return uniqueRequisitions.map(req => ({ label: req, value: req }));
-  }, [data]);
+  useEffect(() => {
+    if (!selectedNode) return;
 
-  const filteredData = useMemo(() => {
-    if (selectedRequisitions.length === 0) {
-      return data;
+    setLoadingNode(true);
+    setData([]);
+    setHeaders([]);
+    const nodeRef = ref(database, selectedNode);
+
+    const unsubscribeNode = onValue(
+      nodeRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const rawData = snapshot.val();
+          if (typeof rawData === 'object' && rawData !== null) {
+            const dataArray = Object.keys(rawData).map((key) => ({
+              id: key,
+              ...rawData[key],
+            }));
+
+            // Extract headers from all items to handle varying structures
+            const allHeaders = new Set<string>();
+            dataArray.forEach(item => {
+                Object.keys(item).forEach(key => {
+                    if(key !== 'id') allHeaders.add(key);
+                })
+            });
+            const sortedHeaders = Array.from(allHeaders).sort();
+            
+            setHeaders(sortedHeaders);
+            setData(dataArray);
+          } else {
+             setData([]);
+             setHeaders([]);
+          }
+        } else {
+          setData([]);
+          setHeaders([]);
+        }
+        setLoadingNode(false);
+      },
+      (error) => {
+        console.error('Firebase node error:', error);
+        setError(`Falha ao carregar dados do nó "${selectedNode}".`);
+        setLoadingNode(false);
+      }
+    );
+
+    return () => off(nodeRef);
+  }, [selectedNode]);
+
+  const handleEditClick = (rowId: string, column: string, value: any) => {
+    setEditingCell({ rowId, column });
+    setEditValue(String(value ?? ''));
+  };
+
+  const handleSave = async () => {
+    if (!editingCell || !selectedNode) return;
+
+    const { rowId, column } = editingCell;
+    const updateRef = ref(database, `${selectedNode}/${rowId}/${column}`);
+    
+    try {
+      await update(ref(database, `${selectedNode}/${rowId}`), { [column]: editValue });
+      toast({
+        title: 'Sucesso',
+        description: 'Valor atualizado com sucesso.',
+      });
+    } catch (err) {
+      console.error('Failed to update value:', err);
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Falha ao atualizar o valor.',
+      });
+    } finally {
+      setEditingCell(null);
+      setEditValue('');
     }
-    return data.filter(item => selectedRequisitions.includes(item.Requisição?.toString()));
-  }, [data, selectedRequisitions]);
+  };
 
+  const handleCancel = () => {
+    setEditingCell(null);
+    setEditValue('');
+  };
+
+  const renderCellContent = (item: any, header: string) => {
+    const isEditing = editingCell?.rowId === item.id && editingCell?.column === header;
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-2">
+            <Input
+                autoFocus
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSave();
+                    if (e.key === 'Escape') handleCancel();
+                }}
+                className="h-8"
+            />
+            <Button size="sm" onClick={handleSave}>Salvar</Button>
+            <Button size="sm" variant="outline" onClick={handleCancel}>Cancelar</Button>
+        </div>
+      );
+    }
+    
+    const value = item[header];
+
+    return (
+        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
+            {typeof value === 'object' && value !== null
+            ? JSON.stringify(value)
+            : String(value ?? '-')}
+        </div>
+    )
+  };
+  
   if (loading) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          Carregando dados da linha de produção...
+          <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+          <p>Conectando ao Firebase...</p>
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (error && !loading) {
     return (
       <Card>
         <CardContent className="p-6 text-center text-destructive">
@@ -83,70 +204,65 @@ export function ProductionLineTable() {
 
   return (
     <Card>
-       <CardHeader>
-        <CardTitle>Filtros</CardTitle>
-         <div className="w-full md:w-1/3">
-            <MultiSelect
-                options={requisitionOptions}
-                onValueChange={setSelectedRequisitions}
-                defaultValue={selectedRequisitions}
-                placeholder="Filtrar por Requisição..."
-                className="w-full"
-            />
+      <CardHeader>
+        <CardTitle>Visualizador do Realtime Database</CardTitle>
+        <CardDescription>
+            Selecione um nó para visualizar e editar seus dados em tempo real.
+        </CardDescription>
+        <div className="w-full md:w-1/3 pt-4">
+            <Select onValueChange={setSelectedNode} value={selectedNode}>
+                <SelectTrigger id="node-selector" aria-label="Selecione um Nó">
+                    <SelectValue placeholder="Selecione um nó..." />
+                </SelectTrigger>
+                <SelectContent>
+                    {nodes.map(node => (
+                        <SelectItem key={node} value={node}>
+                            {node}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
       </CardHeader>
       <CardContent className="p-4 md:p-6">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Site</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Requisição</TableHead>
-                <TableHead>Material</TableHead>
-                <TableHead>Nome da peça</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead className="text-right">Centro (min)</TableHead>
-                <TableHead className="text-right">Torno (min)</TableHead>
-                <TableHead className="text-right">Programação (min)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.map((item) => (
-                <TableRow key={item['#']}>
-                  <TableCell>
-                     <Badge variant={
-                         item.Status === 'Encerrada' ? 'destructive' 
-                         : item.Status === 'Fila de produção' ? 'default'
-                         : 'secondary'
-                     }>
-                        {item.Site}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{item.Data}</TableCell>
-                  <TableCell>{item.Requisição}</TableCell>
-                  <TableCell className="max-w-xs truncate">{item.Material}</TableCell>
-                  <TableCell className="max-w-xs truncate">{item['Nome da peça']}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.Status}</Badge>
-                  </TableCell>
-                  <TableCell>{item.Quantidade}</TableCell>
-                  <TableCell className="text-right font-mono">{item.Centro || '-'}</TableCell>
-                  <TableCell className="text-right font-mono">{item['Torno (minutos)'] || '-'}</TableCell>
-                  <TableCell className="text-right font-mono">{item['Programação (minutos)'] || '-'}</TableCell>
-                </TableRow>
-              ))}
-              {filteredData.length === 0 && (
+        {loadingNode ? (
+             <div className="text-center">
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                <p className="mt-2 text-muted-foreground">Carregando dados do nó: {selectedNode}...</p>
+             </div>
+        ) : (
+            <div className="overflow-x-auto">
+            <Table>
+                <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center">
-                    Nenhum dado encontrado para os filtros selecionados.
-                  </TableCell>
+                    <TableHead>ID</TableHead>
+                    {headers.map((header) => (
+                    <TableHead key={header}>{header}</TableHead>
+                    ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                </TableHeader>
+                <TableBody>
+                {data.map((item) => (
+                    <TableRow key={item.id}>
+                    <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
+                    {headers.map((header) => (
+                        <TableCell key={header}>
+                            {renderCellContent(item, header)}
+                        </TableCell>
+                    ))}
+                    </TableRow>
+                ))}
+                {data.length === 0 && (
+                    <TableRow>
+                    <TableCell colSpan={headers.length + 1} className="h-24 text-center">
+                        Nenhum dado encontrado para o nó "{selectedNode}".
+                    </TableCell>
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+            </div>
+        )}
       </CardContent>
     </Card>
   );

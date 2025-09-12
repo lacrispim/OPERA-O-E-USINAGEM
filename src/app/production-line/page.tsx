@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProductionLineTable } from "./components/production-line-table";
 
 export const metadata = {
-  title: "Linha de Produção | FabriTrack",
+  title: "Visualizador de Dados | FabriTrack",
 };
 
 export default function ProductionLinePage() {
@@ -10,9 +10,9 @@ export default function ProductionLinePage() {
     <>
       <PageHeader
         title="Linha de Produção"
-        description="Visualize os dados da linha de produção em tempo real."
+        description="Visualize e edite os dados do Firebase Realtime Database."
       />
-      <main className="px-4 sm:px-6 lg:px-8">
+      <main className="px-4 sm:px-6 lg:px-8 pb-8">
         <ProductionLineTable />
       </main>
     </>
