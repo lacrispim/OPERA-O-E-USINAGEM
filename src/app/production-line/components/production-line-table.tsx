@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { NodeDataChart } from './node-data-chart';
+import { RequisicaoList } from './requisicao-list';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -220,72 +220,76 @@ export function ProductionLineTable() {
   }
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Visualizador do Realtime Database</CardTitle>
-          <CardDescription>
-              Selecione um nó para visualizar e editar seus dados em tempo real.
-          </CardDescription>
-          <div className="w-full md:w-1/3 pt-4">
-              <Select onValueChange={setSelectedNode} value={selectedNode}>
-                  <SelectTrigger id="node-selector" aria-label="Selecione um Nó">
-                      <SelectValue placeholder="Selecione um nó..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {nodes.map(node => (
-                          <SelectItem key={node} value={node}>
-                              {node}
-                          </SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          {loadingNode ? (
-               <div className="text-center">
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                  <p className="mt-2 text-muted-foreground">Carregando dados do nó: {selectedNode}...</p>
-               </div>
-          ) : (
-              <div className="overflow-x-auto">
-              <Table>
-                  <TableHeader>
-                  <TableRow>
-                      <TableHead>ID</TableHead>
-                      {headers.map((header) => (
-                      <TableHead key={header}>{header}</TableHead>
-                      ))}
-                  </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                  {data.map((item) => (
-                      <TableRow key={item.id}>
-                      <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
-                      {headers.map((header) => (
-                          <TableCell key={header}>
-                              {renderCellContent(item, header)}
-                          </TableCell>
-                      ))}
-                      </TableRow>
-                  ))}
-                  {data.length === 0 && (
-                      <TableRow>
-                      <TableCell colSpan={headers.length + 1} className="h-24 text-center">
-                          Nenhum dado encontrado para o nó "{selectedNode}".
-                      </TableCell>
-                      </TableRow>
-                  )}
-                  </TableBody>
-              </Table>
-              </div>
-          )}
-        </CardContent>
-      </Card>
-      {selectedNode === "Página 1" && data.length > 0 && (
-          <NodeDataChart data={data} />
-      )}
+    <div className="grid gap-8 lg:grid-cols-5">
+      <div className="lg:col-span-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Visualizador do Realtime Database</CardTitle>
+            <CardDescription>
+                Selecione um nó para visualizar e editar seus dados em tempo real.
+            </CardDescription>
+            <div className="w-full md:w-1/3 pt-4">
+                <Select onValueChange={setSelectedNode} value={selectedNode}>
+                    <SelectTrigger id="node-selector" aria-label="Selecione um Nó">
+                        <SelectValue placeholder="Selecione um nó..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {nodes.map(node => (
+                            <SelectItem key={node} value={node}>
+                                {node}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 md:p-6">
+            {loadingNode ? (
+                <div className="text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                    <p className="mt-2 text-muted-foreground">Carregando dados do nó: {selectedNode}...</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>ID</TableHead>
+                        {headers.map((header) => (
+                        <TableHead key={header}>{header}</TableHead>
+                        ))}
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {data.map((item) => (
+                        <TableRow key={item.id}>
+                        <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
+                        {headers.map((header) => (
+                            <TableCell key={header}>
+                                {renderCellContent(item, header)}
+                            </TableCell>
+                        ))}
+                        </TableRow>
+                    ))}
+                    {data.length === 0 && (
+                        <TableRow>
+                        <TableCell colSpan={headers.length + 1} className="h-24 text-center">
+                            Nenhum dado encontrado para o nó "{selectedNode}".
+                        </TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+                </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <div className="lg:col-span-1">
+        {selectedNode === "Página 1" && data.length > 0 && (
+            <RequisicaoList data={data} />
+        )}
+      </div>
     </div>
   );
 }
