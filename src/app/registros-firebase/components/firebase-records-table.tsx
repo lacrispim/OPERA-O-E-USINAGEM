@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Factory } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -80,13 +80,6 @@ export function FirebaseRecordsTable() {
     return () => unsubscribe();
   }, []);
 
-  const totalCentroMinutos = useMemo(() => {
-    return data.reduce((acc, item) => {
-        const minutos = parseFloat(item['Centro (minutos)']);
-        return isNaN(minutos) ? acc : acc + minutos;
-    }, 0);
-  }, [data]);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -114,16 +107,6 @@ export function FirebaseRecordsTable() {
 
   return (
     <div className="space-y-8">
-        <Card className="max-w-xs">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Centro (minutos)</CardTitle>
-                <Factory className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{totalCentroMinutos.toLocaleString('pt-BR')}</div>
-                <p className="text-xs text-muted-foreground">Soma total dos minutos registrados</p>
-            </CardContent>
-        </Card>
         <Card>
             <CardHeader>
                 <CardTitle>Dados "JobTracker"</CardTitle>
