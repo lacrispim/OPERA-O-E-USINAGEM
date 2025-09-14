@@ -108,7 +108,7 @@ export function FirebaseRecordsTable() {
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Dados de "Página1"</CardTitle>
+            <CardTitle>Dados "JobTracker"</CardTitle>
             <CardDescription>
                 Visualização dos dados em tempo real do nó especificado.
             </CardDescription>
