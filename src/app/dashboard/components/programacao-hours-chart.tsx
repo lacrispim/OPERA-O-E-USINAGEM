@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 
 type ProgramacaoHoursChartProps = {
   records: ProductionRecord[];
@@ -24,31 +24,42 @@ const chartConfig = {
 };
 
 export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
-  const totalProgramacaoHours = useMemo(() => {
-    return records.reduce((acc, record) => acc + (record.programacaoTime || 0), 0);
-  }, [records]);
+  const chartData = useMemo(() => {
+    const factoryData = records.reduce((acc, record) => {
+      const factory = record.requestingFactory;
+      if (!acc[factory]) {
+        acc[factory] = { factory, programacaoHours: 0 };
+      }
+      acc[factory].programacaoHours += record.programacaoTime || 0;
+      return acc;
+    }, {} as Record<string, { factory: string; programacaoHours: number }>);
 
-  const chartData = [{ name: "Total", programacaoHours: totalProgramacaoHours }];
+    return Object.values(factoryData);
+  }, [records]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas Totais de Programação</CardTitle>
+        <CardTitle>Horas de Programação por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer layout="vertical">
-             <XAxis
-              type="number"
-              hide
-            />
-            <YAxis
-              dataKey="name"
-              type="category"
+          <BarChart data={chartData} accessibilityLayer>
+             <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="factory"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              fontSize={12}
+              allowDecimals={false}
+              valueFormatter={(value) => `${value}h`}
             />
             <ChartTooltip
               cursor={false}
@@ -59,7 +70,6 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
               dataKey="programacaoHours"
               fill="var(--color-programacaoHours)"
               radius={4}
-              layout="vertical"
             />
           </BarChart>
         </ChartContainer>
