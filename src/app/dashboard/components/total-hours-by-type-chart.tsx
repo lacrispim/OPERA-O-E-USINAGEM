@@ -58,7 +58,12 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer layout="vertical">
+          <BarChart 
+            data={chartData} 
+            accessibilityLayer 
+            layout="vertical"
+            margin={{ left: 20 }}
+          >
             <CartesianGrid horizontal={false} />
             <YAxis
               dataKey="type"
