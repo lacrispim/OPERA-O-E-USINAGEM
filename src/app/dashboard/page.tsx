@@ -133,9 +133,9 @@ export default function DashboardPage() {
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
-                    </div>
-                    <div className="grid gap-8 lg:grid-cols-3">
                         <CentroHoursChart records={filteredRecords} />
+                    </div>
+                    <div className="grid gap-8 md:grid-cols-2">
                         <TornoHoursChart records={filteredRecords} />
                         <ProgramacaoHoursChart records={filteredRecords} />
                     </div>
