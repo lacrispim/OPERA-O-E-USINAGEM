@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductionRecord } from "@/lib/types";
-import { BarChart, Clock, Hash, Package, Boxes } from "lucide-react";
+import { BarChart, Clock, Hash, Package, Boxes, Factory } from "lucide-react";
 
 type StatsCardsProps = {
   records: ProductionRecord[];
@@ -14,6 +14,7 @@ export function StatsCards({ records }: StatsCardsProps) {
   const uniqueParts = new Set(records.map((r) => r.partName)).size;
   const uniqueMaterials = new Set(records.map((r) => r.material)).size;
   const totalQuantity = records.reduce((acc, r) => acc + (r.quantity || 0), 0);
+  const totalCentroTime = records.reduce((acc, r) => acc + (r.centroTime || 0), 0);
 
   const stats = [
     {
@@ -32,6 +33,11 @@ export function StatsCards({ records }: StatsCardsProps) {
       icon: Clock,
     },
     {
+        title: "Horas de Centro (h)",
+        value: totalCentroTime.toFixed(1),
+        icon: Factory,
+    },
+    {
       title: "Peças Únicas",
       value: uniqueParts.toLocaleString(),
       icon: Package,
@@ -44,7 +50,7 @@ export function StatsCards({ records }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
