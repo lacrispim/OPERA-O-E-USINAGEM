@@ -23,16 +23,27 @@ const chartConfig = {
   },
 };
 
+const ALL_FACTORIES = ["Fábrica A", "Fábrica B", "Fábrica C", "Igarassu"];
+
 export function SiteProductionChart({ records }: SiteProductionChartProps) {
   const chartData = useMemo(() => {
-    const siteData = records.reduce((acc, record) => {
+    // Initialize all known factories with 0 quantity
+    const siteData: Record<string, { site: string; quantity: number }> = {};
+    const factorySet = new Set(ALL_FACTORIES);
+
+    records.forEach(r => factorySet.add(r.requestingFactory));
+
+    factorySet.forEach(factory => {
+        siteData[factory] = { site: factory, quantity: 0 };
+    });
+
+    // Aggregate quantities from records
+    records.forEach(record => {
       const site = record.requestingFactory;
-      if (!acc[site]) {
-        acc[site] = { site, quantity: 0 };
+      if (siteData[site]) {
+        siteData[site].quantity += record.quantity || 0;
       }
-      acc[site].quantity += record.quantity || 0;
-      return acc;
-    }, {} as Record<string, { site: string; quantity: number }>);
+    });
 
     return Object.values(siteData);
   }, [records]);

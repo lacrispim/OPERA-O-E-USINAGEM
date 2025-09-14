@@ -23,17 +23,28 @@ const chartConfig = {
   },
 };
 
+const ALL_FACTORIES = ["Fábrica A", "Fábrica B", "Fábrica C", "Igarassu"];
+
 export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
-        const factoryData = records.reduce((acc, record) => {
+        // Initialize all known factories with 0 hours
+        const factoryData: Record<string, number> = {};
+        const factorySet = new Set(ALL_FACTORIES);
+
+        records.forEach(r => factorySet.add(r.requestingFactory));
+
+        factorySet.forEach(factory => {
+            factoryData[factory] = 0;
+        });
+        
+        // Aggregate hours from records
+        records.forEach(record => {
             const factory = record.requestingFactory;
-            if (!acc[factory]) {
-                acc[factory] = 0;
+            if (factoryData.hasOwnProperty(factory)) {
+                const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
+                factoryData[factory] += totalRecordHours;
             }
-            const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
-            acc[factory] += totalRecordHours;
-            return acc;
-        }, {} as Record<string, number>);
+        });
 
         return Object.entries(factoryData).map(([factory, hours]) => ({
             factory,
