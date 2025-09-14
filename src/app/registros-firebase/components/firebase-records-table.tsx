@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo, ChangeEvent } from 'react';
@@ -18,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -34,6 +36,8 @@ const PREFERRED_COLUMN_ORDER = [
 ];
 
 const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torno (minutos)", "Programação (minutos)"];
+const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação"];
+const TRUNCATE_LENGTH = 25;
 
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     const s = status ? status.toLowerCase() : '';
@@ -42,6 +46,24 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     if (s.includes('pendente')) return 'destructive';
     return 'outline';
 }
+
+const TruncatedCell = ({ text }: { text: string }) => {
+    if (text.length <= TRUNCATE_LENGTH) {
+        return <>{text}</>;
+    }
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="cursor-default">{text.substring(0, TRUNCATE_LENGTH)}...</span>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{text}</p>
+            </TooltipContent>
+        </Tooltip>
+    );
+};
+
 
 export function FirebaseRecordsTable() {
   const [data, setData] = useState<any[]>([]);
@@ -137,110 +159,117 @@ export function FirebaseRecordsTable() {
 
   const getColumnValue = (item: any, header: string) => {
     const value = item[header];
+    const stringValue = String(value ?? '-');
 
     if (header === 'Status') {
         const statusText = String(value ?? 'N/A');
         return <Badge variant={getStatusVariant(statusText)}>{statusText}</Badge>;
     }
+    
+    if (TRUNCATE_COLUMNS.includes(header)) {
+        return <TruncatedCell text={stringValue} />;
+    }
 
     if (typeof value === 'object' && value !== null) {
       return JSON.stringify(value);
     }
-    return String(value ?? '-');
+    return stringValue;
   };
 
   return (
-    <div className="space-y-8">
-        <Card>
-            <CardHeader>
-                <CardTitle>JobTracker – Dados de Produção</CardTitle>
-                <CardDescription>
-                    Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
-                </CardDescription>
-                <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
-                    <Select value={siteFilter} onValueChange={setSiteFilter}>
-                        <SelectTrigger className="w-full md:w-[180px]">
-                            <SelectValue placeholder="Filtrar por Site" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueSites.map(site => (
-                            <SelectItem key={site} value={site}>
-                                {site === 'all' ? 'Todos os Sites' : site}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full md:w-[180px]">
-                            <SelectValue placeholder="Filtrar por Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueStatuses.map(status => (
-                            <SelectItem key={status} value={status}>
-                                {status === 'all' ? 'Todos os Status' : status}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <div className="relative w-full md:max-w-xs">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                        placeholder="Filtrar por Data (DD/MM/YYYY)..."
-                        value={dateFilter}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setDateFilter(e.target.value)}
-                        className="pl-10"
-                        />
+    <TooltipProvider>
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>JobTracker – Dados de Produção</CardTitle>
+                    <CardDescription>
+                        Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
+                    </CardDescription>
+                    <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
+                        <Select value={siteFilter} onValueChange={setSiteFilter}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Filtrar por Site" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueSites.map(site => (
+                                <SelectItem key={site} value={site}>
+                                    {site === 'all' ? 'Todos os Sites' : site}
+                                </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Filtrar por Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueStatuses.map(status => (
+                                <SelectItem key={status} value={status}>
+                                    {status === 'all' ? 'Todos os Status' : status}
+                                </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <div className="relative w-full md:max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                            placeholder="Filtrar por Data (DD/MM/YYYY)..."
+                            value={dateFilter}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setDateFilter(e.target.value)}
+                            className="pl-10"
+                            />
+                        </div>
+                        <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
                     </div>
-                    <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        {headers.map((header) => (
-                        <TableHead 
-                            key={header}
-                             className={cn(
-                                NUMERIC_COLUMNS.includes(header) && "text-center"
-                             )}
-                        >
-                            {header}
-                        </TableHead>
-                        ))}
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {filteredData.length > 0 ? (
-                        filteredData.map((item) => (
-                            <TableRow key={item.id} className="even:bg-muted/50">
+                </CardHeader>
+                <CardContent>
+                    <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
                             {headers.map((header) => (
-                                <TableCell 
-                                    key={`${item.id}-${header}`} 
-                                    className={cn(
-                                        "py-2 px-4",
-                                        NUMERIC_COLUMNS.includes(header) && "text-center font-mono",
-                                        (header === 'Site' || header === 'Nome da peça') && "font-bold"
-                                    )}
-                                >
-                                    {getColumnValue(item, header)}
-                                </TableCell>
+                            <TableHead 
+                                key={header}
+                                className={cn(
+                                    NUMERIC_COLUMNS.includes(header) && "text-center"
+                                )}
+                            >
+                                {header}
+                            </TableHead>
                             ))}
-                            </TableRow>
-                        ))
-                    ) : (
-                         <TableRow>
-                            <TableCell colSpan={headers.length} className="h-24 text-center">
-                                Nenhum resultado encontrado com os filtros aplicados.
-                            </TableCell>
                         </TableRow>
-                    )}
-                    </TableBody>
-                </Table>
-                </div>
-            </CardContent>
-        </Card>
-    </div>
+                        </TableHeader>
+                        <TableBody>
+                        {filteredData.length > 0 ? (
+                            filteredData.map((item) => (
+                                <TableRow key={item.id} className="even:bg-muted/50">
+                                {headers.map((header) => (
+                                    <TableCell 
+                                        key={`${item.id}-${header}`} 
+                                        className={cn(
+                                            "py-2 px-4",
+                                            NUMERIC_COLUMNS.includes(header) && "text-center font-mono",
+                                            (header === 'Site' || header === 'Nome da peça') && "font-bold"
+                                        )}
+                                    >
+                                        {getColumnValue(item, header)}
+                                    </TableCell>
+                                ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={headers.length} className="h-24 text-center">
+                                    Nenhum resultado encontrado com os filtros aplicados.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        </TableBody>
+                    </Table>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    </TooltipProvider>
   );
 }
