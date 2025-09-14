@@ -40,7 +40,7 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quantidade de Peças por Site</CardTitle>
+        <CardTitle>Quantidade de Peças por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">

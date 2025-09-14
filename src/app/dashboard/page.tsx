@@ -17,6 +17,7 @@ import { ProgramacaoHoursChart } from "./components/programacao-hours-chart";
 import { CentroHoursChart } from "./components/centro-hours-chart";
 import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SiteProductionChart } from "./components/site-production-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -102,13 +103,14 @@ export default function DashboardPage() {
             ) : (
                 <>
                     <StatsCards records={filteredRecords} />
-                    <div className="grid gap-8">
-                    <TotalHoursByTypeChart records={filteredRecords} />
+                     <div className="grid gap-8 md:grid-cols-2">
+                        <TotalHoursByTypeChart records={filteredRecords} />
+                        <SiteProductionChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 lg:grid-cols-3">
-                    <CentroHoursChart records={filteredRecords} />
-                    <TornoHoursChart records={filteredRecords} />
-                    <ProgramacaoHoursChart records={filteredRecords} />
+                        <CentroHoursChart records={filteredRecords} />
+                        <TornoHoursChart records={filteredRecords} />
+                        <ProgramacaoHoursChart records={filteredRecords} />
                     </div>
                 </>
             )}
