@@ -17,7 +17,6 @@ import { Logo } from '@/components/logo';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/registros', icon: History, label: 'Registros Históricos' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
   { href: '/registros-firebase', icon: FileJson, label: 'Visualização de Dados' },
 ];
