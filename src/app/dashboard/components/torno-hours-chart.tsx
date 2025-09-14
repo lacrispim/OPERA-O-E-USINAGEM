@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 
 type TornoHoursChartProps = {
   records: ProductionRecord[];
@@ -24,31 +24,43 @@ const chartConfig = {
 };
 
 export function TornoHoursChart({ records }: TornoHoursChartProps) {
-   const totalTornoHours = useMemo(() => {
-    return records.reduce((acc, record) => acc + (record.tornoTime || 0), 0);
+  const chartData = useMemo(() => {
+    const factoryData = records.reduce((acc, record) => {
+      const factory = record.requestingFactory;
+      if (!acc[factory]) {
+        acc[factory] = { factory, tornoHours: 0 };
+      }
+      acc[factory].tornoHours += record.tornoTime || 0;
+      return acc;
+    }, {} as Record<string, { factory: string; tornoHours: number }>);
+
+    return Object.values(factoryData);
   }, [records]);
-  
-  const chartData = [{ name: "Total", tornoHours: totalTornoHours }];
+
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas Totais de Torno</CardTitle>
+        <CardTitle>Horas de Torno por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer layout="vertical">
+          <BarChart data={chartData} accessibilityLayer>
+            <CartesianGrid vertical={false} />
             <XAxis
-              type="number"
-              hide
-            />
-            <YAxis
-              dataKey="name"
-              type="category"
+              dataKey="factory"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              fontSize={12}
+              allowDecimals={false}
+              valueFormatter={(value) => `${value}h`}
             />
             <ChartTooltip
               cursor={false}
@@ -59,7 +71,6 @@ export function TornoHoursChart({ records }: TornoHoursChartProps) {
               dataKey="tornoHours"
               fill="var(--color-tornoHours)"
               radius={4}
-              layout="vertical"
             />
           </BarChart>
         </ChartContainer>
