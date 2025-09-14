@@ -15,6 +15,7 @@ import { SiteProductionChart } from "./components/site-production-chart";
 import { TornoHoursChart } from "./components/torno-hours-chart";
 import { ProgramacaoHoursChart } from "./components/programacao-hours-chart";
 import { CentroHoursChart } from "./components/centro-hours-chart";
+import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -100,7 +101,7 @@ export default function DashboardPage() {
             <>
                 <StatsCards records={filteredRecords} />
                 <div className="grid gap-8">
-                  <SiteProductionChart records={filteredRecords} />
+                  <TotalHoursByTypeChart records={filteredRecords} />
                 </div>
                 <div className="grid gap-8 lg:grid-cols-3">
                   <CentroHoursChart records={filteredRecords} />
