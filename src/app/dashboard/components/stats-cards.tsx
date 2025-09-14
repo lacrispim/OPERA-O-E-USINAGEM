@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductionRecord } from "@/lib/types";
-import { BarChart, Hash, Package, Boxes } from "lucide-react";
+import { BarChart, Boxes } from "lucide-react";
 
 type StatsCardsProps = {
   records: ProductionRecord[];
@@ -8,8 +8,6 @@ type StatsCardsProps = {
 
 export function StatsCards({ records }: StatsCardsProps) {
   const totalProductions = records.length;
-  const uniqueParts = new Set(records.map((r) => r.partName)).size;
-  const uniqueMaterials = new Set(records.map((r) => r.material)).size;
   const totalQuantity = records.reduce((acc, r) => acc + (r.quantity || 0), 0);
 
   const stats = [
@@ -22,16 +20,6 @@ export function StatsCards({ records }: StatsCardsProps) {
         title: "Total de Peças",
         value: totalQuantity.toLocaleString(),
         icon: Boxes,
-    },
-    {
-      title: "Peças Únicas",
-      value: uniqueParts.toLocaleString(),
-      icon: Package,
-    },
-    {
-      title: "Materiais Distintos",
-      value: uniqueMaterials.toLocaleString(),
-      icon: Hash,
     },
   ];
 
