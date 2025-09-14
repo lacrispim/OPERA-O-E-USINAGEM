@@ -103,11 +103,11 @@ export default function DashboardPage() {
             ) : (
                 <>
                     <StatsCards records={filteredRecords} />
-                     <div className="grid gap-8 md:grid-cols-2">
-                        <TotalHoursByTypeChart records={filteredRecords} />
-                    </div>
                     <div>
                         <SiteProductionChart records={filteredRecords} />
+                    </div>
+                     <div className="grid gap-8 md:grid-cols-2">
+                        <TotalHoursByTypeChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 lg:grid-cols-3">
                         <CentroHoursChart records={filteredRecords} />
