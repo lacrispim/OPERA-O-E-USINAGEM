@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,16 +24,25 @@ const chartConfig = {
   },
 };
 
+const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
+
 export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
   const chartData = useMemo(() => {
-    const factoryData = records.reduce((acc, record) => {
+    const factoryData: Record<string, { factory: string; programacaoHours: number }> = {};
+    const factorySet = new Set(ALL_FACTORIES);
+
+    // Initialize all factories
+    factorySet.forEach(factory => {
+        factoryData[factory] = { factory, programacaoHours: 0 };
+    });
+
+    // Aggregate hours from records
+    records.forEach(record => {
       const factory = record.requestingFactory;
-      if (!acc[factory]) {
-        acc[factory] = { factory, programacaoHours: 0 };
+      if (factoryData[factory]) {
+        factoryData[factory].programacaoHours += record.programacaoTime || 0;
       }
-      acc[factory].programacaoHours += record.programacaoTime || 0;
-      return acc;
-    }, {} as Record<string, { factory: string; programacaoHours: number }>);
+    });
 
     return Object.values(factoryData);
   }, [records]);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,15 +24,13 @@ const chartConfig = {
   },
 };
 
-const ALL_FACTORIES = ["Fábrica A", "Fábrica B", "Fábrica C", "Igarassu"];
+const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
 
 export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
         // Initialize all known factories with 0 hours
         const factoryData: Record<string, number> = {};
         const factorySet = new Set(ALL_FACTORIES);
-
-        records.forEach(r => factorySet.add(r.requestingFactory));
 
         factorySet.forEach(factory => {
             factoryData[factory] = 0;

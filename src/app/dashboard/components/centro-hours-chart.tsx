@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,16 +24,25 @@ const chartConfig = {
   },
 };
 
+const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
+
 export function CentroHoursChart({ records }: CentroHoursChartProps) {
     const chartData = useMemo(() => {
-    const factoryData = records.reduce((acc, record) => {
+    const factoryData: Record<string, { factory: string; centroHours: number }> = {};
+    const factorySet = new Set(ALL_FACTORIES);
+
+    // Initialize all factories
+    factorySet.forEach(factory => {
+        factoryData[factory] = { factory, centroHours: 0 };
+    });
+
+    // Aggregate hours from records
+    records.forEach(record => {
       const factory = record.requestingFactory;
-      if (!acc[factory]) {
-        acc[factory] = { factory, centroHours: 0 };
+      if (factoryData[factory]) {
+        factoryData[factory].centroHours += record.centroTime || 0;
       }
-      acc[factory].centroHours += record.centroTime || 0;
-      return acc;
-    }, {} as Record<string, { factory: string; centroHours: number }>);
+    });
 
     return Object.values(factoryData);
   }, [records]);
