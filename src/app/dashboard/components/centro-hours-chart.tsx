@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 
 type CentroHoursChartProps = {
   records: ProductionRecord[];
@@ -24,31 +24,43 @@ const chartConfig = {
 };
 
 export function CentroHoursChart({ records }: CentroHoursChartProps) {
-  const totalCentroHours = useMemo(() => {
-    return records.reduce((acc, record) => acc + (record.centroTime || 0), 0);
+    const chartData = useMemo(() => {
+    const factoryData = records.reduce((acc, record) => {
+      const factory = record.requestingFactory;
+      if (!acc[factory]) {
+        acc[factory] = { factory, centroHours: 0 };
+      }
+      acc[factory].centroHours += record.centroTime || 0;
+      return acc;
+    }, {} as Record<string, { factory: string; centroHours: number }>);
+
+    return Object.values(factoryData);
   }, [records]);
 
-  const chartData = [{ name: "Total", centroHours: totalCentroHours }];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas Totais de Centro</CardTitle>
+        <CardTitle>Horas de Centro por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer layout="vertical">
+          <BarChart data={chartData} accessibilityLayer>
+            <CartesianGrid vertical={false} />
             <XAxis
-              type="number"
-              hide
-            />
-            <YAxis
-              dataKey="name"
-              type="category"
+              dataKey="factory"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              fontSize={12}
+              allowDecimals={false}
+              valueFormatter={(value) => `${value}h`}
             />
             <ChartTooltip
               cursor={false}
@@ -59,7 +71,6 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               dataKey="centroHours"
               fill="var(--color-centroHours)"
               radius={4}
-              layout="vertical"
             />
           </BarChart>
         </ChartContainer>
