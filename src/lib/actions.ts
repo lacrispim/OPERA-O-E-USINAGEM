@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { addProductionRecord, getProductionRecords } from '@/lib/data';
+import { getProductionRecords } from '@/lib/data';
 import { optimizeProductionParameters } from '@/ai/flows/optimize-production-parameters';
 
 const productionRecordSchema = z.object({
@@ -22,31 +22,6 @@ export type FormState = {
     }
 } | undefined;
 
-
-export async function createProductionRecordAction(prevState: FormState, formData: FormData): Promise<FormState> {
-  const validatedFields = productionRecordSchema.safeParse({
-    partName: formData.get('partName'),
-    material: formData.get('material'),
-    requestingFactory: formData.get('requestingFactory'),
-    manufacturingTime: formData.get('manufacturingTime'),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      message: 'Falha ao registrar produção. Verifique os campos.',
-      errors: validatedFields.error.flatten().fieldErrors,
-    };
-  }
-
-  try {
-    addProductionRecord(validatedFields.data);
-    revalidatePath('/dashboard');
-    revalidatePath('/registros');
-    return { message: 'Produção registrada com sucesso!' };
-  } catch (e) {
-    return { message: 'Erro no servidor ao registrar produção.' };
-  }
-}
 
 export async function optimizeParametersAction() {
   try {

@@ -23,13 +23,3 @@ const productionRecords: ProductionRecord[] = [...initialRecords];
 export function getProductionRecords(): ProductionRecord[] {
   return [...productionRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
-
-export function addProductionRecord(record: Omit<ProductionRecord, 'id' | 'date'>): ProductionRecord {
-  const newRecord: ProductionRecord = {
-    ...record,
-    id: crypto.randomUUID(),
-    date: new Date().toISOString(),
-  };
-  productionRecords.unshift(newRecord);
-  return newRecord;
-}

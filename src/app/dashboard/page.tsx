@@ -5,9 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getFirebaseProductionRecords } from "@/lib/firebase-data";
 import { PageHeader } from "@/components/page-header";
 import { StatsCards } from "./components/stats-cards";
-import { RegisterProductionSheet } from "./components/register-production-sheet";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ProductionRecord } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, getMonth, getYear } from "date-fns";
@@ -106,12 +104,6 @@ export default function DashboardPage() {
                     ))}
                 </SelectContent>
             </Select>
-            <RegisterProductionSheet>
-                <Button>
-                    <PlusCircle />
-                    Registrar Produção
-                </Button>
-            </RegisterProductionSheet>
         </div>
       </PageHeader>
       <ScrollArea className="flex-grow">
