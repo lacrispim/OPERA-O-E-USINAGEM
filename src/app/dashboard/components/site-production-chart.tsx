@@ -6,8 +6,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
@@ -74,7 +72,6 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
             />
-             <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="quantity"
               fill="var(--color-quantity)"
