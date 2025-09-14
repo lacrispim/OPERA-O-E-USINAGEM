@@ -25,6 +25,8 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), "MMMM", { locale: ptBR }),
 }));
 
+const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
+
 export default function DashboardPage() {
   const [allRecords, setAllRecords] = useState<ProductionRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<ProductionRecord[]>([]);
@@ -32,6 +34,7 @@ export default function DashboardPage() {
 
   const [selectedMonth, setSelectedMonth] = useState<string>(String(getMonth(new Date())));
   const [selectedYear, setSelectedYear] = useState<string>(String(getYear(new Date())));
+  const [selectedFactory, setSelectedFactory] = useState<string>('all');
 
   const availableYears = useMemo(() => {
     if (allRecords.length === 0) return [String(getYear(new Date()))];
@@ -50,14 +53,20 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const filtered = allRecords.filter(record => {
+    const filteredByDate = allRecords.filter(record => {
         const recordDate = new Date(record.date);
         const matchesYear = getYear(recordDate) === parseInt(selectedYear);
         const matchesMonth = getMonth(recordDate) === parseInt(selectedMonth);
         return matchesYear && matchesMonth;
     });
-    setFilteredRecords(filtered);
-  }, [allRecords, selectedMonth, selectedYear]);
+
+    if (selectedFactory === 'all') {
+        setFilteredRecords(filteredByDate);
+    } else {
+        const filteredByFactory = filteredByDate.filter(record => record.requestingFactory === selectedFactory);
+        setFilteredRecords(filteredByFactory);
+    }
+  }, [allRecords, selectedMonth, selectedYear, selectedFactory]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-1rem)]">
@@ -65,7 +74,7 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Visão geral das atividades de produção."
       >
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Selecione o Mês" />
@@ -83,6 +92,17 @@ export default function DashboardPage() {
                 <SelectContent>
                      {availableYears.map(year => (
                         <SelectItem key={year} value={year}>{year}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <Select value={selectedFactory} onValueChange={setSelectedFactory}>
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Selecione a Fábrica" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">Todas as Fábricas</SelectItem>
+                    {ALL_FACTORIES.map(factory => (
+                        <SelectItem key={factory} value={factory}>{factory}</SelectItem>
                     ))}
                 </SelectContent>
             </Select>
@@ -104,12 +124,15 @@ export default function DashboardPage() {
             ) : (
                 <>
                     <StatsCards records={filteredRecords} />
-                    <div>
-                        <SiteProductionChart records={filteredRecords} />
+                    <div className="grid gap-8 md:grid-cols-2">
+                        <SiteProductionChart records={allRecords.filter(record => {
+                            const recordDate = new Date(record.date);
+                            return getYear(recordDate) === parseInt(selectedYear) && getMonth(recordDate) === parseInt(selectedMonth);
+                        })} />
+                        <FactoryHoursBarChart records={filteredRecords} />
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
-                        <FactoryHoursBarChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 lg:grid-cols-3">
                         <CentroHoursChart records={filteredRecords} />
