@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { database } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 import {
@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -27,6 +29,16 @@ const PREFERRED_COLUMN_ORDER = [
     "Programação (minutos)",
     "Observação"
 ];
+
+const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torno (minutos)", "Programação (minutos)"];
+
+const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    const s = status.toLowerCase();
+    if (s.includes('concluído')) return 'default';
+    if (s.includes('produção') || s.includes('andamento')) return 'secondary';
+    if (s.includes('pendente')) return 'destructive';
+    return 'outline';
+}
 
 export function FirebaseRecordsTable() {
   const [data, setData] = useState<any[]>([]);
@@ -99,6 +111,12 @@ export function FirebaseRecordsTable() {
 
   const getColumnValue = (item: any, header: string) => {
     const value = item[header];
+
+    if (header === 'Status') {
+        const statusText = String(value ?? 'N/A');
+        return <Badge variant={getStatusVariant(statusText)}>{statusText}</Badge>;
+    }
+
     if (typeof value === 'object' && value !== null) {
       return JSON.stringify(value);
     }
@@ -109,9 +127,9 @@ export function FirebaseRecordsTable() {
     <div className="space-y-8">
         <Card>
             <CardHeader>
-                <CardTitle>Dados "JobTracker"</CardTitle>
+                <CardTitle>JobTracker – Dados de Produção</CardTitle>
                 <CardDescription>
-                    Visualização dos dados em tempo real do nó especificado.
+                    Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -120,16 +138,30 @@ export function FirebaseRecordsTable() {
                     <TableHeader>
                     <TableRow>
                         {headers.map((header) => (
-                        <TableHead key={header}>{header}</TableHead>
+                        <TableHead 
+                            key={header}
+                             className={cn(
+                                NUMERIC_COLUMNS.includes(header) && "text-center"
+                             )}
+                        >
+                            {header}
+                        </TableHead>
                         ))}
                     </TableRow>
                     </TableHeader>
                     <TableBody>
                     {data.map((item) => (
-                        <TableRow key={item.id}>
+                        <TableRow key={item.id} className="even:bg-muted/50">
                         {headers.map((header) => (
-                            <TableCell key={`${item.id}-${header}`} className="py-2 px-4">
-                            {getColumnValue(item, header)}
+                            <TableCell 
+                                key={`${item.id}-${header}`} 
+                                className={cn(
+                                    "py-2 px-4",
+                                    NUMERIC_COLUMNS.includes(header) && "text-center font-mono",
+                                    (header === 'Site' || header === 'Nome da peça') && "font-bold"
+                                )}
+                            >
+                                {getColumnValue(item, header)}
                             </TableCell>
                         ))}
                         </TableRow>
