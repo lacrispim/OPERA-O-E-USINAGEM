@@ -33,11 +33,8 @@ const chartConfig = {
     label: "Fábrica C",
     color: "hsl(var(--chart-3))",
   },
+  // Add other factories if they exist in the data, or have a fallback
 };
-
-const COLORS = Object.values(chartConfig)
-    .filter(config => config.color)
-    .map(config => config.color as string);
 
 export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
     const { chartData, totalHours } = useMemo(() => {
@@ -61,6 +58,17 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
         return { chartData, totalHours };
     }, [records]);
 
+    const getColor = (name: string) => {
+        const config = chartConfig[name as keyof typeof chartConfig];
+        if (config && 'color' in config) {
+            return config.color;
+        }
+        // Fallback for dynamic factories
+        const otherColors = ["hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+        const index = Object.keys(chartConfig).filter(k => 'color' in chartConfig[k as keyof typeof chartConfig]).length;
+        return otherColors[index % otherColors.length] || 'hsl(var(--muted))';
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -83,8 +91,8 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
                             fill="#8884d8"
                             labelLine={false}
                         >
-                            {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            {chartData.map((entry) => (
+                                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
                             ))}
                             <LabelList
                                 dataKey="value"
