@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from "react";
@@ -11,11 +12,11 @@ import { ProductionRecord } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, getMonth, getYear } from "date-fns";
 import { ptBR } from 'date-fns/locale';
-import { SiteProductionChart } from "./components/site-production-chart";
 import { TornoHoursChart } from "./components/torno-hours-chart";
 import { ProgramacaoHoursChart } from "./components/programacao-hours-chart";
 import { CentroHoursChart } from "./components/centro-hours-chart";
 import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -57,7 +58,7 @@ export default function DashboardPage() {
   }, [allRecords, selectedMonth, selectedYear]);
 
   return (
-    <>
+    <div className="flex flex-col h-[calc(100vh-1rem)]">
       <PageHeader
         title="Dashboard"
         description="Visão geral das atividades de produção."
@@ -91,26 +92,28 @@ export default function DashboardPage() {
             </RegisterProductionSheet>
         </div>
       </PageHeader>
-      <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
-        {loading ? (
-             <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <p className="ml-2">Carregando dados...</p>
-            </div>
-        ) : (
-            <>
-                <StatsCards records={filteredRecords} />
-                <div className="grid gap-8">
-                  <TotalHoursByTypeChart records={filteredRecords} />
+      <ScrollArea className="flex-grow">
+        <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p className="ml-2">Carregando dados...</p>
                 </div>
-                <div className="grid gap-8 lg:grid-cols-3">
-                  <CentroHoursChart records={filteredRecords} />
-                  <TornoHoursChart records={filteredRecords} />
-                  <ProgramacaoHoursChart records={filteredRecords} />
-                </div>
-            </>
-        )}
-      </main>
-    </>
+            ) : (
+                <>
+                    <StatsCards records={filteredRecords} />
+                    <div className="grid gap-8">
+                    <TotalHoursByTypeChart records={filteredRecords} />
+                    </div>
+                    <div className="grid gap-8 lg:grid-cols-3">
+                    <CentroHoursChart records={filteredRecords} />
+                    <TornoHoursChart records={filteredRecords} />
+                    <ProgramacaoHoursChart records={filteredRecords} />
+                    </div>
+                </>
+            )}
+        </main>
+      </ScrollArea>
+    </div>
   );
 }
