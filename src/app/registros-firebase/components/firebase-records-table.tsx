@@ -82,7 +82,7 @@ export function FirebaseRecordsTable() {
 
   const totalCentroMinutos = useMemo(() => {
     return data.reduce((acc, item) => {
-        const minutos = parseFloat(item['Centro']);
+        const minutos = parseFloat(item['Centro (minutos)']);
         return isNaN(minutos) ? acc : acc + minutos;
     }, 0);
   }, [data]);
