@@ -48,8 +48,8 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
 }
 
 const TruncatedCell = ({ text }: { text: string }) => {
-    if (text.length <= TRUNCATE_LENGTH) {
-        return <>{text}</>;
+    if (!text || text.length <= TRUNCATE_LENGTH) {
+        return <>{text || '-'}</>;
     }
 
     return (
