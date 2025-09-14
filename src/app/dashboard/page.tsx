@@ -18,6 +18,7 @@ import { CentroHoursChart } from "./components/centro-hours-chart";
 import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiteProductionChart } from "./components/site-production-chart";
+import { FactoryHoursPieChart } from "./components/factory-hours-pie-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -108,6 +109,7 @@ export default function DashboardPage() {
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
+                        <FactoryHoursPieChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 lg:grid-cols-3">
                         <CentroHoursChart records={filteredRecords} />
