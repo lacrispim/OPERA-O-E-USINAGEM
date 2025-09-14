@@ -26,7 +26,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       recordDate = new Date();
     }
 
-    const centroMin = parseFloat(item['Centro'] || 0);
+    const centroMin = parseFloat(item['Centro (minutos)'] || 0);
     const tornoMin = parseFloat(item['Torno (minutos)'] || 0);
     const programacaoMin = parseFloat(item['Programação (minutos)'] || 0);
     
