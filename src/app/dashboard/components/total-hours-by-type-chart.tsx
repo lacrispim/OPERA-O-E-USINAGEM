@@ -62,7 +62,7 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
             data={chartData} 
             accessibilityLayer 
             layout="vertical"
-            margin={{ left: 20 }}
+            margin={{ left: 10 }}
           >
             <CartesianGrid horizontal={false} />
             <YAxis
@@ -72,6 +72,7 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+              width={80}
             />
             <XAxis
               dataKey="hours"
