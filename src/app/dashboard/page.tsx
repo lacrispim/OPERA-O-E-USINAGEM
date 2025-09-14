@@ -122,15 +122,15 @@ export default function DashboardPage() {
                             return getYear(recordDate) === parseInt(selectedYear) && getMonth(recordDate) === parseInt(selectedMonth);
                         })} />
                     </div>
-                     <div className="grid gap-8 md:grid-cols-2">
+                     <div className="grid grid-cols-1 gap-8">
                         <FactoryHoursBarChart records={filteredRecords} />
+                    </div>
+                     <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
+                        <CentroHoursChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 md:grid-cols-2">
-                        <CentroHoursChart records={filteredRecords} />
                         <TornoHoursChart records={filteredRecords} />
-                    </div>
-                     <div className="grid gap-8 md:grid-cols-2">
                         <ProgramacaoHoursChart records={filteredRecords} />
                     </div>
                 </>
