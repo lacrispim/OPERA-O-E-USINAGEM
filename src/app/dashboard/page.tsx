@@ -117,14 +117,14 @@ export default function DashboardPage() {
             ) : (
                 <>
                     <StatsCards records={filteredRecords} />
+                     <div className="grid grid-cols-1 gap-8">
+                        <FactoryHoursBarChart records={filteredRecords} />
+                    </div>
                     <div className="grid grid-cols-1 gap-8">
                         <SiteProductionChart records={allRecords.filter(record => {
                             const recordDate = new Date(record.date);
                             return getYear(recordDate) === parseInt(selectedYear) && getMonth(recordDate) === parseInt(selectedMonth);
                         })} />
-                    </div>
-                     <div className="grid grid-cols-1 gap-8">
-                        <FactoryHoursBarChart records={filteredRecords} />
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
