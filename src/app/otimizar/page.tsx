@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered, Upload, BrainCircuit } from 'lucide-react';
+import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered, BrainCircuit } from 'lucide-react';
 import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -227,8 +227,7 @@ export default function OtimizarPage() {
             />
             <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-                    <ImageUploadCard />
-                    <div className="lg:row-span-2">
+                    <div className="lg:col-span-2">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Montagem de Parâmetros de Usinagem CNC</CardTitle>
@@ -407,8 +406,8 @@ export default function OtimizarPage() {
                             </CardContent>
                         </Card>
                     </div>
-                    
-                    <div className="space-y-8">
+
+                    <div className="space-y-8 lg:col-span-2">
                         {isLoading && (
                              <Card className="flex flex-col items-center justify-center p-8 h-full">
                                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -472,6 +471,9 @@ export default function OtimizarPage() {
                             </div>
                         )}
                     </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto pt-8">
+                     <ImageUploadCard />
                 </div>
             </main>
         </>
