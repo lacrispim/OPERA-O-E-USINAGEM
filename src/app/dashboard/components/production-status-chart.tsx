@@ -26,7 +26,7 @@ const chartConfig = {
   },
   "Concluído": {
     label: "Concluído",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-5))",
   },
   "Em andamento": {
     label: "Em Andamento",
@@ -42,7 +42,7 @@ const chartConfig = {
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(var(--chart-5))",
+    color: "hsl(var(--chart-1))",
   },
   "Encerrada": {
     label: "Encerrada",

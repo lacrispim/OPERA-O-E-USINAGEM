@@ -28,7 +28,7 @@ const chartConfig = {
   },
   programacao: {
     label: "Programação",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(220 82% 52%)",
   },
 };
 

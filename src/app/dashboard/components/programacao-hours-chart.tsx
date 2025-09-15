@@ -18,7 +18,7 @@ type ProgramacaoHoursChartProps = {
 const chartConfig = {
   programacaoHours: {
     label: "Horas de Programação",
-    color: "hsl(142 82% 42%)", // Dark Green
+    color: "hsl(220 82% 52%)",
   },
 };
 
