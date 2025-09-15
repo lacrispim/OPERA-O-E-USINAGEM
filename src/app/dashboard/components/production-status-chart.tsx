@@ -18,8 +18,6 @@ type ProductionStatusChartProps = {
   records: ProductionRecord[];
 };
 
-const ALL_STATUSES = ["Concluído", "Em andamento", "Em produção", "Pendente", "Fila de produção", "Encerrada", "TBD", "N/A"];
-
 const chartConfig = {
   count: {
     label: "Quantidade",
@@ -33,7 +31,7 @@ const chartConfig = {
     color: "hsl(var(--chart-4))",
   },
   "Em produção": {
-    label: "Em produção",
+    label: "Em Produção",
     color: "hsl(220 82% 52%)",
   },
   "Pendente": {
@@ -58,43 +56,38 @@ const chartConfig = {
   }
 };
 
+const fallbackColors = [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-5))",
+    "hsl(220 82% 52%)",
+];
+
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords } = useMemo(() => {
-        const statusCounts: Record<string, number> = {};
-
-        // Initialize all possible statuses with 0
-        ALL_STATUSES.forEach(status => {
-            statusCounts[status] = 0;
-        });
-
-        // Count statuses from records
-        records.forEach((record) => {
+        const statusCounts = records.reduce((acc, record) => {
             const status = record.status || 'N/A';
-            if (statusCounts.hasOwnProperty(status)) {
-                statusCounts[status] += 1;
-            } else {
-                // If a status from data is not in our predefined list, we can add it
-                // or handle it as 'N/A'. For now, let's add it.
-                statusCounts[status] = 1;
-            }
-        });
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
 
-        const chartData = ALL_STATUSES.map(name => ({
-            name,
-            value: statusCounts[name] || 0,
-        }));
+        const chartData = Object.entries(statusCounts)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
         
         const totalRecords = records.length;
 
         return { chartData, totalRecords };
     }, [records]);
 
-    const getColor = (name: string) => {
+    const getColor = (name: string, index: number) => {
         const config = chartConfig[name as keyof typeof chartConfig];
         if (config && 'color' in config) {
             return config.color;
         }
-        return 'hsl(var(--muted))';
+        return fallbackColors[index % fallbackColors.length];
     }
     
     // Filtered data for the Pie, to avoid showing 0-value slices which can look weird.
@@ -123,8 +116,8 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             fill="#8884d8"
                             labelLine={false}
                         >
-                            {pieData.map((entry) => (
-                                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
+                            {pieData.map((entry, index) => (
+                                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name, index)} />
                             ))}
                             { totalRecords > 0 && (
                                 <LabelList
