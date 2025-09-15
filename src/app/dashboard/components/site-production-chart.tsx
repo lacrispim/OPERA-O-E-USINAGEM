@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, LabelList } from "recharts";
 
 type SiteProductionChartProps = {
   records: ProductionRecord[];
@@ -52,7 +52,7 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">
-          <BarChart data={chartData} accessibilityLayer margin={{ bottom: 20 }}>
+          <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 20 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="site"
@@ -78,7 +78,16 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
               dataKey="quantity"
               fill="var(--color-quantity)"
               radius={4}
-            />
+            >
+                <LabelList
+                    dataKey="quantity"
+                    position="top"
+                    offset={4}
+                    className="fill-foreground"
+                    fontSize={10}
+                    formatter={(value: number) => value.toLocaleString()}
+                />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
