@@ -32,7 +32,7 @@ const chartConfig = {
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(220 82% 52%)",
+    color: "hsl(24.6 95% 53.1%)", // Orange for "Em Produção"
   },
   "Pendente": {
     label: "Pendente",
@@ -40,7 +40,7 @@ const chartConfig = {
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-2))",
   },
   "Encerrada": {
     label: "Encerrada",
