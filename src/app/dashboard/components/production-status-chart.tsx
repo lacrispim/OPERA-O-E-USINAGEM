@@ -79,14 +79,12 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
             }
         });
 
-        // Filter out statuses with 0 count to not clutter the chart itself,
-        // but the legend will be based on the config. Or show all. Let's show all for now.
-        const chartData = Object.entries(statusCounts).map(([name, value]) => ({
+        const chartData = ALL_STATUSES.map(name => ({
             name,
-            value,
+            value: statusCounts[name] || 0,
         }));
         
-        const totalRecords = chartData.reduce((sum, item) => sum + item.value, 0);
+        const totalRecords = records.length;
 
         return { chartData, totalRecords };
     }, [records]);
@@ -144,7 +142,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                              )}
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" payload={chartData.map(item => ({ value: item.name, color: getColor(item.name) }))} />}
+                            content={<ChartLegendContent nameKey="name" payload={chartData.map(item => ({ value: chartConfig[item.name as keyof typeof chartConfig]?.label || item.name, color: getColor(item.name) }))} />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
