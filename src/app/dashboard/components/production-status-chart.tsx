@@ -30,11 +30,11 @@ const chartConfig = {
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-4))",
   },
   "Em produção": {
-    label: "Em Produção",
-    color: "hsl(var(--chart-4))",
+    label: "Em produção",
+    color: "hsl(220 82% 52%)",
   },
   "Pendente": {
     label: "Pendente",
