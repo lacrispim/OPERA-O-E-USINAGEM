@@ -64,7 +64,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            fontSize={12}
+                            fontSize={10}
                             angle={-45}
                             textAnchor="end"
                         />
@@ -72,7 +72,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            fontSize={12}
+                            fontSize={10}
                             allowDecimals={false}
                             valueFormatter={(value) => `${value}h`}
                         />

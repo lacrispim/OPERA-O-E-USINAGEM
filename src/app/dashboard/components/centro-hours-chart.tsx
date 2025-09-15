@@ -62,7 +62,7 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              fontSize={12}
+              fontSize={10}
               angle={-45}
               textAnchor="end"
             />
@@ -70,7 +70,7 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              fontSize={12}
+              fontSize={10}
               allowDecimals={false}
               valueFormatter={(value) => `${value}h`}
             />
