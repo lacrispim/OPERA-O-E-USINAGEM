@@ -63,9 +63,10 @@ Operações a serem realizadas:
 {{/each}}
 
 Sua tarefa é gerar:
-1.  **Parâmetros Operacionais:** Calcule e especifique a Velocidade de Corte (Vc), Rotação do Fuso (RPM), Avanço (F) e as ferramentas recomendadas. Considere os limites da máquina.
-2.  **Estimativas de Tempo:** Calcule o tempo de ciclo por peça e o tempo total para produzir o lote, incluindo o tempo de troca de ferramentas.
-3.  **Recomendações:** Forneça dicas e recomendações adicionais para otimizar o processo, como refrigeração, estratégias de fixação, etc.
+1.  **Parâmetros Operacionais Ideais:** Calcule e especifique a Velocidade de Corte (Vc), Rotação do Fuso (RPM), Avanço (F) e as ferramentas recomendadas. Considere os limites da máquina.
+2.  **Sequência de Operações:** Descreva a sequência lógica e mais eficiente para realizar as operações de usinagem listadas.
+3.  **Estimativas de Tempo:** Calcule o tempo de ciclo por peça e o tempo total para produzir o lote, incluindo o tempo de troca de ferramentas.
+4.  **Alertas e Recomendações:** Forneça alertas sobre potencial desgaste de ferramentas, necessidade de refrigeração, possíveis limitações da máquina e outras recomendações para otimizar o processo (e.g., estratégias de fixação).
 
 Seja preciso e forneça valores realistas para um ambiente de produção industrial.`,
 });

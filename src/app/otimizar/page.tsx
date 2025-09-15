@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb } from 'lucide-react';
+import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered } from 'lucide-react';
 import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -265,6 +265,14 @@ export default function OtimizarPage() {
                                 </Card>
                                 <Card>
                                     <CardHeader>
+                                        <CardTitle className="flex items-center gap-2"><ListOrdered className="text-primary"/>Sequência de Operações</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.operationSequence}</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader>
                                         <CardTitle className="flex items-center gap-2"><Timer className="text-primary"/>Estimativas de Tempo</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
@@ -274,10 +282,10 @@ export default function OtimizarPage() {
                                 </Card>
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-primary"/>Recomendações</CardTitle>
+                                        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-primary"/>Alertas e Recomendações</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-muted-foreground leading-relaxed">{result.recommendations}</p>
+                                        <p className="text-muted-foreground leading-relaxed">{result.alertsAndRecommendations}</p>
                                     </CardContent>
                                 </Card>
                             </div>
