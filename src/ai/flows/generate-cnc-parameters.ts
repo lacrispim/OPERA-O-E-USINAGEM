@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -56,14 +57,23 @@ Spindle:
 
 Processo:
 - Tempo de Troca de Ferramentas: {{toolChangeTime}} segundos
+- Estratégia de Usinagem: {{#each operationParams.machiningStrategy}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
 
 Operações a serem realizadas:
 {{#each operations}}
 - {{this}}
 {{/each}}
 
+{{#if (eq (indexOf operations "rosqueamento") -1)}}
+{{else}}
+Parâmetros de Rosqueamento:
+- Passo: {{operationParams.threadingPitch}}
+- Tipo: {{operationParams.threadType}}
+- Profundidade: {{operationParams.threadingDepth}}
+{{/if}}
+
 Sua tarefa é gerar:
-1.  **Parâmetros Operacionais Ideais:** Calcule e especifique a Velocidade de Corte (Vc), Rotação do Fuso (RPM), Avanço (F) e as ferramentas recomendadas. Considere os limites da máquina.
+1.  **Parâmetros Operacionais Ideais:** Calcule e especifique a Velocidade de Corte (Vc), Rotação do Fuso (RPM), Avanço (F) e as ferramentas recomendadas. Considere os limites da máquina e a estratégia de usinagem (desbaste, acabamento).
 2.  **Sequência de Operações:** Descreva a sequência lógica e mais eficiente para realizar as operações de usinagem listadas.
 3.  **Estimativas de Tempo:** Calcule o tempo de ciclo por peça e o tempo total para produzir o lote, incluindo o tempo de troca de ferramentas.
 4.  **Alertas e Recomendações:** Forneça alertas sobre potencial desgaste de ferramentas, necessidade de refrigeração, possíveis limitações da máquina e outras recomendações para otimizar o processo (e.g., estratégias de fixação).

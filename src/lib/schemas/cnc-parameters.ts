@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const GenerateCncParametersInputSchema = z.object({
@@ -23,6 +24,12 @@ export const GenerateCncParametersInputSchema = z.object({
   spindle: z.object({
     maxRpm: z.string().describe('RPM máximo do fuso.'),
     feedPerMinute: z.string().describe('Avanço por minuto (IPM/mm/min).'),
+  }),
+  operationParams: z.object({
+    machiningStrategy: z.array(z.string()).describe('Estratégia de usinagem (e.g., desbaste, acabamento).'),
+    threadingPitch: z.string().optional().describe('Passo da rosca em mm (se aplicável).'),
+    threadType: z.string().optional().describe('Tipo de rosca (e.g., Métrica, Whitworth) (se aplicável).'),
+    threadingDepth: z.string().optional().describe('Profundidade da rosca em mm (se aplicável).'),
   }),
   toolChangeTime: z.string().describe('Tempo necessário para a troca de ferramentas em segundos.'),
   operations: z.array(z.string()).describe('Lista de operações de usinagem a serem realizadas.'),

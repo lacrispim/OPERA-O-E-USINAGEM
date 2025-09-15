@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -23,6 +24,12 @@ const cncOperations = [
     { value: 'contraponto', label: 'Contraponto' },
     { value: 'furação', label: 'Furação' },
     { value: 'sangramento', label: 'Sangramento' },
+];
+
+const machiningStrategies = [
+    { value: 'desbaste', label: 'Desbaste (Roughing)' },
+    { value: 'semiacabamento', label: 'Semiacabamento (Semi-finishing)' },
+    { value: 'acabamento', label: 'Acabamento (Finishing)' },
 ];
 
 export default function OtimizarPage() {
@@ -56,12 +63,21 @@ export default function OtimizarPage() {
                 maxRpm: '',
                 feedPerMinute: '',
             },
+            operationParams: {
+                machiningStrategy: [],
+                threadingPitch: '',
+                threadType: '',
+                threadingDepth: '',
+            },
             toolChangeTime: '',
             operations: [],
             material: '',
             piecesPerCycle: 1,
         },
     });
+    
+    const watchOperations = form.watch('operations');
+    const showThreadingParams = watchOperations && watchOperations.includes('rosqueamento');
 
     const onSubmit = async (data: GenerateCncParametersInput) => {
         setIsLoading(true);
@@ -88,7 +104,7 @@ export default function OtimizarPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Dados da Peça e Máquina</CardTitle>
+                            <CardTitle>Dados da Peça e Processo</CardTitle>
                             <CardDescription>
                                 Preencha as informações abaixo para que a IA possa gerar os parâmetros.
                             </CardDescription>
@@ -164,7 +180,7 @@ export default function OtimizarPage() {
                                             <FormItem><FormLabel>Tipo</FormLabel><FormControl><Input placeholder="Pastilha de metal duro" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="tools.diameter" render={({ field }) => (
-                                            <FormItem><FormLabel>Diâmetro (mm)</FormLabel><FormControl><Input placeholder="12.0" {...field} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem><FormLabel>Diâmetro (mm)</FormLabel><FormControl><Input placeholder="12.0" {...field} /></FormControl><FormMessage /></FormMessage>
                                         )} />
                                          <FormField control={form.control} name="tools.material" render={({ field }) => (
                                             <FormItem><FormLabel>Material</FormLabel><FormControl><Input placeholder="Metal Duro" {...field} /></FormControl><FormMessage /></FormItem>
@@ -180,14 +196,14 @@ export default function OtimizarPage() {
                                             <FormItem><FormLabel>RPM Máximo</FormLabel><FormControl><Input placeholder="10000" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="spindle.feedPerMinute" render={({ field }) => (
-                                            <FormItem><FormLabel>Avanço (mm/min)</FormLabel><FormControl><Input placeholder="500" {...field} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem><FormLabel>Avanço (mm/min)</FormLabel><FormControl><Input placeholder="500" {...field} /></FormControl><FormMessage /></FormMessage>
                                         )} />
                                          <FormField control={form.control} name="toolChangeTime" render={({ field }) => (
                                             <FormItem><FormLabel>Tempo Troca Ferramentas (s)</FormLabel><FormControl><Input placeholder="5" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                     </div>
 
-                                    <h3 className="font-semibold text-lg pt-4">Operações e Material</h3>
+                                    <h3 className="font-semibold text-lg pt-4">Parâmetros de Operação</h3>
                                      <FormField
                                         control={form.control}
                                         name="operations"
@@ -206,6 +222,43 @@ export default function OtimizarPage() {
                                             </FormItem>
                                         )}
                                     />
+                                     <FormField
+                                        control={form.control}
+                                        name="operationParams.machiningStrategy"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Estratégia de Usinagem</FormLabel>
+                                                <FormControl>
+                                                    <MultiSelect
+                                                        options={machiningStrategies}
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                        placeholder="Selecione as estratégias..."
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {showThreadingParams && (
+                                        <div className="space-y-4 p-4 border rounded-md">
+                                             <h4 className="font-medium">Parâmetros de Rosqueamento</h4>
+                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <FormField control={form.control} name="operationParams.threadingPitch" render={({ field }) => (
+                                                    <FormItem><FormLabel>Passo (mm)</FormLabel><FormControl><Input placeholder="1.5" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="operationParams.threadType" render={({ field }) => (
+                                                    <FormItem><FormLabel>Tipo de Rosca</FormLabel><FormControl><Input placeholder="Métrica" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="operationParams.threadingDepth" render={({ field }) => (
+                                                    <FormItem><FormLabel>Profundidade (mm)</FormLabel><FormControl><Input placeholder="10" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <h3 className="font-semibold text-lg pt-4">Material e Lote</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField control={form.control} name="material" render={({ field }) => (
                                             <FormItem><FormLabel>Material da Peça</FormLabel><FormControl><Input placeholder="Aço 1045" {...field} /></FormControl><FormMessage /></FormItem>
