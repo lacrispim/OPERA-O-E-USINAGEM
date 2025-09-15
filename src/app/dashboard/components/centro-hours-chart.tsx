@@ -78,7 +78,6 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               cursor={false}
               content={<ChartTooltipContent indicator="dot" formatter={(value) => `${Number(value).toFixed(1)}h`} />}
             />
-             <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="centroHours"
               fill="var(--color-centroHours)"
