@@ -49,7 +49,7 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas de Centro por Fábrica</CardTitle>
+        <CardTitle className="text-lg">Horas de Centro por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">

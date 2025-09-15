@@ -49,7 +49,7 @@ export function TornoHoursChart({ records }: TornoHoursChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas de Torno por Fábrica</CardTitle>
+        <CardTitle className="text-lg">Horas de Torno por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">

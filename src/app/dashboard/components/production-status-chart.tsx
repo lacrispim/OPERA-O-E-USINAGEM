@@ -26,35 +26,35 @@ const chartConfig = {
   },
   "Concluído": {
     label: "Concluído",
-    color: "hsl(142.1 76.2% 56.5%)", // Green
+    color: "hsl(var(--chart-2))",
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(210 40% 96.1%)", // Light Blue
+    color: "hsl(var(--chart-3))",
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(47.9 95.8% 53.1%)", // Yellow
+    color: "hsl(var(--chart-4))",
   },
   "Pendente": {
     label: "Pendente",
-    color: "hsl(0 84.2% 60.2%)", // Red
+    color: "hsl(var(--destructive))",
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(221.2 83.2% 53.3%)", // Blue
+    color: "hsl(var(--chart-5))",
   },
   "Encerrada": {
     label: "Encerrada",
-    color: "hsl(217.2 32.6% 17.5%)", // Dark Blue-Gray
+    color: "hsl(var(--muted-foreground))",
   },
   "TBD": {
     label: "TBD",
-    color: "hsl(210 40% 98%)", // Almost White
+    color: "hsl(var(--border))",
   },
   "N/A": {
     label: "Não Aplicável",
-    color: "hsl(222.2 47.4% 11.2%)", // Dark Blue
+    color: "hsl(var(--muted))",
   }
 };
 
@@ -105,7 +105,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Distribuição por Status</CardTitle>
+                <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">

@@ -18,7 +18,7 @@ type FactoryHoursBarChartProps = {
 const chartConfig = {
   hours: {
     label: "Total Horas",
-    color: "hsl(221.2 83.2% 53.3%)", // Petrol Blue
+    color: "hsl(204 100% 40%)", // Bright Blue
   },
 };
 
@@ -53,7 +53,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Total de Horas por Fábrica</CardTitle>
+                <CardTitle className="text-lg">Total de Horas por Fábrica</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-72 w-full">
@@ -80,8 +80,8 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             cursor={false}
                             content={<ChartTooltipContent indicator="dot" formatter={(value) => `${Number(value).toFixed(1)}h`} />}
                         />
-                        <ReferenceLine y={60} stroke="red" strokeDasharray="3 3">
-                            <Label value="Horas disponíveis" position="insideTopRight" fill="red" fontSize={12} />
+                        <ReferenceLine y={60} stroke="hsl(var(--primary))" strokeDasharray="3 3">
+                            <Label value="Horas disponíveis" position="insideTopRight" fill="hsl(var(--primary))" fontSize={12} />
                         </ReferenceLine>
                         <Bar
                             dataKey="hours"

@@ -54,7 +54,7 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Total de Horas por Tipo de Processo</CardTitle>
+        <CardTitle className="text-lg">Total de Horas por Tipo de Processo</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">

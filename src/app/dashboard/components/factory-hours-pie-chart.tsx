@@ -72,7 +72,7 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Distribuição de Horas por Fábrica (%)</CardTitle>
+                <CardTitle className="text-lg">Distribuição de Horas por Fábrica (%)</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">

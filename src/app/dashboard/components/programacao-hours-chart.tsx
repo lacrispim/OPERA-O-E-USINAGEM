@@ -48,7 +48,7 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Horas de Programação por Fábrica</CardTitle>
+        <CardTitle className="text-lg">Horas de Programação por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">
