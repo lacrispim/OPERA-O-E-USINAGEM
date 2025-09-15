@@ -39,6 +39,7 @@ Geometria:
 - Tolerâncias: {{geometry.tolerances}}
 
 Máquina:
+- Tipo de Máquina: {{machine.machineType}}
 - Modelo: {{machine.model}}
 - Eixos: {{machine.axes}}
 - Limites de Velocidade/Torque: {{machine.speedTorqueLimits}}

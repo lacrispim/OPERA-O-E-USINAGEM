@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { generateCncParametersAction } from '@/lib/actions';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const cncOperations = [
     { value: 'rosqueamento', label: 'Rosqueamento' },
@@ -40,6 +41,7 @@ export default function OtimizarPage() {
                 tolerances: '',
             },
             machine: {
+                machineType: 'Torno CNC',
                 model: '',
                 axes: '',
                 speedTorqueLimits: '',
@@ -114,9 +116,39 @@ export default function OtimizarPage() {
                                     </div>
 
                                     <h3 className="font-semibold text-lg pt-4">Máquina</h3>
+                                     <FormField
+                                        control={form.control}
+                                        name="machine.machineType"
+                                        render={({ field }) => (
+                                            <FormItem className="space-y-3">
+                                                <FormLabel>Tipo de Máquina</FormLabel>
+                                                <FormControl>
+                                                    <RadioGroup
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                    className="flex space-x-4"
+                                                    >
+                                                    <FormItem className="flex items-center space-x-2">
+                                                        <FormControl>
+                                                            <RadioGroupItem value="Torno CNC" id="r1" />
+                                                        </FormControl>
+                                                        <FormLabel htmlFor="r1" className="font-normal">Torno CNC</FormLabel>
+                                                    </FormItem>
+                                                    <FormItem className="flex items-center space-x-2">
+                                                        <FormControl>
+                                                            <RadioGroupItem value="Centro de Usinagem" id="r2" />
+                                                        </FormControl>
+                                                        <FormLabel htmlFor="r2" className="font-normal">Centro de Usinagem</FormLabel>
+                                                    </FormItem>
+                                                    </RadioGroup>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField control={form.control} name="machine.model" render={({ field }) => (
-                                            <FormItem><FormLabel>Modelo Torno CNC</FormLabel><FormControl><Input placeholder="ROMI D 800" {...field} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem><FormLabel>Modelo da Máquina</FormLabel><FormControl><Input placeholder="ROMI D 800" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="machine.axes" render={({ field }) => (
                                             <FormItem><FormLabel>Eixos Disponíveis</FormLabel><FormControl><Input placeholder="5 eixos" {...field} /></FormControl><FormMessage /></FormItem>

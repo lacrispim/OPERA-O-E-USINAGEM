@@ -9,7 +9,8 @@ export const GenerateCncParametersInputSchema = z.object({
     tolerances: z.string().describe('Tolerâncias dimensionais e geométricas.'),
   }),
   machine: z.object({
-    model: z.string().describe('Modelo do torno CNC.'),
+    machineType: z.string().describe('Tipo de máquina: Torno CNC ou Centro de Usinagem.'),
+    model: z.string().describe('Modelo da máquina.'),
     axes: z.string().describe('Eixos disponíveis (e.g., 3 eixos, 5 eixos).'),
     speedTorqueLimits: z.string().describe('Limites de velocidade e torque da máquina.'),
   }),
