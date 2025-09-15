@@ -18,7 +18,7 @@ type ProductionStatusChartProps = {
   records: ProductionRecord[];
 };
 
-const ALL_STATUSES = ["Concluído", "Em produção", "Pendente", "Fila de produção", "Em andamento", "Encerrada", "TBD", "N/A"];
+const ALL_STATUSES = ["Concluído", "Em andamento", "Em produção", "Pendente", "Fila de produção", "Encerrada", "TBD", "N/A"];
 
 const chartConfig = {
   count: {
@@ -142,7 +142,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                              )}
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" payload={chartData.map(item => ({ value: chartConfig[item.name as keyof typeof chartConfig]?.label || item.name, color: getColor(item.name) }))} />}
+                            content={<ChartLegendContent nameKey="name" />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
