@@ -18,7 +18,7 @@ type FactoryHoursBarChartProps = {
 const chartConfig = {
   hours: {
     label: "Total Horas",
-    color: "hsl(221 83% 53%)", // Dark Blue
+    color: "hsl(180 100% 50%)", // Cyan
   },
 };
 
