@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, ReferenceLine, Label } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -78,6 +78,9 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             cursor={false}
                             content={<ChartTooltipContent indicator="dot" formatter={(value) => `${Number(value).toFixed(1)}h`} />}
                         />
+                        <ReferenceLine y={60} stroke="red" strokeDasharray="3 3">
+                            <Label value="Meta de Horas" position="insideTopRight" fill="red" fontSize={12} />
+                        </ReferenceLine>
                         <Bar
                             dataKey="hours"
                             fill="var(--color-hours)"
