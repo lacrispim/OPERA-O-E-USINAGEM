@@ -26,7 +26,7 @@ const prompt = ai.definePrompt({
   name: 'generateCncParametersPrompt',
   input: { schema: GenerateCncParametersInputSchema },
   output: { schema: GenerateCncParametersOutputSchema },
-  prompt: `Você é uma IA especialista em processos de usinagem CNC. Com base nas informações fornecidas, monte os parâmetros operacionais e estimativas de tempo para a produção de uma peça.
+  prompt: `Você é uma IA especialista em processos de usinagem CNC. Seu principal objetivo é estimar o tempo de usinagem para uma única peça com base nas informações fornecidas.
 
 Dados da Peça:
 - Material: {{material}}
@@ -72,13 +72,13 @@ Parâmetros de Rosqueamento:
 - Profundidade: {{operationParams.threadingDepth}}
 {{/if}}
 
-Sua tarefa é gerar:
-1.  **Parâmetros Operacionais Ideais:** Calcule e especifique a Velocidade de Corte (Vc), Rotação do Fuso (RPM), Avanço (F) e as ferramentas recomendadas. Considere os limites da máquina e a estratégia de usinagem (desbaste, acabamento).
-2.  **Sequência de Operações:** Descreva a sequência lógica e mais eficiente para realizar as operações de usinagem listadas.
-3.  **Estimativas de Tempo:** Calcule o tempo de ciclo por peça e o tempo total para produzir o lote, incluindo o tempo de troca de ferramentas.
-4.  **Alertas e Recomendações:** Forneça alertas sobre potencial desgaste de ferramentas, necessidade de refrigeração, possíveis limitações da máquina e outras recomendações para otimizar o processo (e.g., estratégias de fixação).
+Sua tarefa principal é calcular e fornecer a **Estimativa de Tempo de Usinagem por Peça**.
 
-Seja preciso e forneça valores realistas para um ambiente de produção industrial.`,
+Para apoiar sua estimativa, forneça também:
+1.  **Sequência de Operações:** Descreva a sequência lógica e mais eficiente para realizar as operações de usinagem listadas.
+2.  **Alertas e Recomendações:** Forneça alertas sobre potencial desgaste de ferramentas, necessidade de refrigeração, possíveis limitações da máquina e outras recomendações para otimizar o processo.
+
+Seja preciso e forneça valores realistas para um ambiente de produção industrial, focando no tempo final da peça.`,
 });
 
 const generateCncParametersFlow = ai.defineFlow(

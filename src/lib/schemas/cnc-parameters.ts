@@ -39,17 +39,8 @@ export const GenerateCncParametersInputSchema = z.object({
 export type GenerateCncParametersInput = z.infer<typeof GenerateCncParametersInputSchema>;
 
 export const GenerateCncParametersOutputSchema = z.object({
-  operationalParameters: z.object({
-      cuttingSpeed: z.string().describe('Velocidade de corte (Vc) em m/min.'),
-      spindleSpeed: z.string().describe('Rotação do fuso (RPM).'),
-      feedRate: z.string().describe('Avanço (F) em mm/rot ou mm/min.'),
-      toolSelection: z.string().describe('Ferramentas recomendadas para as operações.'),
-  }),
+  machiningTimePerPiece: z.string().describe('O tempo estimado de usinagem para uma única peça (e.g., "15 minutos e 30 segundos").'),
   operationSequence: z.string().describe('A sequência lógica de operações para usinar a peça.'),
-  timeEstimates: z.object({
-      cycleTimePerPiece: z.string().describe('Tempo de ciclo estimado por peça em minutos.'),
-      totalBatchTime: z.string().describe('Tempo total estimado para o lote em horas.'),
-  }),
   alertsAndRecommendations: z.string().describe('Alertas sobre desgaste de ferramentas, necessidade de refrigeração, limitações da máquina e outras recomendações para otimização.'),
 });
 export type GenerateCncParametersOutput = z.infer<typeof GenerateCncParametersOutputSchema>;

@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered } from 'lucide-react';
+import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Lightbulb, ListOrdered } from 'lucide-react';
 import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -99,17 +99,17 @@ export default function OtimizarPage() {
     return (
         <>
             <PageHeader
-                title="Otimizar Produção"
-                description="Utilize IA para gerar parâmetros de usinagem CNC."
+                title="Estimar Tempo de Produção"
+                description="Utilize IA para estimar o tempo de usinagem de uma peça."
             />
             <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
                     {/* CNC Parameter Form Card */}
                     <Card className="lg:col-span-1">
                         <CardHeader>
-                            <CardTitle>Montagem de Parâmetros de Usinagem CNC</CardTitle>
+                            <CardTitle>Parâmetros de Usinagem CNC</CardTitle>
                             <CardDescription>
-                                Preencha as informações abaixo para que a IA possa gerar os parâmetros detalhados.
+                                Preencha as informações abaixo para que a IA possa estimar o tempo de produção.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -273,9 +273,9 @@ export default function OtimizarPage() {
 
                                     <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
                                         {isLoading ? (
-                                            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando Parâmetros...</>
+                                            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Estimando Tempo...</>
                                         ) : (
-                                            <><WandSparkles className="mr-2 h-5 w-5" /> Gerar Parâmetros</>
+                                            <><WandSparkles className="mr-2 h-5 w-5" /> Estimar Tempo</>
                                         )}
                                     </Button>
                                 </form>
@@ -288,7 +288,7 @@ export default function OtimizarPage() {
                         {isLoading && (
                              <Card className="flex flex-col items-center justify-center p-8 h-full">
                                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                <p className="mt-4 text-muted-foreground">Analisando dados e calculando parâmetros...</p>
+                                <p className="mt-4 text-muted-foreground">Analisando dados e calculando tempo...</p>
                             </Card>
                         )}
 
@@ -303,7 +303,7 @@ export default function OtimizarPage() {
                         {!isLoading && !result && !error && (
                             <Card className="flex flex-col items-center justify-center p-8 h-full text-center">
                                 <ChevronsRight className="h-12 w-12 text-muted-foreground/50" />
-                                <p className="mt-4 text-muted-foreground">Os resultados da análise de parâmetros aparecerão aqui.</p>
+                                <p className="mt-4 text-muted-foreground">A estimativa de tempo de produção aparecerá aqui.</p>
                             </Card>
                         )}
 
@@ -311,13 +311,11 @@ export default function OtimizarPage() {
                             <div className="space-y-6">
                                <Card>
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2"><Wrench className="text-primary"/>Parâmetros Operacionais</CardTitle>
+                                        <CardTitle className="flex items-center gap-2"><Timer className="text-primary"/>Estimativa de Tempo</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Velocidade de Corte (Vc)</span><span className="font-mono">{result.operationalParameters.cuttingSpeed}</span></div>
-                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Rotação do Fuso (RPM)</span><span className="font-mono">{result.operationalParameters.spindleSpeed}</span></div>
-                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Avanço (F)</span><span className="font-mono">{result.operationalParameters.feedRate}</span></div>
-                                        <div><span className="text-muted-foreground">Ferramentas Recomendadas</span><p className="font-mono mt-1 text-sm">{result.operationalParameters.toolSelection}</p></div>
+                                    <CardContent className="space-y-2">
+                                        <p className="text-muted-foreground">Tempo estimado para usinar a peça:</p>
+                                        <p className="text-3xl font-bold text-center py-4">{result.machiningTimePerPiece}</p>
                                     </CardContent>
                                 </Card>
                                 <Card>
@@ -326,15 +324,6 @@ export default function OtimizarPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.operationSequence}</p>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2"><Timer className="text-primary"/>Estimativas de Tempo</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Tempo de Ciclo / Peça</span><span className="font-mono">{result.timeEstimates.cycleTimePerPiece}</span></div>
-                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Tempo Total do Lote</span><span className="font-mono">{result.timeEstimates.totalBatchTime}</span></div>
                                     </CardContent>
                                 </Card>
                                 <Card>
