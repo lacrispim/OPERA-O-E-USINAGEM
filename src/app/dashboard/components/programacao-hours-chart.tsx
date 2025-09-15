@@ -18,7 +18,7 @@ type ProgramacaoHoursChartProps = {
 const chartConfig = {
   programacaoHours: {
     label: "Horas de Programação",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(142 82% 42%)", // Dark Green
   },
 };
 
@@ -52,16 +52,18 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">
-          <BarChart data={chartData} accessibilityLayer margin={{ bottom: 20 }}>
+          <BarChart data={chartData} accessibilityLayer margin={{ bottom: 30, left: -20 }}>
              <CartesianGrid vertical={false} />
             <XAxis
               dataKey="factory"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={10}
               fontSize={10}
               angle={-45}
               textAnchor="end"
+              interval={0}
+              height={50}
             />
             <YAxis
               tickLine={false}

@@ -18,7 +18,7 @@ type FactoryHoursBarChartProps = {
 const chartConfig = {
   hours: {
     label: "Total Horas",
-    color: "hsl(204 100% 40%)", // Bright Blue
+    color: "hsl(195 100% 40%)", // Teal
   },
 };
 
@@ -57,16 +57,18 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-72 w-full">
-                    <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 20 }}>
+                    <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 30, left: -20 }}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="factory"
                             tickLine={false}
                             axisLine={false}
-                            tickMargin={8}
+                            tickMargin={10}
                             fontSize={10}
                             angle={-45}
                             textAnchor="end"
+                            interval={0}
+                            height={50}
                         />
                         <YAxis
                             tickLine={false}
