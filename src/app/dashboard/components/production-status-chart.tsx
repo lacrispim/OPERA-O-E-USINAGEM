@@ -18,6 +18,8 @@ type ProductionStatusChartProps = {
   records: ProductionRecord[];
 };
 
+const ALL_STATUSES = ["Concluído", "Em produção", "Pendente", "Fila de produção", "Em andamento", "Encerrada", "TBD", "N/A"];
+
 const chartConfig = {
   count: {
     label: "Quantidade",
@@ -42,6 +44,14 @@ const chartConfig = {
     label: "Em Andamento",
     color: "hsl(var(--chart-5))",
   },
+  "Encerrada": {
+    label: "Encerrada",
+    color: "hsl(var(--chart-1))",
+  },
+  "TBD": {
+    label: "TBD",
+    color: "hsl(var(--muted))",
+  },
   "N/A": {
     label: "Não Aplicável",
     color: "hsl(var(--muted))",
@@ -50,15 +60,27 @@ const chartConfig = {
 
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords } = useMemo(() => {
-        const statusCounts = records.reduce((acc, record) => {
-            const status = record.status || 'N/A';
-            if (!acc[status]) {
-                acc[status] = 0;
-            }
-            acc[status] += 1;
-            return acc;
-        }, {} as Record<string, number>);
+        const statusCounts: Record<string, number> = {};
 
+        // Initialize all possible statuses with 0
+        ALL_STATUSES.forEach(status => {
+            statusCounts[status] = 0;
+        });
+
+        // Count statuses from records
+        records.forEach((record) => {
+            const status = record.status || 'N/A';
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status] += 1;
+            } else {
+                // If a status from data is not in our predefined list, we can add it
+                // or handle it as 'N/A'. For now, let's add it.
+                statusCounts[status] = 1;
+            }
+        });
+
+        // Filter out statuses with 0 count to not clutter the chart itself,
+        // but the legend will be based on the config. Or show all. Let's show all for now.
         const chartData = Object.entries(statusCounts).map(([name, value]) => ({
             name,
             value,
@@ -76,6 +98,9 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
         }
         return 'hsl(var(--muted))';
     }
+    
+    // Filtered data for the Pie, to avoid showing 0-value slices which can look weird.
+    const pieData = chartData.filter(d => d.value > 0);
 
     return (
         <Card>
@@ -90,7 +115,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             content={<ChartTooltipContent hideLabel />}
                         />
                         <Pie
-                            data={chartData}
+                            data={pieData}
                             dataKey="value"
                             nameKey="name"
                             cx="50%"
@@ -100,21 +125,26 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             fill="#8884d8"
                             labelLine={false}
                         >
-                            {chartData.map((entry) => (
+                            {pieData.map((entry) => (
                                 <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
                             ))}
-                            <LabelList
-                                dataKey="value"
-                                position="inside"
-                                formatter={(value: number) => {
-                                    if (totalRecords === 0) return "0%";
-                                    return `${((value / totalRecords) * 100).toFixed(0)}%`;
-                                }}
-                                className="fill-white text-sm font-semibold"
-                             />
+                            { totalRecords > 0 && (
+                                <LabelList
+                                    dataKey="value"
+                                    position="inside"
+                                    formatter={(value: number) => {
+                                        if (totalRecords === 0) return "0%";
+                                        const percentage = (value / totalRecords) * 100;
+                                        // Don't show label for small percentages
+                                        if (percentage < 5) return "";
+                                        return `${percentage.toFixed(0)}%`;
+                                    }}
+                                    className="fill-white text-sm font-semibold"
+                                />
+                             )}
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" />}
+                            content={<ChartLegendContent nameKey="name" payload={chartData.map(item => ({ value: item.name, color: getColor(item.name) }))} />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
