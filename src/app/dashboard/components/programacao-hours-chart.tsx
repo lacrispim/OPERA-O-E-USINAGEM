@@ -6,8 +6,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
@@ -77,7 +75,6 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
               cursor={false}
               content={<ChartTooltipContent indicator="dot" formatter={(value) => `${Number(value).toFixed(1)}h`} />}
             />
-             <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="programacaoHours"
               fill="var(--color-programacaoHours)"
