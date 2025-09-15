@@ -18,7 +18,7 @@ type TornoHoursChartProps = {
 const chartConfig = {
   tornoHours: {
     label: "Horas de Torno",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-5))",
   },
 };
 
