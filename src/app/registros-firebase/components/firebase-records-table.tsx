@@ -39,10 +39,10 @@ const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torn
 const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação"];
 const TRUNCATE_LENGTH = 25;
 
-const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" => {
     const s = status ? status.toLowerCase() : '';
     if (s.includes('concluído')) return 'default';
-    if (s.includes('produção') || s.includes('andamento')) return 'secondary';
+    if (s.includes('produção') || s.includes('andamento')) return 'in-progress';
     if (s.includes('pendente')) return 'destructive';
     return 'outline';
 }
