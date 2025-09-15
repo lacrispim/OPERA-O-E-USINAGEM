@@ -4,21 +4,17 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Image from 'next/image';
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered, BrainCircuit } from 'lucide-react';
+import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb, ListOrdered } from 'lucide-react';
 import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { generateCncParametersAction, estimateMachiningTimeAction } from '@/lib/actions';
+import { generateCncParametersAction } from '@/lib/actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { EstimateMachiningTimeOutput } from '@/lib/schemas/machining-time';
-import { useToast } from '@/hooks/use-toast';
-import { Label } from '@/components/ui/label';
 
 
 const cncOperations = [
@@ -36,118 +32,6 @@ const machiningStrategies = [
     { value: 'semiacabamento', label: 'Semiacabamento (Semi-finishing)' },
     { value: 'acabamento', label: 'Acabamento (Finishing)' },
 ];
-
-function ImageUploadCard() {
-    const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<EstimateMachiningTimeOutput | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const { toast } = useToast();
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result as string);
-            };
-            reader.readAsDataURL(selectedFile);
-        }
-    };
-
-    const handleSubmit = async () => {
-        if (!file || !preview) {
-            toast({
-                variant: 'destructive',
-                title: 'Nenhum arquivo selecionado',
-                description: 'Por favor, selecione um arquivo de imagem para analisar.',
-            });
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-        setResult(null);
-
-        const response = await estimateMachiningTimeAction({ drawingImage: preview });
-
-        if (response.error) {
-            setError(response.error);
-        } else if (response.data) {
-            setResult(response.data);
-        }
-        setIsLoading(false);
-    };
-
-    return (
-        <div className='space-y-8'>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Análise de Desenho Técnico</CardTitle>
-                    <CardDescription>
-                        Faça upload de um desenho técnico e a IA estimará o tempo de usinagem.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="drawing-upload">Arquivo do Desenho</Label>
-                        <Input id="drawing-upload" type="file" accept="image/*" onChange={handleFileChange} />
-                    </div>
-                    {preview && (
-                        <div className="border rounded-md p-2">
-                            <Image src={preview} alt="Pré-visualização do desenho" width={500} height={300} className="w-full h-auto object-contain" />
-                        </div>
-                    )}
-                    <Button onClick={handleSubmit} disabled={isLoading || !file} className="w-full">
-                        {isLoading ? (
-                            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Analisando Imagem...</>
-                        ) : (
-                            <><BrainCircuit className="mr-2 h-5 w-5" /> Estimar Tempo de Usinagem</>
-                        )}
-                    </Button>
-                </CardContent>
-            </Card>
-
-             {isLoading && (
-                <Card className="flex flex-col items-center justify-center p-8">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                    <p className="mt-4 text-muted-foreground">Analisando o desenho técnico...</p>
-                </Card>
-            )}
-
-            {error && (
-                <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Ocorreu um Erro</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                </Alert>
-            )}
-            
-            {result && (
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Timer className="text-primary"/>Tempo de Usinagem Estimado</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-center">{result.estimatedTime}</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Lightbulb className="text-primary"/>Justificativa da IA</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.reasoning}</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-        </div>
-    );
-}
 
 
 export default function OtimizarPage() {
@@ -216,7 +100,7 @@ export default function OtimizarPage() {
         <>
             <PageHeader
                 title="Otimizar Produção"
-                description="Utilize IA para gerar parâmetros de usinagem ou estimar tempo a partir de um desenho técnico."
+                description="Utilize IA para gerar parâmetros de usinagem CNC."
             />
             <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
@@ -465,12 +349,7 @@ export default function OtimizarPage() {
                         )}
                     </div>
                 </div>
-                {/* Image Upload Section */}
-                <div className="max-w-7xl mx-auto pt-8">
-                     <ImageUploadCard />
-                </div>
             </main>
         </>
     );
-
-    
+}

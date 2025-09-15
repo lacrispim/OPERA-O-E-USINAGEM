@@ -5,9 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getProductionRecords } from '@/lib/data';
 import { optimizeProductionParameters } from '@/ai/flows/optimize-production-parameters';
 import { generateCncParameters } from '@/ai/flows/generate-cnc-parameters';
-import { estimateMachiningTimeFromImage } from '@/ai/flows/estimate-machining-time-from-image';
 import { GenerateCncParametersInput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
-import { EstimateMachiningTimeInput, EstimateMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 
 
 export async function optimizeParametersAction() {
@@ -40,19 +38,5 @@ export async function generateCncParametersAction(input: GenerateCncParametersIn
             return { error: 'Dados de entrada inválidos. Verifique os campos e tente novamente.' };
         }
         return { error: 'Ocorreu um erro ao comunicar com a IA. Tente novamente mais tarde.' };
-    }
-}
-
-export async function estimateMachiningTimeAction(input: EstimateMachiningTimeInput) {
-    try {
-        const validatedInput = EstimateMachiningTimeInputSchema.parse(input);
-        const result = await estimateMachiningTimeFromImage(validatedInput);
-        return { data: result };
-    } catch (error) {
-        console.error("Error estimating machining time:", error);
-         if (error instanceof z.ZodError) {
-            return { error: 'Dados de entrada da imagem inválidos.' };
-        }
-        return { error: 'Ocorreu um erro ao analisar a imagem. Tente novamente.' };
     }
 }
