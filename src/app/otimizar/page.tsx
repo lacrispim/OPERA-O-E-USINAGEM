@@ -180,7 +180,7 @@ export default function OtimizarPage() {
                                             <FormItem><FormLabel>Tipo</FormLabel><FormControl><Input placeholder="Pastilha de metal duro" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="tools.diameter" render={({ field }) => (
-                                            <FormItem><FormLabel>Diâmetro (mm)</FormLabel><FormControl><Input placeholder="12.0" {...field} /></FormControl><FormMessage /></FormMessage>
+                                            <FormItem><FormLabel>Diâmetro (mm)</FormLabel><FormControl><Input placeholder="12.0" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                          <FormField control={form.control} name="tools.material" render={({ field }) => (
                                             <FormItem><FormLabel>Material</FormLabel><FormControl><Input placeholder="Metal Duro" {...field} /></FormControl><FormMessage /></FormItem>
@@ -196,7 +196,7 @@ export default function OtimizarPage() {
                                             <FormItem><FormLabel>RPM Máximo</FormLabel><FormControl><Input placeholder="10000" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="spindle.feedPerMinute" render={({ field }) => (
-                                            <FormItem><FormLabel>Avanço (mm/min)</FormLabel><FormControl><Input placeholder="500" {...field} /></FormControl><FormMessage /></FormMessage>
+                                            <FormItem><FormLabel>Avanço (mm/min)</FormLabel><FormControl><Input placeholder="500" {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                          <FormField control={form.control} name="toolChangeTime" render={({ field }) => (
                                             <FormItem><FormLabel>Tempo Troca Ferramentas (s)</FormLabel><FormControl><Input placeholder="5" {...field} /></FormControl><FormMessage /></FormItem>
