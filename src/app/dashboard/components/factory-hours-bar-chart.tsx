@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, ReferenceLine, Label } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, ReferenceLine, Label, LabelList } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -57,7 +57,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-72 w-full">
-                    <BarChart data={chartData} accessibilityLayer margin={{ bottom: 20 }}>
+                    <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 20 }}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="factory"
@@ -87,7 +87,16 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             dataKey="hours"
                             fill="var(--color-hours)"
                             radius={4}
-                        />
+                        >
+                             <LabelList
+                                dataKey="hours"
+                                position="top"
+                                offset={4}
+                                className="fill-foreground"
+                                fontSize={10}
+                                formatter={(value: number) => `${value.toFixed(1)}h`}
+                            />
+                        </Bar>
                     </BarChart>
                 </ChartContainer>
             </CardContent>
