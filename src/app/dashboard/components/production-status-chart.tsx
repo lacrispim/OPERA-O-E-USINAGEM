@@ -30,27 +30,27 @@ const chartConfig = {
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-5))",
   },
   "Pendente": {
     label: "Pendente",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-3))",
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--secondary-foreground))",
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(var(--chart-5))",
+    color: "hsl(var(--chart-4))",
   },
   "Encerrada": {
     label: "Encerrada",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--accent-foreground))",
   },
   "TBD": {
     label: "TBD",
-    color: "hsl(var(--muted))",
+    color: "hsl(var(--muted-foreground))",
   },
   "N/A": {
     label: "Não Aplicável",
