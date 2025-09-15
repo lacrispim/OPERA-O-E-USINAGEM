@@ -1,26 +1,56 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { optimizeParametersAction } from "@/lib/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, WandSparkles, Lightbulb, AlertTriangle } from 'lucide-react';
-import { OptimizeProductionParametersOutput } from '@/ai/flows/optimize-production-parameters';
-import { Separator } from '@/components/ui/separator';
+import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb } from 'lucide-react';
+import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/ai/flows/generate-cnc-parameters';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { generateCncParametersAction } from '@/lib/actions';
+
+const cncOperations = [
+    { value: 'rosqueamento', label: 'Rosqueamento' },
+    { value: 'faceamento', label: 'Faceamento' },
+    { value: 'chanfros', label: 'Chanfros' },
+    { value: 'torneamento', label: 'Torneamento' },
+    { value: 'contraponto', label: 'Contraponto' },
+    { value: 'furação', label: 'Furação' },
+    { value: 'sangramento', label: 'Sangramento' },
+];
 
 export default function OtimizarPage() {
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<OptimizeProductionParametersOutput | null>(null);
+    const [result, setResult] = useState<GenerateCncParametersOutput | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const handleOptimize = async () => {
+    const form = useForm<GenerateCncParametersInput>({
+        resolver: zodResolver(GenerateCncParametersInputSchema),
+        defaultValues: {
+            geometry: {
+                shape: '',
+                externalDiameter: '',
+                internalDiameter: '',
+                length: '',
+                tolerances: '',
+            },
+            operations: [],
+            material: '',
+            piecesPerCycle: 1,
+        },
+    });
+
+    const onSubmit = async (data: GenerateCncParametersInput) => {
         setIsLoading(true);
         setError(null);
         setResult(null);
 
-        const response = await optimizeParametersAction();
+        const response = await generateCncParametersAction(data);
 
         if (response.error) {
             setError(response.error);
@@ -33,76 +63,136 @@ export default function OtimizarPage() {
     return (
         <>
             <PageHeader
-                title="Otimizar Produção"
-                description="Use IA para analisar seus dados históricos e obter recomendações."
+                title="Montagem de Parâmetros de Usinagem CNC"
+                description="Utilize IA para gerar parâmetros operacionais e estimativas de tempo para sua produção."
             />
             <main className="px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
-                <Card className="max-w-3xl mx-auto">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                           <WandSparkles className="text-primary"/> Análise Preditiva de Parâmetros
-                        </CardTitle>
-                        <CardDescription>
-                            Clique no botão abaixo para que nossa IA analise todo o histórico de produção e sugira parâmetros otimizados para melhorar o tempo de fabricação e a eficiência.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center space-y-6 text-center">
-                         <p className="text-sm text-muted-foreground">
-                            A análise considera fatores como material, tipo de peça e tempos de fabricação registrados.
-                        </p>
-                        <Button size="lg" onClick={handleOptimize} disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Analisando...
-                                </>
-                            ) : (
-                                <>
-                                    <WandSparkles className="mr-2 h-5 w-5" />
-                                    Otimizar Parâmetros
-                                </>
-                            )}
-                        </Button>
-                    </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Dados da Peça</CardTitle>
+                            <CardDescription>
+                                Preencha as informações abaixo para que a IA possa gerar os parâmetros.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                    <h3 className="font-semibold text-lg">Geometria</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="geometry.shape" render={({ field }) => (
+                                            <FormItem><FormLabel>Formato</FormLabel><FormControl><Input placeholder="Cilíndrico" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="geometry.externalDiameter" render={({ field }) => (
+                                            <FormItem><FormLabel>Ø Externo (mm)</FormLabel><FormControl><Input placeholder="50.0" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="geometry.internalDiameter" render={({ field }) => (
+                                            <FormItem><FormLabel>Ø Interno (mm)</FormLabel><FormControl><Input placeholder="25.0" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="geometry.length" render={({ field }) => (
+                                            <FormItem><FormLabel>Comprimento (mm)</FormLabel><FormControl><Input placeholder="120.0" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="geometry.tolerances" render={({ field }) => (
+                                            <FormItem><FormLabel>Tolerâncias</FormLabel><FormControl><Input placeholder="±0.05mm" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                    </div>
+                                    <h3 className="font-semibold text-lg pt-4">Operações e Produção</h3>
+                                     <FormField
+                                        control={form.control}
+                                        name="operations"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Operações</FormLabel>
+                                                <FormControl>
+                                                    <MultiSelect
+                                                        options={cncOperations}
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                        placeholder="Selecione as operações..."
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="material" render={({ field }) => (
+                                            <FormItem><FormLabel>Material</FormLabel><FormControl><Input placeholder="Aço 1045" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="piecesPerCycle" render={({ field }) => (
+                                            <FormItem><FormLabel>Peças por Ciclo</FormLabel><FormControl><Input type="number" min={1} {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 1)} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                    </div>
 
-                {error && (
-                    <Alert variant="destructive" className="max-w-3xl mx-auto">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Ocorreu um Erro</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
+                                    <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                                        {isLoading ? (
+                                            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando Parâmetros...</>
+                                        ) : (
+                                            <><WandSparkles className="mr-2 h-5 w-5" /> Gerar Parâmetros</>
+                                        )}
+                                    </Button>
+                                </form>
+                            </Form>
+                        </CardContent>
+                    </Card>
+                    
+                    <div className="space-y-8">
+                        {isLoading && (
+                             <Card className="flex flex-col items-center justify-center p-8 h-full">
+                                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                <p className="mt-4 text-muted-foreground">Analisando dados e calculando parâmetros...</p>
+                            </Card>
+                        )}
 
-                {result && (
-                     <div className="max-w-3xl mx-auto space-y-8">
-                        <h2 className="text-2xl font-bold text-center">Resultados da Otimização</h2>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Lightbulb className="text-primary"/>
-                                    Parâmetros Recomendados
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-md">
-                                    {result.recommendedParameters}
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                             <CardHeader>
-                                <CardTitle>Justificativa</CardTitle>
-                                <CardDescription>Entenda o porquê destas recomendações.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground leading-relaxed">
-                                    {result.reasoning}
-                                </p>
-                            </CardContent>
-                        </Card>
+                        {error && (
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>Ocorreu um Erro</AlertTitle>
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        )}
+                        
+                        {!isLoading && !result && !error && (
+                            <Card className="flex flex-col items-center justify-center p-8 h-full text-center">
+                                <ChevronsRight className="h-12 w-12 text-muted-foreground/50" />
+                                <p className="mt-4 text-muted-foreground">Os resultados da análise aparecerão aqui.</p>
+                            </Card>
+                        )}
+
+                        {result && (
+                            <div className="space-y-6">
+                               <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2"><Wrench className="text-primary"/>Parâmetros Operacionais</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Velocidade de Corte (Vc)</span><span className="font-mono">{result.operationalParameters.cuttingSpeed}</span></div>
+                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Rotação do Fuso (RPM)</span><span className="font-mono">{result.operationalParameters.spindleSpeed}</span></div>
+                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Avanço (F)</span><span className="font-mono">{result.operationalParameters.feedRate}</span></div>
+                                        <div><span className="text-muted-foreground">Ferramentas Recomendadas</span><p className="font-mono mt-1 text-sm">{result.operationalParameters.toolSelection}</p></div>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2"><Timer className="text-primary"/>Estimativas de Tempo</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Tempo de Ciclo / Peça</span><span className="font-mono">{result.timeEstimates.cycleTimePerPiece}</span></div>
+                                        <div className="flex justify-between items-center"><span className="text-muted-foreground">Tempo Total do Lote</span><span className="font-mono">{result.timeEstimates.totalBatchTime}</span></div>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-primary"/>Recomendações</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-muted-foreground leading-relaxed">{result.recommendations}</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </main>
         </>
     );

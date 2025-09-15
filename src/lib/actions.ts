@@ -4,23 +4,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { getProductionRecords } from '@/lib/data';
 import { optimizeProductionParameters } from '@/ai/flows/optimize-production-parameters';
-
-const productionRecordSchema = z.object({
-  partName: z.string().min(1, 'Nome da peça é obrigatório.'),
-  material: z.string().min(1, 'Material é obrigatório.'),
-  requestingFactory: z.string().min(1, 'Fábrica é obrigatória.'),
-  manufacturingTime: z.coerce.number().min(0.1, 'Tempo de fabricação deve ser maior que zero.'),
-});
-
-export type FormState = {
-    message: string;
-    errors?: {
-        partName?: string[];
-        material?: string[];
-        requestingFactory?: string[];
-        manufacturingTime?: string[];
-    }
-} | undefined;
+import { generateCncParameters, GenerateCncParametersInput, GenerateCncParametersInputSchema } from '@/ai/flows/generate-cnc-parameters';
 
 
 export async function optimizeParametersAction() {
@@ -40,4 +24,18 @@ export async function optimizeParametersAction() {
       console.error(error);
       return { error: 'Ocorreu um erro ao comunicar com a IA. Tente novamente.' };
   }
+}
+
+export async function generateCncParametersAction(input: GenerateCncParametersInput) {
+    try {
+        const validatedInput = GenerateCncParametersInputSchema.parse(input);
+        const result = await generateCncParameters(validatedInput);
+        return { data: result };
+    } catch (error) {
+        console.error("Error generating CNC parameters:", error);
+        if (error instanceof z.ZodError) {
+            return { error: 'Dados de entrada inválidos. Verifique os campos e tente novamente.' };
+        }
+        return { error: 'Ocorreu um erro ao comunicar com a IA. Tente novamente mais tarde.' };
+    }
 }
