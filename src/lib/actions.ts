@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { getProductionRecords } from '@/lib/data';
 import { optimizeProductionParameters } from '@/ai/flows/optimize-production-parameters';
-import { generateCncParameters, GenerateCncParametersInput, GenerateCncParametersInputSchema } from '@/ai/flows/generate-cnc-parameters';
+import { generateCncParameters } from '@/ai/flows/generate-cnc-parameters';
+import { GenerateCncParametersInput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 
 
 export async function optimizeParametersAction() {

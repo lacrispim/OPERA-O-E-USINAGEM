@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, WandSparkles, AlertTriangle, ChevronsRight, Timer, Wrench, Lightbulb } from 'lucide-react';
-import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/ai/flows/generate-cnc-parameters';
+import { GenerateCncParametersInput, GenerateCncParametersOutput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
