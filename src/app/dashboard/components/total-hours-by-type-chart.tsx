@@ -20,7 +20,7 @@ const chartConfig = {
   },
   centro: {
     label: "Centro",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-4))",
   },
   torno: {
     label: "Torno",
@@ -28,7 +28,7 @@ const chartConfig = {
   },
   programacao: {
     label: "Programação",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--chart-2))",
   },
 };
 

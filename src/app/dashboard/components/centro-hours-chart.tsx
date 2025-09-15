@@ -20,7 +20,7 @@ type CentroHoursChartProps = {
 const chartConfig = {
   centroHours: {
     label: "Horas de Centro",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-4))",
   },
 };
 
