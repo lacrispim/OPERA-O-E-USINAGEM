@@ -16,8 +16,9 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { generateCncParametersAction, estimateMachiningTimeAction } from '@/lib/actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { EstimateMachiningTimeOutput } from '@/ai/flows/estimate-machining-time-from-image';
+import type { EstimateMachiningTimeOutput } from '@/lib/schemas/machining-time';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 
 const cncOperations = [

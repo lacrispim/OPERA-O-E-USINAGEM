@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { getProductionRecords } from '@/lib/data';
 import { optimizeProductionParameters } from '@/ai/flows/optimize-production-parameters';
 import { generateCncParameters } from '@/ai/flows/generate-cnc-parameters';
-import { estimateMachiningTimeFromImage, EstimateMachiningTimeInput, EstimateMachiningTimeInputSchema } from '@/ai/flows/estimate-machining-time-from-image';
+import { estimateMachiningTimeFromImage } from '@/ai/flows/estimate-machining-time-from-image';
 import { GenerateCncParametersInput, GenerateCncParametersInputSchema } from '@/lib/schemas/cnc-parameters';
+import { EstimateMachiningTimeInput, EstimateMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 
 
 export async function optimizeParametersAction() {
