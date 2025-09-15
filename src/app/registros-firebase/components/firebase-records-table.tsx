@@ -42,7 +42,8 @@ const TRUNCATE_LENGTH = 25;
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" => {
     const s = status ? status.toLowerCase() : '';
     if (s.includes('concluído')) return 'default';
-    if (s.includes('produção') || s.includes('andamento')) return 'in-progress';
+    if (s === 'em produção' || s.includes('andamento')) return 'in-progress';
+    if (s === 'fila de produção') return 'secondary';
     if (s.includes('pendente')) return 'destructive';
     return 'outline';
 }
