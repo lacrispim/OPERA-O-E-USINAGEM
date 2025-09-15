@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, LabelList } from "recharts";
 
 type TotalHoursByTypeChartProps = {
   records: ProductionRecord[];
@@ -45,9 +45,9 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
     );
 
     return [
-      { type: "Centro", hours: totals.centro, fill: "var(--color-centro)" },
-      { type: "Torno", hours: totals.torno, fill: "var(--color-torno)" },
-      { type: "Programação", hours: totals.programacao, fill: "var(--color-programacao)" },
+      { type: "Centro", hours: Number(totals.centro.toFixed(1)), fill: "var(--color-centro)" },
+      { type: "Torno", hours: Number(totals.torno.toFixed(1)), fill: "var(--color-torno)" },
+      { type: "Programação", hours: Number(totals.programacao.toFixed(1)), fill: "var(--color-programacao)" },
     ];
   }, [records]);
 
@@ -62,7 +62,7 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
             data={chartData} 
             accessibilityLayer 
             layout="vertical"
-            margin={{ left: 10 }}
+            margin={{ left: 10, right: 40 }} // Added right margin for labels
           >
             <CartesianGrid horizontal={false} />
             <YAxis
@@ -92,7 +92,16 @@ export function TotalHoursByTypeChart({ records }: TotalHoursByTypeChartProps) {
               dataKey="hours"
               radius={4}
               barSize={40}
-            />
+            >
+                <LabelList
+                    dataKey="hours"
+                    position="right"
+                    offset={8}
+                    className="fill-foreground"
+                    fontSize={12}
+                    formatter={(value: number) => `${value.toFixed(1)}h`}
+                />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
