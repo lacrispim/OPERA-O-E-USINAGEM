@@ -54,8 +54,8 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
         <CardTitle>Horas de Centro por Fábrica</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-64 w-full">
-          <BarChart data={chartData} accessibilityLayer>
+        <ChartContainer config={chartConfig} className="h-72 w-full">
+          <BarChart data={chartData} accessibilityLayer margin={{ bottom: 20 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="factory"
@@ -63,6 +63,8 @@ export function CentroHoursChart({ records }: CentroHoursChartProps) {
               axisLine={false}
               tickMargin={8}
               fontSize={12}
+              angle={-45}
+              textAnchor="end"
             />
             <YAxis
               tickLine={false}
