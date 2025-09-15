@@ -17,6 +17,7 @@ import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiteProductionChart } from "./components/site-production-chart";
 import { FactoryHoursBarChart } from "./components/factory-hours-bar-chart";
+import { ProductionStatusChart } from "./components/production-status-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -127,10 +128,13 @@ export default function DashboardPage() {
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
+                        <ProductionStatusChart records={filteredRecords} />
+                    </div>
+                     <div className="grid gap-8 md:grid-cols-2">
                         <CentroHoursChart records={filteredRecords} />
+                        <TornoHoursChart records={filteredRecords} />
                     </div>
                     <div className="grid gap-8 md:grid-cols-2">
-                        <TornoHoursChart records={filteredRecords} />
                         <ProgramacaoHoursChart records={filteredRecords} />
                     </div>
                 </>

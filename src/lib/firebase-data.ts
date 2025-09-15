@@ -44,6 +44,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       centroTime: isNaN(centroMin) ? 0 : centroMin / 60,
       tornoTime: isNaN(tornoMin) ? 0 : tornoMin / 60,
       programacaoTime: isNaN(programacaoMin) ? 0 : programacaoMin / 60,
+      status: item.Status || 'N/A',
     };
   });
   

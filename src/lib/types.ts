@@ -9,6 +9,7 @@ export type ProductionRecord = {
   centroTime: number; // in hours
   tornoTime: number; // in hours
   programacaoTime: number; // in hours
+  status: string;
 };
 
 export type FirebaseProductionRecord = {
