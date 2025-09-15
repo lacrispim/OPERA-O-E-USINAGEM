@@ -24,15 +24,15 @@ const chartConfig = {
   },
   "Concluído": {
     label: "Concluído",
-    color: "hsl(210 93% 57%)", // Bright Blue
+    color: "hsl(var(--chart-1))", // Rose
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(220 82% 52%)", // Standard Blue
+    color: "hsl(var(--chart-2))", // Teal
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(195 100% 40%)", // Teal Blue
+    color: "hsl(var(--chart-3))", // Orange
   },
   "Pendente": {
     label: "Pendente",
@@ -40,7 +40,7 @@ const chartConfig = {
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(200 100% 50%)", // Sky Blue
+    color: "hsl(var(--chart-4))", // Purple
   },
   "Encerrada": {
     label: "Encerrada",
