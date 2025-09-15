@@ -42,10 +42,27 @@ const TRUNCATE_LENGTH = 25;
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" => {
     const s = status ? status.toLowerCase() : '';
     if (s.includes('concluído')) return 'default';
-    if (s === 'em produção' || s.includes('andamento')) return 'in-progress';
+    if (s === 'em produção') return 'in-progress';
     if (s === 'fila de produção') return 'secondary';
+    if (s.includes('andamento')) return 'in-progress';
     if (s.includes('pendente')) return 'destructive';
     return 'outline';
+}
+
+const factoryColors: Record<string, string> = {
+    "Igarassu": "bg-sky-200 text-sky-800",
+    "Vinhedo": "bg-amber-200 text-amber-800",
+    "Suape": "bg-violet-200 text-violet-800",
+    "Aguaí": "bg-emerald-200 text-emerald-800",
+    "Garanhuns": "bg-rose-200 text-rose-800",
+    "Indaiatuba": "bg-lime-200 text-lime-800",
+    "Valinhos": "bg-cyan-200 text-cyan-800",
+    "Pouso Alegre": "bg-fuchsia-200 text-fuchsia-800",
+    "default": "bg-gray-200 text-gray-800"
+};
+
+const getFactoryColor = (factory: string) => {
+    return factoryColors[factory] || factoryColors.default;
 }
 
 const TruncatedCell = ({ text }: { text: string }) => {
@@ -166,6 +183,11 @@ export function FirebaseRecordsTable() {
         const statusText = String(value ?? 'N/A');
         return <Badge variant={getStatusVariant(statusText)}>{statusText}</Badge>;
     }
+
+    if (header === 'Site') {
+        const siteText = String(value ?? 'N/A');
+        return <Badge className={cn("border-transparent hover:opacity-80", getFactoryColor(siteText))}>{siteText}</Badge>;
+    }
     
     if (TRUNCATE_COLUMNS.includes(header)) {
         return <TruncatedCell text={stringValue} />;
@@ -250,7 +272,7 @@ export function FirebaseRecordsTable() {
                                         className={cn(
                                             "py-2 px-4",
                                             NUMERIC_COLUMNS.includes(header) && "text-center font-mono",
-                                            (header === 'Site' || header === 'Nome da peça') && "font-bold"
+                                            (header === 'Nome da peça') && "font-bold"
                                         )}
                                     >
                                         {getColumnValue(item, header)}
