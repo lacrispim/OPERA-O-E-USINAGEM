@@ -79,7 +79,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Horas por Fábrica</CardTitle>
+                <CardTitle className="text-lg">Planejamento Mensal de Horas</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-96 w-full">
