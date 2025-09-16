@@ -42,6 +42,11 @@ export const PredictMachiningTimeOutputSchema = z.object({
   totalTimeMinutes: z.number().describe('O tempo total de produção estimado, em minutos.'),
   setupTimeMinutes: z.number().describe('O tempo estimado para preparação e setup da máquina, em minutos.'),
   machiningTimeMinutes: z.number().describe('O tempo de usinagem efetivo, em minutos.'),
+  idealParameters: z.object({
+    feedRate: z.string().describe('A velocidade de avanço ideal, em mm/min.'),
+    spindleSpeed: z.string().describe('A rotação ideal do fuso, em RPM.'),
+    depthOfCut: z.string().describe('A profundidade de corte ideal por passada, em mm.'),
+  }).describe('Os parâmetros de corte ideais para a operação.'),
   notes: z.string().describe('Observações e recomendações relevantes sobre o processo.'),
 });
 

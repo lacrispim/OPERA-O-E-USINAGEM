@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Clock, ChevronsRight } from 'lucide-react';
+import { Loader2, Zap } from 'lucide-react';
 import { predictMachiningTime } from '@/ai/flows/predict-machining-time';
 import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 
@@ -240,22 +240,22 @@ export default function OtimizarPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Estimativa de Tempo</CardTitle>
+                            <CardTitle>Estimativa da IA</CardTitle>
                             <CardDescription>O resultado da análise aparecerá aqui.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                              {isLoading && (
                                 <div className="flex flex-col items-center justify-center h-64">
                                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                    <p className="mt-4 text-muted-foreground">Analisando parâmetros e calculando o tempo...</p>
+                                    <p className="mt-4 text-muted-foreground">Analisando parâmetros e calculando...</p>
                                 </div>
                             )}
                             {error && <p className="text-destructive">{error}</p>}
                             {result && (
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     <div className="bg-muted p-4 rounded-lg text-center">
                                         <h3 className="text-lg font-medium text-muted-foreground">Tempo Total Estimado</h3>
-                                        <p className="text-4xl font-bold text-primary">{result.totalTimeMinutes.toFixed(2)} minutos</p>
+                                        <p className="text-4xl font-bold text-primary">{result.totalTimeMinutes.toFixed(2)} min</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 text-center">
                                          <div className="bg-card border p-3 rounded-md">
@@ -267,6 +267,25 @@ export default function OtimizarPage() {
                                             <p className="text-lg font-semibold">{result.machiningTimeMinutes} min</p>
                                         </div>
                                     </div>
+                                    
+                                    <div>
+                                        <h4 className="font-semibold mb-2 flex items-center"><Zap className="mr-2 h-4 w-4 text-primary" />Parâmetros Ideais</h4>
+                                        <div className="grid grid-cols-3 gap-2 text-center text-xs p-3 bg-card border rounded-md">
+                                            <div>
+                                                <p className="font-medium text-muted-foreground">Avanço</p>
+                                                <p className="font-mono">{result.idealParameters.feedRate}</p>
+                                            </div>
+                                             <div>
+                                                <p className="font-medium text-muted-foreground">Rotação</p>
+                                                <p className="font-mono">{result.idealParameters.spindleSpeed}</p>
+                                            </div>
+                                             <div>
+                                                <p className="font-medium text-muted-foreground">Prof. Corte</p>
+                                                <p className="font-mono">{result.idealParameters.depthOfCut}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div>
                                         <h4 className="font-semibold mb-2">Observações da IA:</h4>
                                         <p className="text-sm text-muted-foreground p-3 bg-card border rounded-md">{result.notes}</p>
