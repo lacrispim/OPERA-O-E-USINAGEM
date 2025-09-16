@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
