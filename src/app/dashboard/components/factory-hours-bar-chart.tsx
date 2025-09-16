@@ -27,7 +27,7 @@ const chartConfig = {
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
-const AVAILABLE_HOURS = 70;
+const AVAILABLE_HOURS = 60;
 
 const CustomLegend = (props: any) => {
   const { payload } = props;
