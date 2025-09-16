@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Clock, ChevronsRight } from 'lucide-react';
-import { predictMachiningTime, type PredictMachiningTimeInput, type PredictMachiningTimeOutput } from '@/ai/flows/predict-machining-time';
-import { PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
+import { predictMachiningTime } from '@/ai/flows/predict-machining-time';
+import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 
 type FormData = PredictMachiningTimeInput;
 
@@ -24,9 +24,9 @@ export default function OtimizarPage() {
         resolver: zodResolver(PredictMachiningTimeInputSchema),
         defaultValues: {
             machineType: 'Torno CNC - Centur 30',
+            material: 'Aço 1045',
             partDiameter: 50,
             partLength: 150,
-            material: 'Aço 1045',
             operationCount: 3,
             partDimensions: { width: 100, height: 100, depth: 50 },
             toolCount: 5,
@@ -97,7 +97,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Diâmetro da Peça (mm)</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                            <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -110,7 +114,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Comprimento da Peça (mm)</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                             <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -123,7 +131,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Número de Operações</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                                                            <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -139,7 +151,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Largura da Peça (mm)</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                             <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -152,7 +168,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Altura da Peça (mm)</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                             <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -165,7 +185,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Profundidade da Peça (mm)</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                            <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -178,7 +202,11 @@ export default function OtimizarPage() {
                                                     <FormItem>
                                                         <FormLabel>Número de Ferramentas</FormLabel>
                                                         <FormControl>
-                                                            <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                                                            <Input
+                                                                type="number"
+                                                                {...field}
+                                                                value={field.value ?? ""}
+                                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
