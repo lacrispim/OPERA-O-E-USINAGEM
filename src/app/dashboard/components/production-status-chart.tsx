@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Pie, PieChart, Cell, LabelList } from "recharts";
+import { Pie, PieChart, Cell } from "recharts";
+import { LabelList } from "recharts";
 
 type ProductionStatusChartProps = {
   records: ProductionRecord[];
@@ -63,7 +64,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                 <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">
+                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-96">
                     <PieChart>
                         <ChartTooltip
                             cursor={false}
@@ -75,7 +76,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            outerRadius={80}
+                            outerRadius={120}
                             labelLine={false}
                         >
                             {chartData.map((entry) => (
