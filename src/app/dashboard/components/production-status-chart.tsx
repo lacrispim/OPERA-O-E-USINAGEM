@@ -6,58 +6,56 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis, Cell } from "recharts";
+import { Pie, PieChart, Cell, LabelList } from "recharts";
 
 type ProductionStatusChartProps = {
   records: ProductionRecord[];
 };
 
 const chartConfig = {
-  count: {
-    label: "Quantidade",
-  },
-  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-alt-1))" },
-  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-alt-2))" },
+  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-new-1))" },
+  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-new-2))" },
   "Em produção": { label: "Em Produção", color: "hsl(var(--chart-status-orange))" },
-  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-alt-4))" },
-  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-alt-5))" },
-  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-alt-6))" },
+  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-new-4))" },
+  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-new-5))" },
+  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-new-6))" },
   "TBD": { label: "TBD", color: "hsl(var(--border))" },
   "N/A": { label: "Não Aplicável", color: "hsl(var(--muted))" },
 };
 
-const ALL_STATUSES = Object.keys(chartConfig).filter(k => k !== 'count');
-
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
-    const chartData = useMemo(() => {
-        const statusCounts: Record<string, number> = {};
-        ALL_STATUSES.forEach(status => {
-            statusCounts[status] = 0;
-        });
-
-        records.forEach((record) => {
+    const { chartData, totalRecords } = useMemo(() => {
+        const statusCounts = records.reduce((acc, record) => {
             const status = record.status || 'N/A';
-            if (statusCounts.hasOwnProperty(status)) {
-                statusCounts[status]++;
-            } else {
-                statusCounts[status] = 1; 
+            if (!acc[status]) {
+                acc[status] = 0;
             }
-        });
+            acc[status]++;
+            return acc;
+        }, {} as Record<string, number>);
 
-        return Object.entries(statusCounts)
-            .map(([name, value]) => ({ 
-                name, 
-                value, 
-                // @ts-ignore
-                fill: chartConfig[name]?.color || 'hsl(var(--muted))' 
-            }))
+        const chartData = Object.entries(statusCounts)
+            .map(([name, value]) => ({ name, value }))
             .filter(d => d.value > 0)
             .sort((a, b) => b.value - a.value);
         
+        const totalRecords = chartData.reduce((sum, item) => sum + item.value, 0);
+
+        return { chartData, totalRecords };
     }, [records]);
+
+    const getColor = (name: string) => {
+        const config = chartConfig[name as keyof typeof chartConfig];
+        if (config && 'color' in config) {
+            return config.color;
+        }
+        return 'hsl(var(--muted))';
+    }
 
     return (
         <Card>
@@ -65,45 +63,41 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                 <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="h-72 w-full">
-                  <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 30, left: -20 }}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      fontSize={10}
-                      angle={-45}
-                      textAnchor="end"
-                      interval={0}
-                      height={50}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      fontSize={10}
-                      allowDecimals={false}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Bar dataKey="value" radius={4}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                      <LabelList
-                          dataKey="value"
-                          position="top"
-                          offset={4}
-                          className="fill-foreground"
-                          fontSize={10}
-                          formatter={(value: number) => value > 0 ? value.toLocaleString() : ''}
-                      />
-                    </Bar>
-                  </BarChart>
+                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">
+                    <PieChart>
+                        <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent hideLabel />}
+                        />
+                        <Pie
+                            data={chartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            labelLine={false}
+                        >
+                            {chartData.map((entry) => (
+                                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
+                            ))}
+                            <LabelList
+                                dataKey="value"
+                                position="inside"
+                                formatter={(value: number) => {
+                                    if (totalRecords === 0) return "0%";
+                                    return `${((value / totalRecords) * 100).toFixed(0)}%`;
+                                }}
+                                className="fill-white text-sm font-semibold"
+                             />
+                        </Pie>
+                         <ChartLegend
+                            content={<ChartLegendContent nameKey="name" />}
+                            verticalAlign="bottom"
+                            align="center"
+                            wrapperStyle={{paddingTop: 20}}
+                        />
+                    </PieChart>
                 </ChartContainer>
             </CardContent>
         </Card>
