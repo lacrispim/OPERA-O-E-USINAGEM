@@ -27,6 +27,7 @@ const chartConfig = {
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
+const CUMULATIVE_BASE_HOURS = 60;
 
 export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
@@ -57,9 +58,10 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
         let cumulativeHours = 0;
         const paretoData = sortedData.map(item => {
             cumulativeHours += item.hours;
+            const percentage = (cumulativeHours / CUMULATIVE_BASE_HOURS) * 100;
             return {
                 ...item,
-                cumulative: Number(((cumulativeHours / totalHours) * 100).toFixed(0)),
+                cumulative: Number(percentage.toFixed(0)),
             };
         });
         
@@ -67,7 +69,9 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
         const displayedFactories = new Set(paretoData.map(d => d.factory));
         ALL_FACTORIES.forEach(factory => {
             if (!displayedFactories.has(factory)) {
-                paretoData.push({ factory, hours: 0, cumulative: 100 });
+                // Find the last cumulative value to continue from there if needed
+                const lastCumulative = paretoData.length > 0 ? paretoData[paretoData.length - 1].cumulative : 0;
+                paretoData.push({ factory, hours: 0, cumulative: lastCumulative });
             }
         });
 
@@ -112,7 +116,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             axisLine={false}
                             tickMargin={8}
                             fontSize={10}
-                            domain={[0, 100]}
+                            domain={[0, 'dataMax']}
                             tickFormatter={(value) => `${value}%`}
                              label={{ value: 'Cumulativo %', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '12px', fill: 'hsl(var(--foreground))' } }}
                         />
