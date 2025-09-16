@@ -16,6 +16,7 @@ import { estimateMachiningTimeFromImage } from '@/ai/flows/estimate-machining-ti
 import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 import type { EstimateMachiningTimeFromImageOutput } from '@/lib/schemas/machining-time-from-image';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 type FormData = PredictMachiningTimeInput;
 
@@ -358,8 +359,8 @@ export default function OtimizarPage() {
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
                              <form className="space-y-4">
-                                <FormItem>
-                                    <FormLabel htmlFor="machine-type-image">Máquina para Análise</FormLabel>
+                                <div className="space-y-2">
+                                    <Label htmlFor="machine-type-image">Máquina para Análise</Label>
                                      <Select value={selectedMachineForImage} onValueChange={setSelectedMachineForImage}>
                                         <SelectTrigger id="machine-type-image">
                                             <SelectValue />
@@ -369,20 +370,18 @@ export default function OtimizarPage() {
                                             <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                </FormItem>
+                                </div>
                                 
-                                <FormItem>
-                                     <FormLabel htmlFor="file-upload">Desenho Técnico</FormLabel>
-                                     <FormControl>
-                                        <Button asChild className="w-full cursor-pointer">
-                                            <label htmlFor="file-upload">
-                                                <Upload className="mr-2 h-4 w-4" />
-                                                Carregar Desenho
-                                                <input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
-                                            </label>
-                                        </Button>
-                                    </FormControl>
-                                </FormItem>
+                                <div className="space-y-2">
+                                     <Label htmlFor="file-upload">Desenho Técnico</Label>
+                                    <Button asChild className="w-full cursor-pointer">
+                                        <label htmlFor="file-upload">
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Carregar Desenho
+                                            <input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
+                                        </label>
+                                    </Button>
+                                </div>
                             </form>
                             <div className="space-y-6">
                                 {isUploading && (
@@ -422,5 +421,3 @@ export default function OtimizarPage() {
         </>
     );
 }
-
-    
