@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -128,6 +128,14 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 />
                             }
                         />
+                        <ReferenceLine 
+                            y={60} 
+                            yAxisId="left" 
+                            stroke="hsl(var(--destructive))" 
+                            strokeDasharray="3 3" 
+                        >
+                            <Label value="Limite (60h)" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
+                        </ReferenceLine>
                         <Bar
                             dataKey="hours"
                             yAxisId="left"
