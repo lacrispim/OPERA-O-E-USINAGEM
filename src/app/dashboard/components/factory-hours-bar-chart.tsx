@@ -31,7 +31,7 @@ const chartConfig = {
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
-const CUMULATIVE_BASE_HOURS = 60;
+const CUMULATIVE_BASE_HOURS = 70;
 
 const CustomLegend = (props: any) => {
   const { payload } = props;
