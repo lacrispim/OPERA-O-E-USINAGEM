@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label, Legend } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -128,19 +128,21 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 />
                             }
                         />
+                         <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
                         <ReferenceLine 
                             y={60} 
                             yAxisId="left" 
                             stroke="hsl(var(--destructive))" 
                             strokeDasharray="3 3" 
                         >
-                            <Label value="Limite (60h)" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
+                            <Label value="Horas Disponíveis" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                         </ReferenceLine>
                         <Bar
                             dataKey="hours"
                             yAxisId="left"
                             fill="var(--color-hours)"
                             radius={4}
+                            name="Total Horas"
                         >
                              <LabelList
                                 dataKey="hours"
@@ -161,6 +163,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 fill: "var(--color-cumulative)",
                                 r: 4
                             }}
+                            name="Cumulativo %"
                         />
                     </ComposedChart>
                 </ChartContainer>
