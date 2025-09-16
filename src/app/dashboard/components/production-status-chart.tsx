@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis, Cell } from "recharts";
 
 type ProductionStatusChartProps = {
   records: ProductionRecord[];
@@ -19,12 +19,12 @@ const chartConfig = {
   count: {
     label: "Quantidade",
   },
-  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-alt-1))" },
-  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-alt-2))" },
-  "Em produção": { label: "Em Produção", color: "hsl(var(--chart-status-alt-3))" },
-  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-alt-4))" },
-  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-alt-5))" },
-  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-alt-6))" },
+  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-new-1))" },
+  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-new-2))" },
+  "Em produção": { label: "Em Produção", color: "hsl(var(--chart-status-new-3))" },
+  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-new-4))" },
+  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-new-5))" },
+  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-new-6))" },
   "TBD": { label: "TBD", color: "hsl(var(--border))" },
   "N/A": { label: "Não Aplicável", color: "hsl(var(--muted))" },
 };
@@ -43,7 +43,6 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
             if (statusCounts.hasOwnProperty(status)) {
                 statusCounts[status]++;
             } else {
-                // This case should ideally not be hit if ALL_STATUSES is comprehensive
                 statusCounts[status] = 1; 
             }
         });
@@ -55,7 +54,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                 // @ts-ignore
                 fill: chartConfig[name]?.color || 'hsl(var(--muted))' 
             }))
-            .filter(d => d.value > 0) // Only show statuses with records
+            .filter(d => d.value > 0)
             .sort((a, b) => b.value - a.value);
         
     }, [records]);
@@ -92,6 +91,9 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                       content={<ChartTooltipContent indicator="dot" />}
                     />
                     <Bar dataKey="value" radius={4}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
                       <LabelList
                           dataKey="value"
                           position="top"
