@@ -30,15 +30,23 @@ const chartConfig = {
 };
 
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
-    const { chartData, totalRecords } = useMemo(() => {
-        const statusCounts = records.reduce((acc, record) => {
-            const status = record.status || 'N/A';
-            if (!acc[status]) {
-                acc[status] = 0;
-            }
-            acc[status]++;
+    const { chartData, totalRecords, legendPayload } = useMemo(() => {
+        const allStatuses = Object.keys(chartConfig);
+        const statusCounts = allStatuses.reduce((acc, status) => {
+            acc[status] = 0;
             return acc;
         }, {} as Record<string, number>);
+        
+        records.forEach(record => {
+            const status = record.status || 'N/A';
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status]++;
+            } else if (status) {
+                // Handle unexpected statuses if necessary
+                if (!statusCounts[status]) statusCounts[status] = 0;
+                statusCounts[status]++;
+            }
+        });
 
         const chartData = Object.entries(statusCounts)
             .map(([name, value]) => ({ name, value }))
@@ -47,7 +55,15 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
         
         const totalRecords = chartData.reduce((sum, item) => sum + item.value, 0);
 
-        return { chartData, totalRecords };
+        const legendPayload = allStatuses.map(status => ({
+            value: `${status} (${statusCounts[status]})`,
+            type: 'square',
+            id: status,
+            color: chartConfig[status as keyof typeof chartConfig]?.color || 'hsl(var(--muted))'
+        }));
+
+
+        return { chartData, totalRecords, legendPayload };
     }, [records]);
 
     const getColor = (name: string) => {
@@ -93,7 +109,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                              />
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" />}
+                            content={<ChartLegendContent payload={legendPayload} />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
