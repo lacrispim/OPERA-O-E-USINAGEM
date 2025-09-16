@@ -42,7 +42,7 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
       }
     });
 
-    return Object.values(siteData);
+    return Object.values(siteData).sort((a, b) => b.quantity - a.quantity);
   }, [records]);
 
   return (
@@ -87,7 +87,7 @@ export function SiteProductionChart({ records }: SiteProductionChartProps) {
                     offset={4}
                     className="fill-foreground"
                     fontSize={10}
-                    formatter={(value: number) => value.toLocaleString()}
+                    formatter={(value: number) => value > 0 ? value.toLocaleString() : ''}
                 />
             </Bar>
           </BarChart>
