@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +16,7 @@ import { estimateMachiningTimeFromImage } from '@/ai/flows/estimate-machining-ti
 import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 import type { EstimateMachiningTimeFromImageOutput } from '@/lib/schemas/machining-time-from-image';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 type FormData = PredictMachiningTimeInput;
 
@@ -356,10 +358,10 @@ export default function OtimizarPage() {
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
-                                    <FormItem>
-                                        <FormLabel>Máquina para Análise</FormLabel>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="machine-type-image">Máquina para Análise</Label>
                                          <Select value={selectedMachineForImage} onValueChange={setSelectedMachineForImage}>
-                                            <SelectTrigger>
+                                            <SelectTrigger id="machine-type-image">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -367,7 +369,7 @@ export default function OtimizarPage() {
                                                 <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                    </FormItem>
+                                    </div>
                                     <Button asChild className="w-full cursor-pointer">
                                         <label>
                                             <Upload className="mr-2 h-4 w-4" />
@@ -415,5 +417,3 @@ export default function OtimizarPage() {
         </>
     );
 }
-
-    
