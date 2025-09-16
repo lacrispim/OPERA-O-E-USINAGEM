@@ -24,10 +24,35 @@ const chartConfig = {
     label: "Cumulativo %",
     color: "hsl(var(--primary))",
   },
+  availableHours: {
+    label: "Horas Disponíveis",
+    color: "hsl(var(--destructive))",
+  }
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
 const CUMULATIVE_BASE_HOURS = 60;
+
+const CustomLegend = (props: any) => {
+  const { payload } = props;
+  return (
+    <div className="flex justify-center items-center gap-4" style={{ paddingTop: 30 }}>
+      {payload.map((entry: any, index: any) => (
+        <div key={`item-${index}`} className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5" style={{ backgroundColor: entry.color }}></span>
+          <span className="text-sm text-muted-foreground">{entry.value}</span>
+        </div>
+      ))}
+       <div className="flex items-center gap-1.5">
+            <svg width="10" height="10" viewBox="0 0 10 2" className="h-2.5 w-2.5">
+                <line x1="0" y1="1" x2="10" y2="1" stroke="hsl(var(--destructive))" strokeWidth="2" strokeDasharray="3 3" />
+            </svg>
+            <span className="text-sm text-muted-foreground">Horas Disponíveis</span>
+        </div>
+    </div>
+  );
+};
+
 
 export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
@@ -116,7 +141,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             axisLine={false}
                             tickMargin={8}
                             fontSize={10}
-                            domain={[0, 'dataMax']}
+                            domain={[0, 100]}
                             tickFormatter={(value) => `${value}%`}
                              label={{ value: 'Cumulativo %', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '12px', fill: 'hsl(var(--foreground))' } }}
                         />
@@ -132,9 +157,9 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 />
                             }
                         />
-                         <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
+                         <Legend content={<CustomLegend />} />
                         <ReferenceLine 
-                            y={60} 
+                            y={CUMULATIVE_BASE_HOURS}
                             yAxisId="left" 
                             stroke="hsl(var(--destructive))" 
                             strokeDasharray="3 3" 
