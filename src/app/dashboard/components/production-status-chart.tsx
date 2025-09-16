@@ -51,7 +51,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                 <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">
+                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-80">
                     <PieChart>
                         <ChartTooltip
                             cursor={false}
@@ -63,7 +63,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            outerRadius={80}
+                            outerRadius={100}
                             labelLine={false}
                         >
                             {chartData.map((entry) => (
@@ -82,9 +82,10 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                         </Pie>
                          <ChartLegend
                             content={<ChartLegendContent nameKey="name" />}
-                            verticalAlign="bottom"
-                            align="center"
-                            wrapperStyle={{paddingTop: 20}}
+                            layout="vertical"
+                            verticalAlign="middle"
+                            align="right"
+                            wrapperStyle={{paddingLeft: 20}}
                         />
                     </PieChart>
                 </ChartContainer>
