@@ -116,12 +116,12 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                                     className="fill-white text-sm font-semibold"
                                 />
                             </Pie>
+                             <ChartLegend
+                                content={<ChartLegendContent payload={legendPayload} className="flex-col items-start gap-2" />}
+                                className="flex justify-center"
+                            />
                         </PieChart>
                     </ChartContainer>
-                     <ChartLegend
-                        content={<ChartLegendContent payload={legendPayload} className="flex-col items-start gap-2" />}
-                        className="flex justify-center"
-                    />
                 </div>
             </CardContent>
         </Card>
