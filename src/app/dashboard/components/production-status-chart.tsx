@@ -85,9 +85,9 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                                 dataKey="value"
                                 position="inside"
                                 formatter={(value: number) => {
-                                    if (totalRecords === 0) return "0%";
+                                    if (totalRecords === 0 || value === 0) return "";
                                     const percentage = (value / totalRecords) * 100;
-                                    return percentage > 5 ? `${percentage.toFixed(0)}%` : '';
+                                    return `${percentage.toFixed(0)}%`;
                                 }}
                                 className="fill-white text-sm font-semibold"
                              />
