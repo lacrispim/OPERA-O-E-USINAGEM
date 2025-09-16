@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,29 +19,40 @@ type ProductionStatusChartProps = {
 };
 
 const chartConfig = {
-  'Concluído': { label: 'Concluído', color: 'hsl(var(--chart-status-1))' },
-  'Em produção': { label: 'Em produção', color: 'hsl(var(--chart-status-orange))' },
-  'Fila de produção': { label: 'Fila de produção', color: 'hsl(var(--chart-status-2))' },
-  'Em andamento': { label: 'Em andamento', color: 'hsl(var(--chart-status-3))' },
-  'Pendente': { label: 'Pendente', color: 'hsl(var(--chart-status-4))' },
-  'Outro': { label: 'Outro', color: 'hsl(var(--chart-status-5))' },
+  'Concluído': { label: 'Concluído', color: 'hsl(var(--chart-status-new-1))' },
+  'Em produção': { label: 'Em produção', color: 'hsl(var(--chart-status-new-2))' },
+  'Fila de produção': { label: 'Fila de produção', color: 'hsl(var(--chart-status-new-3))' },
+  'Em andamento': { label: 'Em andamento', color: 'hsl(var(--chart-status-new-4))' },
+  'Pendente': { label: 'Pendente', color: 'hsl(var(--chart-status-new-5))' },
+  'Outro': { label: 'Outro', color: 'hsl(var(--chart-status-new-6))' },
 };
 
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords } = useMemo(() => {
-        const statusCounts = records.reduce((acc, record) => {
+        const statusCounts: Record<string, number> = {};
+
+        // Initialize all statuses from config to ensure they appear in the legend
+        Object.keys(chartConfig).forEach(status => {
+            statusCounts[status] = 0;
+        });
+
+        // Count records for each status
+        records.forEach(record => {
             const status = record.status || 'Outro';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status]++;
+            } else {
+                 statusCounts['Outro']++;
+            }
+        });
 
         const chartData = Object.entries(statusCounts).map(([name, value]) => ({
             name,
             value,
             fill: chartConfig[name as keyof typeof chartConfig]?.color || chartConfig['Outro'].color,
-        }));
+        })).filter(item => item.value > 0); // Only show statuses with data in the chart itself
         
-        const totalRecords = chartData.reduce((sum, item) => sum + item.value, 0);
+        const totalRecords = records.length;
 
         return { chartData, totalRecords };
     }, [records]);
@@ -82,10 +94,9 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                         </Pie>
                          <ChartLegend
                             content={<ChartLegendContent nameKey="name" />}
-                            layout="vertical"
-                            verticalAlign="middle"
-                            align="right"
-                            wrapperStyle={{paddingLeft: 20}}
+                            verticalAlign="bottom"
+                            align="center"
+                            wrapperStyle={{paddingTop: 20}}
                         />
                     </PieChart>
                 </ChartContainer>
