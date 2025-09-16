@@ -24,27 +24,27 @@ const chartConfig = {
   },
   "Concluído": {
     label: "Concluído",
-    color: "hsl(var(--chart-1))", // Rose
+    color: "hsl(var(--chart-status-1))",
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(var(--chart-2))", // Teal
+    color: "hsl(var(--chart-status-2))",
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(var(--chart-3))", // Orange
+    color: "hsl(var(--chart-status-3))",
   },
   "Pendente": {
     label: "Pendente",
-    color: "hsl(var(--destructive))",
+    color: "hsl(var(--chart-status-4))",
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(var(--chart-4))", // Purple
+    color: "hsl(var(--chart-status-5))",
   },
   "Encerrada": {
     label: "Encerrada",
-    color: "hsl(var(--muted-foreground))",
+    color: "hsl(var(--chart-status-6))",
   },
   "TBD": {
     label: "TBD",
@@ -57,7 +57,6 @@ const chartConfig = {
 };
 
 const ALL_STATUSES = Object.keys(chartConfig).filter(k => k !== 'count');
-
 
 const fallbackColors = [
     "hsl(215 70% 60%)",
@@ -150,7 +149,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                         </Pie>
                          <ChartLegend
                             content={<ChartLegendContent nameKey="name" payload={chartData.map((entry, index) => ({
-                                value: entry.name,
+                                value: `${entry.name} (${entry.value})`,
                                 color: getColor(entry.name, index),
                                 type: 'circle',
                             }))} />}
