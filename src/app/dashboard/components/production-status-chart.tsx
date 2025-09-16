@@ -24,27 +24,27 @@ const chartConfig = {
   },
   "Concluído": {
     label: "Concluído",
-    color: "hsl(var(--chart-status-1))",
+    color: "hsl(var(--chart-status-alt-1))",
   },
   "Em andamento": {
     label: "Em Andamento",
-    color: "hsl(var(--chart-status-2))",
+    color: "hsl(var(--chart-status-alt-2))",
   },
   "Em produção": {
     label: "Em Produção",
-    color: "hsl(var(--chart-status-3))",
+    color: "hsl(var(--chart-status-alt-3))",
   },
   "Pendente": {
     label: "Pendente",
-    color: "hsl(var(--chart-status-4))",
+    color: "hsl(var(--chart-status-alt-4))",
   },
   "Fila de produção": {
     label: "Fila de Produção",
-    color: "hsl(var(--chart-status-5))",
+    color: "hsl(var(--chart-status-alt-5))",
   },
   "Encerrada": {
     label: "Encerrada",
-    color: "hsl(var(--chart-status-6))",
+    color: "hsl(var(--chart-status-alt-6))",
   },
   "TBD": {
     label: "TBD",

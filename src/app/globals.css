@@ -34,6 +34,12 @@
     --chart-status-4: 0 84% 60%;
     --chart-status-5: 262 82% 57%;
     --chart-status-6: 221 83% 53%;
+    --chart-status-alt-1: 130 60% 40%;
+    --chart-status-alt-2: 30 90% 50%;
+    --chart-status-alt-3: 50 90% 55%;
+    --chart-status-alt-4: 0 80% 60%;
+    --chart-status-alt-5: 210 90% 50%;
+    --chart-status-alt-6: 180 70% 45%;
     --radius: 0.5rem;
   }
   .dark {
@@ -67,6 +73,12 @@
     --chart-status-4: 0 90% 65%;
     --chart-status-5: 262 88% 65%;
     --chart-status-6: 221 78% 60%;
+    --chart-status-alt-1: 130 60% 50%;
+    --chart-status-alt-2: 30 90% 60%;
+    --chart-status-alt-3: 50 90% 65%;
+    --chart-status-alt-4: 0 80% 70%;
+    --chart-status-alt-5: 210 90% 60%;
+    --chart-status-alt-6: 180 70% 55%;
     
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 93.3%;
