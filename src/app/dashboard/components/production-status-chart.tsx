@@ -88,7 +88,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
 
         const chartData = Object.entries(statusCounts)
             .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value); // Keep sorting to have larger slices together
+            .sort((a, b) => b.value - a.value);
         
         const totalRecords = records.length;
 
@@ -152,10 +152,12 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                                 value: `${entry.name} (${entry.value})`,
                                 color: getColor(entry.name, index),
                                 type: 'circle',
-                            }))} />}
-                            verticalAlign="bottom"
-                            align="center"
-                            wrapperStyle={{paddingTop: 20}}
+                            }))} 
+                            layout="vertical"
+                            verticalAlign="middle"
+                            align="right"
+                            wrapperStyle={{paddingLeft: 20}}
+                            />}
                         />
                     </PieChart>
                 </ChartContainer>
