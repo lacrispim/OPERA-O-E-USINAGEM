@@ -41,7 +41,7 @@ const CustomLegend = (props: any) => {
       ))}
        <div className="flex items-center gap-1.5">
             <svg width="10" height="10" viewBox="0 0 10 2" className="h-2.5 w-2.5">
-                <line x1="0" y1="1" x2="10" y2="1" stroke="hsl(var(--destructive))" strokeWidth="2" strokeDasharray="3 3" />
+                <line x1="0" y1="1" x2="10" y2="1" stroke="white" strokeWidth="2" strokeDasharray="3 3" />
             </svg>
             <span className="text-sm text-muted-foreground">Horas Disponíveis</span>
         </div>
@@ -116,10 +116,10 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                          <Legend content={<CustomLegend />} />
                         <ReferenceLine 
                             y={AVAILABLE_HOURS}
-                            stroke="hsl(var(--destructive))" 
+                            stroke="white" 
                             strokeDasharray="3 3" 
                         >
-                            <Label value="Horas Disponíveis" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
+                            <Label value="Horas Disponíveis" position="insideTopRight" fill="white" fontSize={10} />
                         </ReferenceLine>
                         <Bar
                             dataKey="hours"
