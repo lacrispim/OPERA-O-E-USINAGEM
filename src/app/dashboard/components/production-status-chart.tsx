@@ -6,12 +6,10 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Pie, PieChart, Cell, LabelList } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type ProductionStatusChartProps = {
   records: ProductionRecord[];
@@ -33,13 +31,8 @@ const chartConfig = {
 
 const ALL_STATUSES = Object.keys(chartConfig).filter(k => k !== 'count');
 
-const fallbackColors = [
-    "hsl(215 70% 60%)", "hsl(225 90% 45%)", "hsl(205 85% 55%)",
-    "hsl(230 75% 65%)", "hsl(210 80% 50%)", "hsl(220 82% 52%)",
-];
-
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
-    const { chartData, totalRecords } = useMemo(() => {
+    const chartData = useMemo(() => {
         const statusCounts: Record<string, number> = {};
         ALL_STATUSES.forEach(status => {
             statusCounts[status] = 0;
@@ -50,82 +43,66 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
             if (statusCounts.hasOwnProperty(status)) {
                 statusCounts[status]++;
             } else {
-                statusCounts[status] = 1; // Should not happen if ALL_STATUSES is correct
+                // This case should ideally not be hit if ALL_STATUSES is comprehensive
+                statusCounts[status] = 1; 
             }
         });
 
-        const chartData = Object.entries(statusCounts)
-            .map(([name, value]) => ({ name, value }))
+        return Object.entries(statusCounts)
+            .map(([name, value]) => ({ 
+                name, 
+                value, 
+                // @ts-ignore
+                fill: chartConfig[name]?.color || 'hsl(var(--muted))' 
+            }))
+            .filter(d => d.value > 0) // Only show statuses with records
             .sort((a, b) => b.value - a.value);
         
-        const totalRecords = records.length;
-
-        return { chartData, totalRecords };
     }, [records]);
-
-    const getColor = (name: string, index: number) => {
-        const config = chartConfig[name as keyof typeof chartConfig];
-        return (config && 'color' in config) ? config.color : fallbackColors[index % fallbackColors.length];
-    }
-    
-    const filteredChartData = chartData.filter(d => d.value > 0);
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col sm:flex-row items-center justify-center gap-8 p-4">
-                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64 flex-shrink-0">
-                    <PieChart>
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Pie
-                            data={filteredChartData}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            labelLine={false}
-                        >
-                            {filteredChartData.map((entry, index) => (
-                                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name, index)} />
-                            ))}
-                             { totalRecords > 0 && (
-                                <LabelList
-                                    dataKey="value"
-                                    position="inside"
-                                    formatter={(value: number) => {
-                                        if (totalRecords === 0) return "0%";
-                                        const percentage = (value / totalRecords) * 100;
-                                        if (percentage < 5) return "";
-                                        return `${percentage.toFixed(0)}%`;
-                                    }}
-                                    className="fill-white text-sm font-semibold"
-                                 />
-                             )}
-                        </Pie>
-                    </PieChart>
+            <CardContent>
+                <ChartContainer config={chartConfig} className="h-72 w-full">
+                  <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 30, left: -20 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      fontSize={10}
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                      height={50}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      fontSize={10}
+                      allowDecimals={false}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <Bar dataKey="value" radius={4}>
+                      <LabelList
+                          dataKey="value"
+                          position="top"
+                          offset={4}
+                          className="fill-foreground"
+                          fontSize={10}
+                          formatter={(value: number) => value > 0 ? value.toLocaleString() : ''}
+                      />
+                    </Bar>
+                  </BarChart>
                 </ChartContainer>
-                <div className="flex w-full sm:w-auto flex-col gap-2 text-sm">
-                    <div className="font-medium text-muted-foreground">Legenda</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-8 gap-y-2">
-                        {filteredChartData.map((entry, index) => (
-                            <div key={entry.name} className="flex items-center gap-2">
-                                <div
-                                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                                    style={{ backgroundColor: getColor(entry.name, index) }}
-                                />
-                                <div className="flex-1 truncate">{entry.name} ({entry.value})</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </CardContent>
         </Card>
     );
