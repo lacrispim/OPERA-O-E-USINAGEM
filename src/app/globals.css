@@ -40,12 +40,13 @@
     --chart-status-alt-4: 0 80% 60%;
     --chart-status-alt-5: 210 90% 50%;
     --chart-status-alt-6: 180 70% 45%;
-    --chart-status-new-1: 120 50% 50%; /* Lime Green */
-    --chart-status-new-2: 30 95% 55%;  /* Orange */
-    --chart-status-new-3: 190 85% 50%; /* Teal */
-    --chart-status-new-4: 340 85% 60%; /* Red-Pink */
-    --chart-status-new-5: 280 75% 60%; /* Purple */
-    --chart-status-new-6: 50 80% 55%;  /* Gold */
+    
+    --chart-status-fila: 190 85% 50%; /* Teal */
+    --chart-status-producao: 30 95% 55%;  /* Orange */
+    --chart-status-tbd: 280 75% 60%; /* Purple */
+    --chart-status-encerrada: 120 50% 50%; /* Lime Green */
+    --chart-status-outro: 220 13% 69%; /* Slate */
+
     --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     --radius: 0.5rem;
   }
@@ -86,12 +87,13 @@
     --chart-status-alt-4: 0 80% 70%;
     --chart-status-alt-5: 210 90% 60%;
     --chart-status-alt-6: 180 70% 55%;
-    --chart-status-new-1: 120 50% 60%;
-    --chart-status-new-2: 30 95% 65%;
-    --chart-status-new-3: 190 85% 60%;
-    --chart-status-new-4: 340 85% 70%;
-    --chart-status-new-5: 280 75% 70%;
-    --chart-status-new-6: 50 80% 65%;
+
+    --chart-status-fila: 190 85% 60%; /* Teal */
+    --chart-status-producao: 30 95% 65%;  /* Orange */
+    --chart-status-tbd: 280 75% 70%; /* Purple */
+    --chart-status-encerrada: 120 50% 60%; /* Lime Green */
+    --chart-status-outro: 220 13% 69%; /* Slate */
+
     --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     
     --sidebar-background: 0 0% 15%;

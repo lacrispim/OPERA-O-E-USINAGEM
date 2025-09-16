@@ -19,13 +19,13 @@ type ProductionStatusChartProps = {
 };
 
 const chartConfig = {
-  'Concluído': { label: 'Concluído', color: 'hsl(var(--chart-status-new-1))' },
-  'Em produção': { label: 'Em produção', color: 'hsl(var(--chart-status-new-2))' },
-  'Fila de produção': { label: 'Fila de produção', color: 'hsl(var(--chart-status-new-3))' },
-  'Em andamento': { label: 'Em andamento', color: 'hsl(var(--chart-status-new-4))' },
-  'Pendente': { label: 'Pendente', color: 'hsl(var(--chart-status-new-5))' },
-  'Outro': { label: 'Outro', color: 'hsl(var(--chart-status-new-6))' },
+  'Fila de produção': { label: 'Fila de produção', color: 'hsl(var(--chart-status-fila))' },
+  'Em produção': { label: 'Em produção', color: 'hsl(var(--chart-status-producao))' },
+  'TBD': { label: 'TBD', color: 'hsl(var(--chart-status-tbd))' },
+  'Encerrada': { label: 'Encerrada', color: 'hsl(var(--chart-status-encerrada))' },
+  'Outro': { label: 'Outro', color: 'hsl(var(--chart-status-outro))' },
 };
+
 
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords } = useMemo(() => {
