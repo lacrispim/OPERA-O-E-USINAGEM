@@ -24,14 +24,14 @@ Considere os seguintes dados da máquina e da peça:
 - **Tipo de Máquina Selecionada**: {{{machineType}}}
 - **Material da Peça**: {{{material}}}
 
-{{#if (eq machineType "Torno CNC - Centur 30")}}
+{{#if machineType.isTorno}}
 - **Detalhes da Máquina**: Torno CNC Centur 30 de 3 eixos, especializado em operações de torneamento, rosqueamento, faceamento e sangramento. Ideal para peças cilíndricas.
 - **Diâmetro da Peça**: {{{partDiameter}}} mm
 - **Comprimento da Peça**: {{{partLength}}} mm
 - **Número de Operações de Torneamento**: {{{operationCount}}}
 {{/if}}
 
-{{#if (eq machineType "Centro de Usinagem D600")}}
+{{#if machineType.isCentro}}
 - **Detalhes da Máquina**: Centro de Usinagem D600, ideal para fresamento, furação, criação de cavidades e usinagem complexa em múltiplos eixos.
 - **Dimensões da Peça (Largura x Altura x Profundidade)**: {{{partDimensions.width}}} x {{{partDimensions.height}}} x {{{partDimensions.depth}}} mm
 - **Número de Ferramentas (trocas)**: {{{toolCount}}}
@@ -54,7 +54,20 @@ const predictMachiningTimeFlow = ai.defineFlow(
     outputSchema: PredictMachiningTimeOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const isTorno = input.machineType === 'Torno CNC - Centur 30';
+    const isCentro = input.machineType === 'Centro de Usinagem D600';
+
+    const promptInput = {
+      ...input,
+      machineType: {
+        isTorno,
+        isCentro,
+        toString: () => input.machineType,
+      },
+    };
+    
+    // @ts-ignore
+    const { output } = await prompt(promptInput);
     return output!;
   }
 );
