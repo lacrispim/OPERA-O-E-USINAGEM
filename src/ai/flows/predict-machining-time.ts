@@ -1,0 +1,62 @@
+'use server';
+/**
+ * @fileOverview AI flow for predicting machining time based on machine and part parameters.
+ *
+ * - predictMachiningTime: A function that calls the AI model to get a time estimate.
+ */
+
+import { ai } from '@/ai/genkit';
+import {
+  PredictMachiningTimeInput,
+  PredictMachiningTimeInputSchema,
+  PredictMachiningTimeOutput,
+  PredictMachiningTimeOutputSchema,
+} from '@/lib/schemas/machining-time';
+
+const prompt = ai.definePrompt({
+  name: 'predictMachiningTimePrompt',
+  input: { schema: PredictMachiningTimeInputSchema },
+  output: { schema: PredictMachiningTimeOutputSchema },
+  prompt: `Você é um engenheiro de produção especialista em usinagem CNC. Sua tarefa é estimar o tempo de produção de uma peça com base nos parâmetros fornecidos.
+
+Considere os seguintes dados da máquina e da peça:
+
+- **Tipo de Máquina**: {{{machineType}}}
+- **Material da Peça**: {{{material}}}
+
+{{#if (eq machineType "Torno CNC - Centur 30")}}
+- **Diâmetro da Peça**: {{{partDiameter}}} mm
+- **Comprimento da Peça**: {{{partLength}}} mm
+- **Número de Operações de Torneamento**: {{{operationCount}}}
+{{/if}}
+
+{{#if (eq machineType "Centro de Usinagem D600")}}
+- **Dimensões da Peça (Largura x Altura x Profundidade)**: {{{partDimensions.width}}} x {{{partDimensions.height}}} x {{{partDimensions.depth}}} mm
+- **Número de Ferramentas (trocas)**: {{{toolCount}}}
+{{/if}}
+
+Com base nessas informações, calcule e forneça:
+1.  **Tempo de Setup (minutos)**: Considere o tempo para preparar a máquina, fixar a peça e carregar as ferramentas.
+2.  **Tempo de Usinagem (minutos)**: Calcule o tempo efetivo de corte, levando em conta o tipo de máquina, material e complexidade (número de operações/ferramentas).
+3.  **Tempo Total (minutos)**: A soma do tempo de setup e de usinagem.
+4.  **Observações**: Forneça uma breve nota com recomendações ou pontos de atenção, como a necessidade de refrigeração, possível desgaste de ferramenta, ou sugestões para otimização.
+
+Seja realista e baseie suas estimativas em práticas comuns da indústria de usinagem. Retorne a resposta no formato JSON especificado.`,
+});
+
+const predictMachiningTimeFlow = ai.defineFlow(
+  {
+    name: 'predictMachiningTimeFlow',
+    inputSchema: PredictMachiningTimeInputSchema,
+    outputSchema: PredictMachiningTimeOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    return output!;
+  }
+);
+
+
+export async function predictMachiningTime(input: PredictMachiningTimeInput): Promise<PredictMachiningTimeOutput> {
+  return predictMachiningTimeFlow(input);
+}
