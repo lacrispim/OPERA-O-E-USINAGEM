@@ -12,6 +12,7 @@ import {
   EstimateMachiningTimeFromImageOutput,
   EstimateMachiningTimeFromImageOutputSchema,
 } from '@/lib/schemas/machining-time-from-image';
+import { googleAI } from '@genkit-ai/googleai';
 
 const prompt = ai.definePrompt({
   name: 'estimateMachiningTimeFromImagePrompt',
@@ -40,6 +41,7 @@ const estimateMachiningTimeFromImageFlow = ai.defineFlow(
     name: 'estimateMachiningTimeFromImageFlow',
     inputSchema: EstimateMachiningTimeFromImageInputSchema,
     outputSchema: EstimateMachiningTimeFromImageOutputSchema,
+    models: [googleAI.model('gemini-2.5-flash-preview')],
   },
   async (input) => {
     const { output } = await prompt(input);
