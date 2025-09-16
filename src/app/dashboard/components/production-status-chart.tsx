@@ -33,25 +33,21 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords, legendPayload } = useMemo(() => {
         const allStatuses = Object.keys(chartConfig);
         
-        // Initialize counts for all possible statuses
         const statusCounts = allStatuses.reduce((acc, status) => {
             acc[status] = 0;
             return acc;
         }, {} as Record<string, number>);
         
-        // Aggregate counts from the filtered records
         records.forEach(record => {
             const status = record.status || 'N/A';
             if (statusCounts.hasOwnProperty(status)) {
                 statusCounts[status]++;
             } else {
-                // This handles unexpected statuses from data, though they won't have a color unless added to chartConfig
                 if (!statusCounts[status]) statusCounts[status] = 0;
                 statusCounts[status]++;
             }
         });
 
-        // Data for the pie chart should only include items with a value > 0
         const chartData = Object.entries(statusCounts)
             .map(([name, value]) => ({ name, value }))
             .filter(d => d.value > 0)
@@ -59,7 +55,6 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
         
         const totalRecords = records.length;
 
-        // The legend payload should include all statuses, showing 0 for those not in the current data
         const legendPayload = allStatuses.map(status => ({
             value: `${status} (${statusCounts[status]})`,
             type: 'square',
@@ -110,7 +105,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                                     formatter={(value: number) => {
                                         if (totalRecords === 0) return "";
                                         const percentage = (value / totalRecords) * 100;
-                                        if (percentage < 5) return ""; // Hide label for very small slices
+                                        if (percentage < 5) return "";
                                         return `${percentage.toFixed(0)}%`;
                                     }}
                                     className="fill-white text-sm font-semibold"
@@ -122,6 +117,9 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                             />
                         </PieChart>
                     </ChartContainer>
+                     <div className="hidden md:flex">
+                        {/* This empty div helps with the grid layout but we can place the legend here if we want */}
+                    </div>
                 </div>
             </CardContent>
         </Card>
