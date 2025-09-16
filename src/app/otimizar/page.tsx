@@ -16,7 +16,6 @@ import { estimateMachiningTimeFromImage } from '@/ai/flows/estimate-machining-ti
 import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachiningTimeInputSchema } from '@/lib/schemas/machining-time';
 import type { EstimateMachiningTimeFromImageOutput } from '@/lib/schemas/machining-time-from-image';
 import { useToast } from '@/hooks/use-toast';
-import { Label } from '@/components/ui/label';
 
 type FormData = PredictMachiningTimeInput;
 
@@ -348,72 +347,80 @@ export default function OtimizarPage() {
                             )}
                         </CardContent>
                     </Card>
-
-                    {/* Card for Image-based Estimation */}
-                    <div className="lg:col-span-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Análise de Desenho Técnico</CardTitle>
-                                <CardDescription>Envie o desenho técnico da peça para uma estimativa de tempo baseada na geometria.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="machine-type-image">Máquina para Análise</Label>
-                                         <Select value={selectedMachineForImage} onValueChange={setSelectedMachineForImage}>
-                                            <SelectTrigger id="machine-type-image">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Torno CNC - Centur 30">Torno CNC - Centur 30</SelectItem>
-                                                <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                </div>
+                
+                {/* Card for Image-based Estimation */}
+                 <div className="max-w-7xl mx-auto mt-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Análise de Desenho Técnico</CardTitle>
+                            <CardDescription>Envie o desenho técnico da peça para uma estimativa de tempo baseada na geometria.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <form className="space-y-4">
+                                <FormItem>
+                                    <FormLabel htmlFor="machine-type-image">Máquina para Análise</FormLabel>
+                                     <Select value={selectedMachineForImage} onValueChange={setSelectedMachineForImage}>
+                                        <SelectTrigger id="machine-type-image">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Torno CNC - Centur 30">Torno CNC - Centur 30</SelectItem>
+                                            <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                                
+                                <FormItem>
+                                     <FormLabel htmlFor="file-upload">Desenho Técnico</FormLabel>
+                                     <FormControl>
+                                        <Button asChild className="w-full cursor-pointer">
+                                            <label htmlFor="file-upload">
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                Carregar Desenho
+                                                <input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
+                                            </label>
+                                        </Button>
+                                    </FormControl>
+                                </FormItem>
+                            </form>
+                            <div className="space-y-6">
+                                {isUploading && (
+                                    <div className="flex flex-col items-center justify-center h-full">
+                                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                        <p className="mt-4 text-muted-foreground">Analisando imagem...</p>
                                     </div>
-                                    <Button asChild className="w-full cursor-pointer">
-                                        <label>
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Carregar Desenho
-                                            <input type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
-                                        </label>
-                                    </Button>
-                                </div>
-                                <div className="space-y-6">
-                                    {isUploading && (
-                                        <div className="flex flex-col items-center justify-center h-full">
-                                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                            <p className="mt-4 text-muted-foreground">Analisando imagem...</p>
+                                )}
+                                {imageError && <p className="text-destructive">{imageError}</p>}
+                                {imageResult && (
+                                    <div className="space-y-4">
+                                        <div className="bg-muted p-4 rounded-lg text-center">
+                                            <h3 className="text-lg font-medium text-muted-foreground">Tempo Total (Desenho)</h3>
+                                            <p className="text-3xl font-bold text-primary">{imageResult.totalTimeMinutes.toFixed(2)} min</p>
                                         </div>
-                                    )}
-                                    {imageError && <p className="text-destructive">{imageError}</p>}
-                                    {imageResult && (
-                                        <div className="space-y-4">
-                                            <div className="bg-muted p-4 rounded-lg text-center">
-                                                <h3 className="text-lg font-medium text-muted-foreground">Tempo Total (Desenho)</h3>
-                                                <p className="text-3xl font-bold text-primary">{imageResult.totalTimeMinutes.toFixed(2)} min</p>
+                                        <div className="grid grid-cols-2 gap-4 text-center">
+                                            <div className="bg-card border p-3 rounded-md">
+                                                <p className="text-sm text-muted-foreground">Setup</p>
+                                                <p className="text-lg font-semibold">{imageResult.setupTimeMinutes} min</p>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4 text-center">
-                                                <div className="bg-card border p-3 rounded-md">
-                                                    <p className="text-sm text-muted-foreground">Setup</p>
-                                                    <p className="text-lg font-semibold">{imageResult.setupTimeMinutes} min</p>
-                                                </div>
-                                                <div className="bg-card border p-3 rounded-md">
-                                                    <p className="text-sm text-muted-foreground">Usinagem</p>
-                                                    <p className="text-lg font-semibold">{imageResult.machiningTimeMinutes} min</p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold mb-2">Observações (Análise da Imagem):</h4>
-                                                <p className="text-sm text-muted-foreground p-3 bg-card border rounded-md">{imageResult.notes}</p>
+                                            <div className="bg-card border p-3 rounded-md">
+                                                <p className="text-sm text-muted-foreground">Usinagem</p>
+                                                <p className="text-lg font-semibold">{imageResult.machiningTimeMinutes} min</p>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-2">Observações (Análise da Imagem):</h4>
+                                            <p className="text-sm text-muted-foreground p-3 bg-card border rounded-md">{imageResult.notes}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </main>
         </>
     );
 }
+
+    
