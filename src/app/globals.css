@@ -46,6 +46,7 @@
     --chart-status-new-4: 350 80% 65%; /* Red-Pink */
     --chart-status-new-5: 300 65% 60%; /* Purple */
     --chart-status-new-6: 60 70% 50%;  /* Gold */
+    --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     --radius: 0.5rem;
   }
   .dark {
@@ -91,6 +92,7 @@
     --chart-status-new-4: 350 80% 75%;
     --chart-status-new-5: 300 65% 70%;
     --chart-status-new-6: 60 70% 60%;
+    --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 93.3%;

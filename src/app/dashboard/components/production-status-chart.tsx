@@ -19,12 +19,12 @@ const chartConfig = {
   count: {
     label: "Quantidade",
   },
-  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-new-1))" },
-  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-new-2))" },
-  "Em produção": { label: "Em Produção", color: "hsl(var(--chart-status-new-3))" },
-  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-new-4))" },
-  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-new-5))" },
-  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-new-6))" },
+  "Concluído": { label: "Concluído", color: "hsl(var(--chart-status-alt-1))" },
+  "Em andamento": { label: "Em Andamento", color: "hsl(var(--chart-status-alt-2))" },
+  "Em produção": { label: "Em Produção", color: "hsl(var(--chart-status-orange))" },
+  "Pendente": { label: "Pendente", color: "hsl(var(--chart-status-alt-4))" },
+  "Fila de produção": { label: "Fila de Produção", color: "hsl(var(--chart-status-alt-5))" },
+  "Encerrada": { label: "Encerrada", color: "hsl(var(--chart-status-alt-6))" },
   "TBD": { label: "TBD", color: "hsl(var(--border))" },
   "N/A": { label: "Não Aplicável", color: "hsl(var(--muted))" },
 };
