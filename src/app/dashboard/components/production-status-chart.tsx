@@ -6,11 +6,12 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Pie, PieChart, Cell } from "recharts";
-import { LabelList } from "recharts";
+import { Pie, PieChart, Cell, LabelList } from "recharts";
 
 type ProductionStatusChartProps = {
   records: ProductionRecord[];
@@ -49,7 +50,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
             if (statusCounts.hasOwnProperty(status)) {
                 statusCounts[status]++;
             } else {
-                statusCounts[status] = 1;
+                statusCounts[status] = 1; // Should not happen if ALL_STATUSES is correct
             }
         });
 
