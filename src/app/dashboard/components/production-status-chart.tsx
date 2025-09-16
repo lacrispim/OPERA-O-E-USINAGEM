@@ -56,6 +56,9 @@ const chartConfig = {
   }
 };
 
+const ALL_STATUSES = Object.keys(chartConfig).filter(k => k !== 'count');
+
+
 const fallbackColors = [
     "hsl(215 70% 60%)",
     "hsl(225 90% 45%)",
@@ -67,15 +70,26 @@ const fallbackColors = [
 
 export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
     const { chartData, totalRecords } = useMemo(() => {
-        const statusCounts = records.reduce((acc, record) => {
+        // Initialize all known statuses with 0 count
+        const statusCounts: Record<string, number> = {};
+        ALL_STATUSES.forEach(status => {
+            statusCounts[status] = 0;
+        });
+
+        // Aggregate counts from records
+        records.forEach((record) => {
             const status = record.status || 'N/A';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status]++;
+            } else {
+                // If a status from data is not in our config, add it
+                statusCounts[status] = 1;
+            }
+        });
 
         const chartData = Object.entries(statusCounts)
             .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value);
+            .sort((a, b) => b.value - a.value); // Keep sorting to have larger slices together
         
         const totalRecords = records.length;
 
@@ -135,7 +149,11 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                              )}
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" />}
+                            content={<ChartLegendContent nameKey="name" payload={chartData.map((entry, index) => ({
+                                value: entry.name,
+                                color: getColor(entry.name, index),
+                                type: 'circle',
+                            }))} />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
