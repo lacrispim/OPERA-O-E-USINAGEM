@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label, Legend } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -20,10 +20,6 @@ const chartConfig = {
     label: "Total Horas",
     color: "hsl(195 100% 40%)", // Teal
   },
-  cumulative: {
-    label: "Cumulativo %",
-    color: "hsl(var(--primary))",
-  },
   availableHours: {
     label: "Horas Disponíveis",
     color: "hsl(var(--destructive))",
@@ -31,7 +27,7 @@ const chartConfig = {
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
-const CUMULATIVE_BASE_HOURS = 70;
+const AVAILABLE_HOURS = 70;
 
 const CustomLegend = (props: any) => {
   const { payload } = props;
@@ -58,59 +54,36 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
         const factoryData: Record<string, number> = {};
         
+        // Initialize all factories to ensure they are displayed
+        ALL_FACTORIES.forEach(factory => {
+            factoryData[factory] = 0;
+        });
+        
         records.forEach(record => {
             const factory = record.requestingFactory;
-            if (!factoryData[factory]) {
-                factoryData[factory] = 0;
+            if (factoryData.hasOwnProperty(factory)) {
+                const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
+                factoryData[factory] += totalRecordHours;
             }
-            const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
-            factoryData[factory] += totalRecordHours;
         });
 
-        const sortedData = Object.entries(factoryData)
+        return Object.entries(factoryData)
             .map(([factory, hours]) => ({
                 factory,
                 hours: Number(hours.toFixed(1)),
             }))
             .sort((a, b) => b.hours - a.hours);
 
-        const totalHours = sortedData.reduce((sum, item) => sum + item.hours, 0);
-
-        if (totalHours === 0) {
-            return ALL_FACTORIES.map(f => ({ factory: f, hours: 0, cumulative: 0 }));
-        }
-
-        let cumulativeHours = 0;
-        const paretoData = sortedData.map(item => {
-            cumulativeHours += item.hours;
-            const percentage = (cumulativeHours / CUMULATIVE_BASE_HOURS) * 100;
-            return {
-                ...item,
-                cumulative: Number(percentage.toFixed(0)),
-            };
-        });
-        
-        // Add factories with 0 hours to the end to ensure they are displayed
-        const displayedFactories = new Set(paretoData.map(d => d.factory));
-        ALL_FACTORIES.forEach(factory => {
-            if (!displayedFactories.has(factory)) {
-                // Find the last cumulative value to continue from there if needed
-                const lastCumulative = paretoData.length > 0 ? paretoData[paretoData.length - 1].cumulative : 0;
-                paretoData.push({ factory, hours: 0, cumulative: lastCumulative });
-            }
-        });
-
-        return paretoData;
     }, [records]);
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Gráfico de Pareto - Horas por Fábrica</CardTitle>
+                <CardTitle className="text-lg">Horas por Fábrica</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-96 w-full">
-                    <ComposedChart data={chartData} accessibilityLayer margin={{ top: 20, right: 20, bottom: 40, left: -10 }}>
+                    <BarChart data={chartData} accessibilityLayer margin={{ top: 20, right: 20, bottom: 40, left: -10 }}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="factory"
@@ -124,8 +97,6 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             height={60}
                         />
                         <YAxis
-                            yAxisId="left"
-                            orientation="left"
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
@@ -134,33 +105,17 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             valueFormatter={(value) => `${value}h`}
                             label={{ value: 'Total Horas', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '12px', fill: 'hsl(var(--foreground))' } }}
                         />
-                        <YAxis
-                            yAxisId="right"
-                            orientation="right"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            fontSize={10}
-                            domain={[0, 100]}
-                            tickFormatter={(value) => `${value}%`}
-                             label={{ value: 'Cumulativo %', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '12px', fill: 'hsl(var(--foreground))' } }}
-                        />
                         <Tooltip
                             content={
                                 <ChartTooltipContent 
-                                    formatter={(value, name) => {
-                                        if (name === "hours") return `${Number(value).toFixed(1)}h`;
-                                        if (name === "cumulative") return `${value}%`;
-                                        return String(value);
-                                    }}
+                                    formatter={(value) => `${Number(value).toFixed(1)}h`}
                                     indicator="dot"
                                 />
                             }
                         />
                          <Legend content={<CustomLegend />} />
                         <ReferenceLine 
-                            y={CUMULATIVE_BASE_HOURS}
-                            yAxisId="left" 
+                            y={AVAILABLE_HOURS}
                             stroke="hsl(var(--destructive))" 
                             strokeDasharray="3 3" 
                         >
@@ -168,7 +123,6 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                         </ReferenceLine>
                         <Bar
                             dataKey="hours"
-                            yAxisId="left"
                             fill="var(--color-hours)"
                             radius={4}
                             name="Total Horas"
@@ -182,19 +136,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 formatter={(value: number) => value > 0 ? `${value.toFixed(1)}h` : ''}
                             />
                         </Bar>
-                         <Line
-                            type="monotone"
-                            dataKey="cumulative"
-                            yAxisId="right"
-                            stroke="var(--color-cumulative)"
-                            strokeWidth={2}
-                            dot={{
-                                fill: "var(--color-cumulative)",
-                                r: 4
-                            }}
-                            name="Cumulativo %"
-                        />
-                    </ComposedChart>
+                    </BarChart>
                 </ChartContainer>
             </CardContent>
         </Card>
