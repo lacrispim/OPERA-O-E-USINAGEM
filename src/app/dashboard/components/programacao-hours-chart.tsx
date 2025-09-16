@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, LabelList } from "recharts";
 
 type ProgramacaoHoursChartProps = {
   records: ProductionRecord[];
@@ -42,7 +42,7 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
       }
     });
 
-    return Object.values(factoryData);
+    return Object.values(factoryData).map(d => ({...d, programacaoHours: Number(d.programacaoHours.toFixed(1))}));
   }, [records]);
 
   return (
@@ -52,7 +52,7 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-72 w-full">
-          <BarChart data={chartData} accessibilityLayer margin={{ bottom: 30, left: -20 }}>
+          <BarChart data={chartData} accessibilityLayer margin={{ top: 20, bottom: 30, left: -20 }}>
              <CartesianGrid vertical={false} />
             <XAxis
               dataKey="factory"
@@ -81,7 +81,16 @@ export function ProgramacaoHoursChart({ records }: ProgramacaoHoursChartProps) {
               dataKey="programacaoHours"
               fill="var(--color-programacaoHours)"
               radius={4}
-            />
+            >
+                <LabelList
+                    dataKey="programacaoHours"
+                    position="top"
+                    offset={4}
+                    className="fill-foreground"
+                    fontSize={10}
+                    formatter={(value: number) => value > 0 ? `${value.toFixed(1)}h` : ''}
+                />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
