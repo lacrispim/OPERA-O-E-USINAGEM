@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -38,6 +39,27 @@ const PREFERRED_COLUMN_ORDER = [
 const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torno (minutos)", "Programação (minutos)"];
 const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação"];
 const TRUNCATE_LENGTH = 25;
+
+const STANDARDIZED_STATUS = {
+    CONCLUIDO: 'Concluído',
+    EM_PRODUCAO: 'Em produção',
+    FILA_PRODUCAO: 'Fila de produção',
+    EM_ANDAMENTO: 'Em andamento',
+    PENDENTE: 'Pendente',
+    OUTRO: 'Outro',
+};
+
+const standardizeStatus = (status: string): string => {
+    if (!status) return STANDARDIZED_STATUS.OUTRO;
+    const s = status.toLowerCase().trim();
+    if (s.includes('concluido') || s.includes('concluído')) return STANDARDIZED_STATUS.CONCLUIDO;
+    if (s.includes('em produçao') || s.includes('em produção')) return STANDARDIZED_STATUS.EM_PRODUCAO;
+    if (s.includes('fila de produçao') || s.includes('fila de produção')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
+    if (s.includes('andamento')) return STANDARDIZED_STATUS.EM_ANDAMENTO;
+    if (s.includes('pendente')) return STANDARDIZED_STATUS.PENDENTE;
+    return status; // Keep original if no match
+};
+
 
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" => {
     const s = status ? status.toLowerCase() : '';
@@ -91,7 +113,7 @@ export function FirebaseRecordsTable() {
 
   // Filter states
   const [siteFilter, setSiteFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [dateFilter, setDateFilter] = useState('');
 
   useEffect(() => {
@@ -103,10 +125,14 @@ export function FirebaseRecordsTable() {
       (snapshot) => {
         if (snapshot.exists()) {
           const rawData = snapshot.val();
-          const dataArray = Object.keys(rawData).map((key) => ({
-            id: key,
-            ...rawData[key],
-          }));
+          const dataArray = Object.keys(rawData).map((key) => {
+            const item = rawData[key];
+            return {
+              id: key,
+              ...item,
+              Status: standardizeStatus(item.Status), // Standardize status on data load
+            };
+          });
 
           const allHeaders = new Set<string>();
             dataArray.forEach(item => {
@@ -140,13 +166,18 @@ export function FirebaseRecordsTable() {
     return () => unsubscribe();
   }, []);
 
-  const uniqueSites = useMemo(() => ['all', ...new Set(data.map(d => d.Site).filter(Boolean))], [data]);
-  const uniqueStatuses = useMemo(() => ['all', ...new Set(data.map(d => d.Status).filter(Boolean))], [data]);
+  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.Site).filter(Boolean)))], [data]);
+  
+  const uniqueStatuses = useMemo(() => {
+    const statuses = new Set(data.map(d => d.Status).filter(Boolean));
+    return Array.from(statuses).map(s => ({label: s, value: s}));
+  }, [data]);
+
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
         const matchesSite = siteFilter === 'all' || item.Site === siteFilter;
-        const matchesStatus = statusFilter === 'all' || item.Status === statusFilter;
+        const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.Status);
         const matchesDate = !dateFilter || (item.Data && item.Data.includes(dateFilter));
         return matchesSite && matchesStatus && matchesDate;
     });
@@ -154,7 +185,7 @@ export function FirebaseRecordsTable() {
 
   const clearFilters = () => {
     setSiteFilter('all');
-    setStatusFilter('all');
+    setStatusFilter([]);
     setDateFilter('');
   }
 
@@ -208,7 +239,7 @@ export function FirebaseRecordsTable() {
                     <CardDescription>
                         Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
                     </CardDescription>
-                    <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
+                    <div className="flex flex-col md:flex-row flex-wrap items-center gap-4 pt-4">
                         <Select value={siteFilter} onValueChange={setSiteFilter}>
                             <SelectTrigger className="w-full md:w-[180px]">
                                 <SelectValue placeholder="Filtrar por Site" />
@@ -221,18 +252,13 @@ export function FirebaseRecordsTable() {
                                 ))}
                             </SelectContent>
                         </Select>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-full md:w-[180px]">
-                                <SelectValue placeholder="Filtrar por Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {uniqueStatuses.map(status => (
-                                <SelectItem key={status} value={status}>
-                                    {status === 'all' ? 'Todos os Status' : status}
-                                </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <MultiSelect
+                            options={uniqueStatuses}
+                            onValueChange={setStatusFilter}
+                            defaultValue={statusFilter}
+                            placeholder="Filtrar por Status"
+                            className="w-full md:w-[220px]"
+                        />
                         <div className="relative w-full md:max-w-xs">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
