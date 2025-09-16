@@ -6,8 +6,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
@@ -147,18 +145,6 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                                  />
                              )}
                         </Pie>
-                         <ChartLegend
-                            content={<ChartLegendContent nameKey="name" payload={chartData.map((entry, index) => ({
-                                value: `${entry.name} (${entry.value})`,
-                                color: getColor(entry.name, index),
-                                type: 'circle',
-                            }))} 
-                            layout="vertical"
-                            verticalAlign="middle"
-                            align="right"
-                            wrapperStyle={{paddingLeft: 20}}
-                            />}
-                        />
                     </PieChart>
                 </ChartContainer>
             </CardContent>
