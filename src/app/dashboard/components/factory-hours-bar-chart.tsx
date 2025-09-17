@@ -50,8 +50,8 @@ export function FactoryHoursBarChart({ records, className }: FactoryHoursBarChar
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} axisLine={false} tickLine={false} />
-            <YAxis unit="h" axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} tickLine={false} />
+            <YAxis unit="h" tickLine={false} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
               formatter={(value: number) => [`${value.toFixed(2)}h`, 'Total']}
