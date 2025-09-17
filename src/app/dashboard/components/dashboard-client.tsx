@@ -11,6 +11,7 @@ import { format, getYear, getMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PlannedPiecesBarChart } from './planned-pieces-bar-chart';
 import { TotalPiecesCard } from './total-pieces-card';
+import { UniqueRequestsCard } from './unique-requests-card';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -112,6 +113,7 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
 
       <div className="grid gap-6 md:grid-cols-4">
         <TotalPiecesCard records={filteredRecords} className="md:col-span-1" />
+        <UniqueRequestsCard records={filteredRecords} className="md:col-span-1" />
       </div>
 
       <PlannedPiecesBarChart records={filteredRecords} />

@@ -1,3 +1,4 @@
+
 export type ProductionRecord = {
   id: string;
   requestingFactory: string;
@@ -10,6 +11,7 @@ export type ProductionRecord = {
   tornoTime: number; // in hours
   programacaoTime: number; // in hours
   status: string;
+  requestId?: number;
 };
 
 export type FirebaseProductionRecord = {

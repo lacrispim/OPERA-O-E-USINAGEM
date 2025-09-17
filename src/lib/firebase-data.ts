@@ -47,7 +47,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
         const parts = item.Data.split('/');
         if (parts.length === 3) {
           // new Date(year, monthIndex, day)
-          recordDate = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]);
+          recordDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
         } else {
           recordDate = new Date(item.Data);
         }
@@ -68,6 +68,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
     
     const manufacturingTimeHours = (centroMin + tornoMin + programacaoMin) / 60;
     const quantity = parseInt(item['Quantidade'] || '0', 10);
+    const requestId = parseInt(item['Requisição'] || '0', 10);
 
     return {
       id: item.id || String(index),
@@ -81,6 +82,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       tornoTime: isNaN(tornoMin) ? 0 : tornoMin / 60,
       programacaoTime: isNaN(programacaoMin) ? 0 : programacaoMin / 60,
       status: standardizeStatus(item.Status),
+      requestId: isNaN(requestId) ? undefined : requestId,
     };
   });
   
