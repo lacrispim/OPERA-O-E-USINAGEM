@@ -17,6 +17,7 @@ import { TechnologyHoursBarChart } from './technology-hours-bar-chart';
 import { StatusPieChart } from './status-pie-chart';
 import { CentroHoursBarChart } from './centro-hours-bar-chart';
 import { TornoHoursBarChart } from './torno-hours-bar-chart';
+import { ProgramacaoHoursBarChart } from './programacao-hours-bar-chart';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -135,7 +136,8 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
         <TornoHoursBarChart records={filteredRecords} />
       </div>
       
-      <div className="grid grid-cols-1">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ProgramacaoHoursBarChart records={filteredRecords} />
         <StatusPieChart records={filteredRecords} />
       </div>
 
