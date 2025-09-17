@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { ProductionRecord } from "@/lib/types";
 import { useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Tooltip, ReferenceLine, Label, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from "recharts";
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
@@ -18,37 +18,11 @@ type FactoryHoursBarChartProps = {
 const chartConfig = {
   hours: {
     label: "Total Horas",
-    color: "hsl(195 100% 40%)", // Teal
+    color: "hsl(var(--primary))",
   },
-  availableHours: {
-    label: "Horas Disponíveis",
-    color: "hsl(var(--destructive))",
-  }
 };
 
 const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
-const AVAILABLE_HOURS = 60;
-
-const CustomLegend = (props: any) => {
-  const { payload } = props;
-  return (
-    <div className="flex justify-center items-center gap-4" style={{ paddingTop: 30 }}>
-      {payload.map((entry: any, index: any) => (
-        <div key={`item-${index}`} className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5" style={{ backgroundColor: entry.color }}></span>
-          <span className="text-sm text-muted-foreground">{entry.value}</span>
-        </div>
-      ))}
-       <div className="flex items-center gap-1.5">
-            <svg width="10" height="10" viewBox="0 0 10 2" className="h-2.5 w-2.5">
-                <line x1="0" y1="1" x2="10" y2="1" stroke="white" strokeWidth="2" strokeDasharray="3 3" />
-            </svg>
-            <span className="text-sm text-muted-foreground">Horas Disponíveis</span>
-        </div>
-    </div>
-  );
-};
-
 
 export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     const chartData = useMemo(() => {
@@ -79,7 +53,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Planejamento Mensal de Horas</CardTitle>
+                <CardTitle className="text-lg">Total de Horas por Fábrica</CardTitle>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-96 w-full">
@@ -105,7 +79,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                             valueFormatter={(value) => `${value}h`}
                             label={{ value: 'Total Horas', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '12px', fill: 'hsl(var(--foreground))' } }}
                         />
-                        <Tooltip
+                        <ChartTooltip
                             content={
                                 <ChartTooltipContent 
                                     formatter={(value) => `${Number(value).toFixed(1)}h`}
@@ -113,19 +87,10 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
                                 />
                             }
                         />
-                         <Legend content={<CustomLegend />} />
-                        <ReferenceLine 
-                            y={AVAILABLE_HOURS}
-                            stroke="white" 
-                            strokeDasharray="3 3" 
-                        >
-                            <Label value="Horas Disponíveis" position="insideTopRight" fill="white" fontSize={10} />
-                        </ReferenceLine>
                         <Bar
                             dataKey="hours"
                             fill="var(--color-hours)"
                             radius={4}
-                            name="Total Horas"
                         >
                              <LabelList
                                 dataKey="hours"
