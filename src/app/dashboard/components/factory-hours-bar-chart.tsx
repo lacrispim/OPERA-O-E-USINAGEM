@@ -69,8 +69,8 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
               }}
             />
             <Legend />
-            <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-              <Label value="Limite (60h)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} />
+            <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" strokeWidth={2}>
+              <Label value="Limite (60h)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} fontWeight="bold" />
             </ReferenceLine>
             <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas">
               <LabelList dataKey="Horas" content={<CustomLabel />} />
