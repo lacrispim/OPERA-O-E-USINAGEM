@@ -5,9 +5,11 @@ import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine, Label } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 type FactoryHoursBarChartProps = {
   records: ProductionRecord[];
+  className?: string;
 };
 
 const ALL_FACTORIES = [
@@ -26,7 +28,7 @@ const CustomLabel = (props: any) => {
   return null;
 };
 
-export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
+export function FactoryHoursBarChart({ records, className }: FactoryHoursBarChartProps) {
   const chartData = useMemo(() => {
     const dataByFactory: { [key: string]: number } = {};
 
@@ -50,7 +52,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
   }, [records]);
 
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle>Horas Planejadas</CardTitle>
         <CardDescription>

@@ -5,9 +5,11 @@ import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 type PlannedPiecesBarChartProps = {
   records: ProductionRecord[];
+  className?: string;
 };
 
 const ALL_FACTORIES = [
@@ -27,7 +29,7 @@ const CustomLabel = (props: any) => {
 };
 
 
-export function PlannedPiecesBarChart({ records }: PlannedPiecesBarChartProps) {
+export function PlannedPiecesBarChart({ records, className }: PlannedPiecesBarChartProps) {
   const chartData = useMemo(() => {
     const dataByFactory: { [key: string]: number } = {};
 
@@ -50,7 +52,7 @@ export function PlannedPiecesBarChart({ records }: PlannedPiecesBarChartProps) {
   }, [records]);
 
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle>Quantidade de Peças Planejadas</CardTitle>
         <CardDescription>Total de peças planejadas por fábrica.</CardDescription>
