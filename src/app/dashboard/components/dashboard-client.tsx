@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { format, getYear, getMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PlannedPiecesBarChart } from './planned-pieces-bar-chart';
-import { VinhedoSeptemberCard } from './vinhedo-september-card';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -31,30 +30,22 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [monthFilter, setMonthFilter] = useState<string>('all');
 
-  const { uniqueFactories, uniqueYears, vinhedoSeptemberQuantity } = useMemo(() => {
+  const { uniqueFactories, uniqueYears } = useMemo(() => {
     const factorySet = new Set(ALL_FACTORIES);
     const yearSet = new Set<number>();
-    let vinhedoQuantity = 0;
 
     initialRecords.forEach(record => {
-      const date = new Date(record.date);
       if (record.requestingFactory) {
         factorySet.add(record.requestingFactory);
       }
       if (record.date) {
         yearSet.add(getYear(new Date(record.date)));
       }
-
-      // Calculate Vinhedo's quantity for September
-      if (record.requestingFactory === 'Vinhedo' && getMonth(date) === 8) { // September is month 8 (0-indexed)
-        vinhedoQuantity += record.quantity || 0;
-      }
     });
 
     return {
       uniqueFactories: Array.from(factorySet).sort().map(f => ({ label: f, value: f })),
       uniqueYears: ['all', ...Array.from(yearSet).sort((a, b) => b - a)],
-      vinhedoSeptemberQuantity: vinhedoQuantity,
     };
   }, [initialRecords]);
 
@@ -117,10 +108,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
             </div>
         </div>
       </Card>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <VinhedoSeptemberCard quantity={vinhedoSeptemberQuantity} />
-      </div>
 
       <PlannedPiecesBarChart records={filteredRecords} />
 
