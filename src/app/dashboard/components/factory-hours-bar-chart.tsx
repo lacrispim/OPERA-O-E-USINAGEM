@@ -33,7 +33,7 @@ const renderCustomLegend = (props: any) => {
       <li key="limit-item" className="flex items-center gap-2">
          <div className="w-4 h-4 flex items-center justify-center">
             <svg width="14" height="4" viewBox="0 0 14 2">
-                <line x1="0" y1="1" x2="14" y2="1" stroke="hsl(var(--destructive))" strokeWidth="2" strokeDasharray="3 3"/>
+                <line x1="0" y1="1" x2="14" y2="1" stroke="hsl(var(--foreground))" strokeWidth="2" strokeDasharray="3 3"/>
             </svg>
          </div>
          <span>Horas Disponíveis</span>
