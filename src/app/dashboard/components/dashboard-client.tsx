@@ -13,7 +13,6 @@ import { PlannedPiecesBarChart } from './planned-pieces-bar-chart';
 import { TotalPiecesCard } from './total-pieces-card';
 import { UniqueRequestsCard } from './unique-requests-card';
 import { FactoryHoursBarChart } from './factory-hours-bar-chart';
-import { TechnologyHoursBarChart } from './technology-hours-bar-chart';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -122,10 +121,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
         <PlannedPiecesBarChart records={filteredRecords} />
         <FactoryHoursBarChart records={filteredRecords} />
       </div>
-       <div className="grid gap-6">
-        <TechnologyHoursBarChart records={filteredRecords} />
-      </div>
-
     </div>
   );
 }
