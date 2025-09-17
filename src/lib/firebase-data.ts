@@ -28,6 +28,13 @@ const standardizeStatus = (status: string): string => {
     return STANDARDIZED_STATUS.OUTRO; // Keep original if no match
 };
 
+const standardizeFactoryName = (name: string): string => {
+    if (!name) return 'N/A';
+    const n = name.trim();
+    if (n.toLowerCase() === 'igarassú') return 'Igarassu';
+    return n;
+};
+
 function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] {
   if (!firebaseData) return [];
   
@@ -59,7 +66,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
 
     return {
       id: item.id || String(index),
-      requestingFactory: item.Site || 'N/A',
+      requestingFactory: standardizeFactoryName(item.Site),
       partName: item['Nome da peça'] || 'N/A',
       material: item.Material || 'N/A',
       manufacturingTime: isNaN(manufacturingTimeHours) ? 0 : manufacturingTimeHours,
