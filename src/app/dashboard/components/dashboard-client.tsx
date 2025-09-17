@@ -15,6 +15,7 @@ import { UniqueRequestsCard } from './unique-requests-card';
 import { FactoryHoursBarChart } from './factory-hours-bar-chart';
 import { TechnologyHoursBarChart } from './technology-hours-bar-chart';
 import { StatusPieChart } from './status-pie-chart';
+import { CentroHoursBarChart } from './centro-hours-bar-chart';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -126,6 +127,11 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         <PlannedPiecesBarChart records={filteredRecords} />
         <TechnologyHoursBarChart records={filteredRecords} />
+      </div>
+
+       <div className="grid gap-6 lg:grid-cols-2">
+        <CentroHoursBarChart records={filteredRecords} />
+        {/* Placeholder for a potential second chart in this row */}
       </div>
       
       <div className="grid grid-cols-1">
