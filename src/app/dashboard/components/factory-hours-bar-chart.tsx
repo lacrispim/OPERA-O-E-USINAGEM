@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine, Label } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -15,18 +15,6 @@ type FactoryHoursBarChartProps = {
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
 ];
-
-const CustomLabel = (props: any) => {
-  const { x, y, width, value } = props;
-  if (value > 0) {
-    return (
-      <text x={x + width / 2} y={y} dy={-4} fill="hsl(var(--foreground))" fontSize={12} textAnchor="middle">
-        {value.toFixed(1)}h
-      </text>
-    );
-  }
-  return null;
-};
 
 export function FactoryHoursBarChart({ records, className }: FactoryHoursBarChartProps) {
   const chartData = useMemo(() => {
@@ -76,9 +64,7 @@ export function FactoryHoursBarChart({ records, className }: FactoryHoursBarChar
             <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" strokeWidth={2}>
               <Label value="Limite (60h)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} fontWeight="bold" />
             </ReferenceLine>
-            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas">
-              <LabelList dataKey="Horas" content={<CustomLabel />} />
-            </Bar>
+            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
