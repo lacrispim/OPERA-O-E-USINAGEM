@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { format, getYear, getMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { IgarassuPiecesCard } from './igarassu-pieces-card';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -60,12 +59,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
     });
   }, [initialRecords, factoryFilter, yearFilter, monthFilter]);
   
-  const igarassuTotalPieces = useMemo(() => {
-    return filteredRecords
-      .filter(record => record.requestingFactory === 'Igarassu')
-      .reduce((sum, record) => sum + (record.quantity || 0), 0);
-  }, [filteredRecords]);
-
 
   const clearFilters = () => {
     setFactoryFilter([]);
@@ -77,7 +70,7 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
     <div className="space-y-6">
       <Card className="p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-3 flex flex-col md:flex-row flex-wrap items-center gap-4">
+            <div className="md:col-span-4 flex flex-col md:flex-row flex-wrap items-center gap-4">
                 <div className="w-full md:w-auto md:min-w-[250px] lg:min-w-[300px]">
                     <MultiSelect
                         options={uniqueFactories}
@@ -111,9 +104,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
                     </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
-            </div>
-             <div className="md:col-span-1">
-                <IgarassuPiecesCard totalPieces={igarassuTotalPieces} />
             </div>
         </div>
       </Card>
