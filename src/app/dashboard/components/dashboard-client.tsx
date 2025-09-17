@@ -4,7 +4,6 @@
 import { useState, useMemo } from 'react';
 import type { ProductionRecord } from '@/lib/types';
 import { TotalPiecesCard } from './total-pieces-card';
-import { FactoryHoursBarChart } from './factory-hours-bar-chart';
 import { Card } from '@/components/ui/card';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -111,9 +110,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
         <TotalPiecesCard records={filteredRecords} />
       </div>
 
-       <div className="grid gap-6">
-        <FactoryHoursBarChart records={filteredRecords} />
-      </div>
     </div>
   );
 }
