@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,36 +18,39 @@ type FactoryHoursPieChartProps = {
   records: ProductionRecord[];
 };
 
+const ALL_FACTORIES = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"];
+
 const chartConfig = {
   hours: {
     label: "Horas",
   },
-  "Fábrica A": {
-    label: "Fábrica A",
-    color: "hsl(var(--chart-1))",
-  },
-  "Fábrica B": {
-    label: "Fábrica B",
-    color: "hsl(var(--chart-2))",
-  },
-  "Fábrica C": {
-    label: "Fábrica C",
-    color: "hsl(var(--chart-3))",
-  },
-  // Add other factories if they exist in the data, or have a fallback
+  "Igarassu": { label: "Igarassu", color: "hsl(var(--chart-1))" },
+  "Vinhedo": { label: "Vinhedo", color: "hsl(var(--chart-2))" },
+  "Suape": { label: "Suape", color: "hsl(var(--chart-3))" },
+  "Aguaí": { label: "Aguaí", color: "hsl(var(--chart-4))" },
+  "Garanhuns": { label: "Garanhuns", color: "hsl(var(--chart-5))" },
+  "Indaiatuba": { label: "Indaiatuba", color: "hsl(220 82% 52%)" },
+  "Valinhos": { label: "Valinhos", color: "hsl(340 82% 52%)" },
+  "Pouso Alegre": { label: "Pouso Alegre", color: "hsl(160 82% 42%)" },
 };
 
 export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
     const { chartData, totalHours } = useMemo(() => {
-        const factoryData = records.reduce((acc, record) => {
+        const factoryData: Record<string, number> = {};
+
+        // Initialize all factories with 0 hours
+        ALL_FACTORIES.forEach(factory => {
+            factoryData[factory] = 0;
+        });
+        
+        // Aggregate hours from records
+        records.forEach(record => {
             const factory = record.requestingFactory;
-            if (!acc[factory]) {
-                acc[factory] = 0;
+            if (factoryData.hasOwnProperty(factory)) {
+                const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
+                factoryData[factory] += totalRecordHours;
             }
-            const totalRecordHours = (record.centroTime || 0) + (record.tornoTime || 0) + (record.programacaoTime || 0);
-            acc[factory] += totalRecordHours;
-            return acc;
-        }, {} as Record<string, number>);
+        });
 
         const chartData = Object.entries(factoryData).map(([name, value]) => ({
             name,
@@ -63,11 +67,12 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
         if (config && 'color' in config) {
             return config.color;
         }
-        // Fallback for dynamic factories
-        const otherColors = ["hsl(var(--chart-4))", "hsl(var(--chart-5))"];
-        const index = Object.keys(chartConfig).filter(k => 'color' in chartConfig[k as keyof typeof chartConfig]).length;
-        return otherColors[index % otherColors.length] || 'hsl(var(--muted))';
+        return 'hsl(var(--muted))';
     }
+    
+    // Filter out items with 0 value for the pie chart slices, but keep them for the legend
+    const pieData = chartData.filter(item => item.value > 0);
+
 
     return (
         <Card>
@@ -82,7 +87,7 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
                             content={<ChartTooltipContent hideLabel formatter={(value) => `${Number(value).toFixed(1)}h`} />}
                         />
                         <Pie
-                            data={chartData}
+                            data={pieData}
                             dataKey="value"
                             nameKey="name"
                             cx="50%"
@@ -91,21 +96,23 @@ export function FactoryHoursPieChart({ records }: FactoryHoursPieChartProps) {
                             fill="#8884d8"
                             labelLine={false}
                         >
-                            {chartData.map((entry) => (
+                            {pieData.map((entry) => (
                                 <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
                             ))}
                             <LabelList
                                 dataKey="value"
                                 position="inside"
                                 formatter={(value: number) => {
-                                    if (totalHours === 0) return "0%";
-                                    return `${((value / totalHours) * 100).toFixed(0)}%`;
+                                    if (totalHours === 0 || value === 0) return "";
+                                    const percentage = (value / totalHours) * 100;
+                                    if (percentage < 5) return ""; // Hide label for very small slices
+                                    return `${percentage.toFixed(0)}%`;
                                 }}
                                 className="fill-white text-sm font-semibold"
                              />
                         </Pie>
                          <ChartLegend
-                            content={<ChartLegendContent nameKey="name" />}
+                            content={<ChartLegendContent payload={chartData.map(item => ({ value: item.name, type: 'square', color: getColor(item.name) }))} nameKey="value" />}
                             verticalAlign="bottom"
                             align="center"
                             wrapperStyle={{paddingTop: 20}}
