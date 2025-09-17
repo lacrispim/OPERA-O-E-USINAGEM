@@ -18,7 +18,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiteProductionChart } from "./components/site-production-chart";
 import { ProductionStatusChart } from "./components/production-status-chart";
 import { HoursByStatusChart } from "./components/hours-by-status-chart";
-import { FactoryHoursBarChart } from "./components/factory-hours-bar-chart";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -124,7 +123,6 @@ export default function DashboardPage() {
                     <StatsCards records={filteredRecords} />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <SiteProductionChart records={filteredRecords} />
-                        <FactoryHoursBarChart records={filteredRecords} />
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
