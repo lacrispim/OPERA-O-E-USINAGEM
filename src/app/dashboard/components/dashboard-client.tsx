@@ -14,6 +14,7 @@ import { TotalPiecesCard } from './total-pieces-card';
 import { UniqueRequestsCard } from './unique-requests-card';
 import { FactoryHoursBarChart } from './factory-hours-bar-chart';
 import { TechnologyHoursBarChart } from './technology-hours-bar-chart';
+import { StatusPieChart } from './status-pie-chart';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -116,6 +117,7 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
       <div className="grid gap-6 md:grid-cols-4">
         <TotalPiecesCard records={filteredRecords} className="md:col-span-1" />
         <UniqueRequestsCard records={filteredRecords} className="md:col-span-1" />
+        <StatusPieChart records={filteredRecords} className="md:col-span-2" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

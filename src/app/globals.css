@@ -28,18 +28,6 @@
     --chart-3: 45 93% 47%;
     --chart-4: 260 82% 57%;
     --chart-5: 210 93% 57%;
-    --chart-status-1: 142 76% 36%;
-    --chart-status-2: 44 89% 50%;
-    --chart-status-3: 20 94% 49%;
-    --chart-status-4: 0 84% 60%;
-    --chart-status-5: 262 82% 57%;
-    --chart-status-6: 221 83% 53%;
-    --chart-status-alt-1: 130 60% 40%;
-    --chart-status-alt-2: 30 90% 50%;
-    --chart-status-alt-3: 50 90% 55%;
-    --chart-status-alt-4: 0 80% 60%;
-    --chart-status-alt-5: 210 90% 50%;
-    --chart-status-alt-6: 180 70% 45%;
     
     --chart-status-fila: 190 85% 50%; /* Teal */
     --chart-status-producao: 30 95% 55%;  /* Orange */
@@ -49,7 +37,6 @@
     --chart-status-tratamento: 60 90% 45%; /* Yellow */
     --chart-status-outro: 220 13% 69%; /* Slate */
 
-    --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     --radius: 0.5rem;
   }
   .dark {
@@ -77,18 +64,6 @@
     --chart-3: 45 100% 57%;
     --chart-4: 260 92% 67%;
     --chart-5: 210 100% 67%;
-    --chart-status-1: 142 71% 45%;
-    --chart-status-2: 44 95% 55%;
-    --chart-status-3: 20 100% 58%;
-    --chart-status-4: 0 90% 65%;
-    --chart-status-5: 262 88% 65%;
-    --chart-status-6: 221 78% 60%;
-    --chart-status-alt-1: 130 60% 50%;
-    --chart-status-alt-2: 30 90% 60%;
-    --chart-status-alt-3: 50 90% 65%;
-    --chart-status-alt-4: 0 80% 70%;
-    --chart-status-alt-5: 210 90% 60%;
-    --chart-status-alt-6: 180 70% 55%;
 
     --chart-status-fila: 190 85% 60%; /* Teal */
     --chart-status-producao: 30 95% 65%;  /* Orange */
@@ -97,8 +72,6 @@
     --chart-status-declinado: 0 70% 70%; /* Red */
     --chart-status-tratamento: 60 90% 55%; /* Yellow */
     --chart-status-outro: 220 13% 69%; /* Slate */
-
-    --chart-status-orange: 24 96% 53%; /* Vivid Orange */
     
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 93.3%;
