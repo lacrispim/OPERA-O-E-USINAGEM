@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { format, getYear, getMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PlannedPiecesBarChart } from './planned-pieces-bar-chart';
 
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
@@ -107,6 +108,8 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
             </div>
         </div>
       </Card>
+
+      <PlannedPiecesBarChart records={filteredRecords} />
 
     </div>
   );
