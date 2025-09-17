@@ -16,7 +16,6 @@ import { CentroHoursChart } from "./components/centro-hours-chart";
 import { TotalHoursByTypeChart } from "./components/total-hours-by-type-chart";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiteProductionChart } from "./components/site-production-chart";
-import { FactoryHoursBarChart } from "./components/factory-hours-bar-chart";
 import { ProductionStatusChart } from "./components/production-status-chart";
 import { HoursByStatusChart } from "./components/hours-by-status-chart";
 
@@ -122,9 +121,6 @@ export default function DashboardPage() {
             ) : (
                 <>
                     <StatsCards records={filteredRecords} />
-                     <div className="grid grid-cols-1 gap-8">
-                        <FactoryHoursBarChart records={filteredRecords} />
-                    </div>
                     <div className="grid grid-cols-1 gap-8">
                         <SiteProductionChart records={filteredRecords} />
                     </div>
