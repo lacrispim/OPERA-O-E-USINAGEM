@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 
 const PREFERRED_COLUMN_ORDER = [
@@ -109,6 +111,11 @@ const TruncatedCell = ({ text }: { text: string }) => {
     );
 };
 
+const months = Array.from({ length: 12 }, (_, i) => ({
+    value: String(i),
+    label: format(new Date(0, i), "MMMM", { locale: ptBR }),
+  }));
+
 
 export function FirebaseRecordsTable() {
   const [data, setData] = useState<any[]>([]);
@@ -120,6 +127,7 @@ export function FirebaseRecordsTable() {
   const [siteFilter, setSiteFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [monthFilter, setMonthFilter] = useState('all');
   
   useEffect(() => {
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
@@ -188,15 +196,18 @@ export function FirebaseRecordsTable() {
         const matchesSearch = !term ||
             String(item['Nome da peça'] || '').toLowerCase().includes(term) ||
             String(item.Material || '').toLowerCase().includes(term);
+        
+        const matchesMonth = monthFilter === 'all' || (item.Data && new Date(item.Data.split('/').reverse().join('-')).getMonth() === parseInt(monthFilter));
 
-        return matchesSite && matchesStatus && matchesSearch;
+        return matchesSite && matchesStatus && matchesSearch && matchesMonth;
     });
-  }, [data, siteFilter, statusFilter, searchTerm]);
+  }, [data, siteFilter, statusFilter, searchTerm, monthFilter]);
 
   const clearFilters = () => {
     setSiteFilter('all');
     setStatusFilter([]);
     setSearchTerm('');
+    setMonthFilter('all');
   };
 
   if (loading) {
@@ -268,6 +279,17 @@ export function FirebaseRecordsTable() {
                                 <SelectItem key={site} value={site}>
                                     {site === 'all' ? 'Todos os Sites' : site}
                                 </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={monthFilter} onValueChange={setMonthFilter}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Filtrar por Mês" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todos os Meses</SelectItem>
+                                {months.map(month => (
+                                    <SelectItem key={month.value} value={String(month.value)}>{month.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
