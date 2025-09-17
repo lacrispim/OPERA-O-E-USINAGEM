@@ -3,7 +3,6 @@
 
 import { useState, useMemo } from 'react';
 import type { ProductionRecord } from '@/lib/types';
-import { TotalPiecesCard } from './total-pieces-card';
 import { Card } from '@/components/ui/card';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -105,10 +104,6 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
             <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
         </div>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <TotalPiecesCard records={filteredRecords} />
-      </div>
 
     </div>
   );
