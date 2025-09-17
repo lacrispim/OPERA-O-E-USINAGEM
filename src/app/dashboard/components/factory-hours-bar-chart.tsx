@@ -52,7 +52,7 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Total de Horas por Site</CardTitle>
+        <CardTitle>Horas Planejadas</CardTitle>
         <CardDescription>Soma das horas de produção (torno, centro, programação) por fábrica.</CardDescription>
       </CardHeader>
       <CardContent>
