@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
 
@@ -13,6 +13,19 @@ type PlannedPiecesBarChartProps = {
 const ALL_FACTORIES = [
   "Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre"
 ];
+
+const CustomLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  if (value > 0) {
+    return (
+      <text x={x + width / 2} y={y} dy={-4} fill="hsl(var(--foreground))" fontSize={12} textAnchor="middle">
+        {value.toLocaleString('pt-BR')}
+      </text>
+    );
+  }
+  return null;
+};
+
 
 export function PlannedPiecesBarChart({ records }: PlannedPiecesBarChartProps) {
   const chartData = useMemo(() => {
@@ -44,7 +57,7 @@ export function PlannedPiecesBarChart({ records }: PlannedPiecesBarChartProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={chartData}>
+          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
             <YAxis />
@@ -55,7 +68,9 @@ export function PlannedPiecesBarChart({ records }: PlannedPiecesBarChartProps) {
               }}
             />
             <Legend />
-            <Bar dataKey="Quantidade" fill="hsl(var(--primary))" name="Quantidade de Peças" />
+            <Bar dataKey="Quantidade" fill="hsl(var(--primary))" name="Quantidade de Peças">
+                <LabelList dataKey="Quantidade" content={<CustomLabel />} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
