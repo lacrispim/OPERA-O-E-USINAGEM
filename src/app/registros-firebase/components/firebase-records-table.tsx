@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { format, getMonth, getYear } from "date-fns";
+import { ptBR } from 'date-fns/locale';
 
 const PREFERRED_COLUMN_ORDER = [
     "Site",
@@ -108,6 +110,11 @@ const TruncatedCell = ({ text }: { text: string }) => {
     );
 };
 
+const months = Array.from({ length: 12 }, (_, i) => ({
+  value: i,
+  label: format(new Date(0, i), "MMMM", { locale: ptBR }),
+}));
+
 
 export function FirebaseRecordsTable() {
   const [data, setData] = useState<any[]>([]);
@@ -118,7 +125,24 @@ export function FirebaseRecordsTable() {
   // Filter states
   const [siteFilter, setSiteFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [dateFilter, setDateFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState<string>(String(getMonth(new Date())));
+  const [selectedYear, setSelectedYear] = useState<string>(String(getYear(new Date())));
+
+  const parseDate = (dateString: string): Date | null => {
+    if (!dateString || typeof dateString !== 'string') return null;
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+      const year = parseInt(parts[2], 10);
+      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+        return new Date(year, month, day);
+      }
+    }
+    return null;
+  };
+
 
   useEffect(() => {
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
@@ -170,6 +194,16 @@ export function FirebaseRecordsTable() {
     return () => unsubscribe();
   }, []);
 
+  const availableYears = useMemo(() => {
+    if (data.length === 0) return [String(getYear(new Date()))];
+    const years = new Set(data.map(r => {
+        const date = parseDate(r.Data);
+        return date ? getYear(date) : null;
+    }).filter(Boolean));
+    const sortedYears = Array.from(years).sort((a, b) => b - a).map(String);
+    return sortedYears.length > 0 ? sortedYears : [String(getYear(new Date()))];
+  }, [data]);
+
   const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.Site).filter(Boolean)))], [data]);
   
   const uniqueStatuses = useMemo(() => {
@@ -180,17 +214,30 @@ export function FirebaseRecordsTable() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
+        const itemDate = parseDate(item.Data);
+        if (!itemDate) return false;
+
+        const matchesYear = getYear(itemDate) === parseInt(selectedYear);
+        const matchesMonth = getMonth(itemDate) === parseInt(selectedMonth);
+        
         const matchesSite = siteFilter === 'all' || item.Site === siteFilter;
         const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.Status);
-        const matchesDate = !dateFilter || (item.Data && item.Data.includes(dateFilter));
-        return matchesSite && matchesStatus && matchesDate;
+
+        const term = searchTerm.toLowerCase();
+        const matchesSearch = !term ||
+            String(item['Nome da peça'] || '').toLowerCase().includes(term) ||
+            String(item.Material || '').toLowerCase().includes(term);
+
+        return matchesYear && matchesMonth && matchesSite && matchesStatus && matchesSearch;
     });
-  }, [data, siteFilter, statusFilter, dateFilter]);
+  }, [data, siteFilter, statusFilter, searchTerm, selectedMonth, selectedYear]);
 
   const clearFilters = () => {
     setSiteFilter('all');
     setStatusFilter([]);
-    setDateFilter('');
+    setSearchTerm('');
+    setSelectedMonth(String(getMonth(new Date())));
+    setSelectedYear(String(getYear(new Date())));
   }
 
   if (loading) {
@@ -244,6 +291,35 @@ export function FirebaseRecordsTable() {
                         Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
                     </CardDescription>
                     <div className="flex flex-col md:flex-row flex-wrap items-center gap-4 pt-4">
+                         <div className="relative w-full md:max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                            placeholder="Buscar por peça ou material..."
+                            value={searchTerm}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                            />
+                        </div>
+                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Selecione o Mês" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {months.map(month => (
+                                    <SelectItem key={month.value} value={String(month.value)}>{month.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={selectedYear} onValueChange={setSelectedYear}>
+                            <SelectTrigger className="w-full md:w-[120px]">
+                                <SelectValue placeholder="Selecione o Ano" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availableYears.map(year => (
+                                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <Select value={siteFilter} onValueChange={setSiteFilter}>
                             <SelectTrigger className="w-full md:w-[180px]">
                                 <SelectValue placeholder="Filtrar por Site" />
@@ -263,15 +339,6 @@ export function FirebaseRecordsTable() {
                             placeholder="Filtrar por Status"
                             className="w-full md:w-[220px]"
                         />
-                        <div className="relative w-full md:max-w-xs">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                            placeholder="Filtrar por Data (DD/MM/YYYY)..."
-                            value={dateFilter}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setDateFilter(e.target.value)}
-                            className="pl-10"
-                            />
-                        </div>
                         <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
                     </div>
                 </CardHeader>
