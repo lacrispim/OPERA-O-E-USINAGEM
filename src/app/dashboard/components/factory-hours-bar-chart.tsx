@@ -53,7 +53,9 @@ export function FactoryHoursBarChart({ records }: FactoryHoursBarChartProps) {
     <Card>
       <CardHeader>
         <CardTitle>Horas Planejadas</CardTitle>
-        <CardDescription>Soma das horas de produção (torno, centro, programação) por fábrica.</CardDescription>
+        <CardDescription>
+          Soma das horas de produção por fábrica. A linha tracejada indica o limite de 60 horas disponíveis.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
