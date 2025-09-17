@@ -45,6 +45,8 @@
     --chart-status-producao: 30 95% 55%;  /* Orange */
     --chart-status-tbd: 280 75% 60%; /* Purple */
     --chart-status-encerrada: 120 50% 50%; /* Lime Green */
+    --chart-status-declinado: 0 70% 60%; /* Red */
+    --chart-status-tratamento: 60 90% 45%; /* Yellow */
     --chart-status-outro: 220 13% 69%; /* Slate */
 
     --chart-status-orange: 24 96% 53%; /* Vivid Orange */
@@ -92,6 +94,8 @@
     --chart-status-producao: 30 95% 65%;  /* Orange */
     --chart-status-tbd: 280 75% 70%; /* Purple */
     --chart-status-encerrada: 120 50% 60%; /* Lime Green */
+    --chart-status-declinado: 0 70% 70%; /* Red */
+    --chart-status-tratamento: 60 90% 55%; /* Yellow */
     --chart-status-outro: 220 13% 69%; /* Slate */
 
     --chart-status-orange: 24 96% 53%; /* Vivid Orange */

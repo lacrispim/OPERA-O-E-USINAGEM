@@ -19,10 +19,12 @@ const chartConfig = {
   hours: {
     label: "Horas",
   },
-  'Fila de produção': { color: 'hsl(var(--chart-status-fila))' },
-  'Em produção': { color: 'hsl(var(--chart-status-producao))' },
+  'Fila de Produção': { color: 'hsl(var(--chart-status-fila))' },
+  'Em Produção': { color: 'hsl(var(--chart-status-producao))' },
   'TBD': { color: 'hsl(var(--chart-status-tbd))' },
-  'Encerrada': { color: 'hsl(var(--chart-status-encerrada))' },
+  'Encerrado': { color: 'hsl(var(--chart-status-encerrada))' },
+  'Declinado': { color: 'hsl(var(--chart-status-declinado))' },
+  'Tratamento': { color: 'hsl(var(--chart-status-tratamento))' },
   'Outro': { color: 'hsl(var(--chart-status-outro))' },
 };
 

@@ -41,33 +41,37 @@ const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação"];
 const TRUNCATE_LENGTH = 25;
 
 const STANDARDIZED_STATUS = {
-    CONCLUIDO: 'Concluído',
-    EM_PRODUCAO: 'Em produção',
-    FILA_PRODUCAO: 'Fila de produção',
-    EM_ANDAMENTO: 'Em andamento',
-    PENDENTE: 'Pendente',
+    EM_PRODUCAO: 'Em Produção',
+    FILA_PRODUCAO: 'Fila de Produção',
+    ENCERRADO: 'Encerrado',
+    TBD: 'TBD',
+    DECLINADO: 'Declinado',
+    TRATAMENTO: 'Tratamento',
     OUTRO: 'Outro',
 };
 
 const standardizeStatus = (status: string): string => {
     if (!status) return STANDARDIZED_STATUS.OUTRO;
     const s = status.toLowerCase().trim();
-    if (s.includes('concluido') || s.includes('concluído')) return STANDARDIZED_STATUS.CONCLUIDO;
     if (s.includes('em produçao') || s.includes('em produção')) return STANDARDIZED_STATUS.EM_PRODUCAO;
     if (s.includes('fila de produçao') || s.includes('fila de produção')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
-    if (s.includes('andamento')) return STANDARDIZED_STATUS.EM_ANDAMENTO;
-    if (s.includes('pendente')) return STANDARDIZED_STATUS.PENDENTE;
-    return status; // Keep original if no match
+    if (s.includes('concluido') || s.includes('concluído') || s.includes('encerrada') || s.includes('encerrado')) return STANDARDIZED_STATUS.ENCERRADO;
+    if (s.includes('tbd')) return STANDARDIZED_STATUS.TBD;
+    if (s.includes('declinado')) return STANDARDIZED_STATUS.DECLINADO;
+    if (s.includes('tratamento')) return STANDARDIZED_STATUS.TRATAMENTO;
+    if (s.includes('pendente') || s.includes('andamento')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
+    return s; // Keep original-like if no match, but capitalized
 };
 
 
-const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" => {
+const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" | "warning" | "error" => {
     const s = status ? status.toLowerCase() : '';
-    if (s.includes('concluído')) return 'default';
+    if (s.includes('encerrado')) return 'default';
     if (s === 'em produção') return 'in-progress';
     if (s === 'fila de produção') return 'secondary';
-    if (s.includes('andamento')) return 'in-progress';
-    if (s.includes('pendente')) return 'destructive';
+    if (s.includes('tratamento')) return 'warning';
+    if (s.includes('declinado')) return 'error';
+    if (s.includes('tbd')) return 'outline';
     return 'outline';
 }
 

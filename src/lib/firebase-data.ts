@@ -1,3 +1,4 @@
+
 'use server';
 
 import { ref, get } from 'firebase/database';
@@ -5,10 +6,12 @@ import { database } from '@/lib/firebase';
 import type { ProductionRecord } from '@/lib/types';
 
 const STANDARDIZED_STATUS = {
-    EM_PRODUCAO: 'Em produção',
-    FILA_PRODUCAO: 'Fila de produção',
-    ENCERRADA: 'Encerrada',
+    EM_PRODUCAO: 'Em Produção',
+    FILA_PRODUCAO: 'Fila de Produção',
+    ENCERRADO: 'Encerrado',
     TBD: 'TBD',
+    DECLINADO: 'Declinado',
+    TRATAMENTO: 'Tratamento',
     OUTRO: 'Outro',
 };
 
@@ -17,8 +20,10 @@ const standardizeStatus = (status: string): string => {
     const s = status.toLowerCase().trim();
     if (s.includes('em produçao') || s.includes('em produção')) return STANDARDIZED_STATUS.EM_PRODUCAO;
     if (s.includes('fila de produçao') || s.includes('fila de produção')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
-    if (s.includes('concluido') || s.includes('concluído') || s.includes('encerrada')) return STANDARDIZED_STATUS.ENCERRADA;
+    if (s.includes('concluido') || s.includes('concluído') || s.includes('encerrada') || s.includes('encerrado')) return STANDARDIZED_STATUS.ENCERRADO;
     if (s.includes('tbd')) return STANDARDIZED_STATUS.TBD;
+    if (s.includes('declinado')) return STANDARDIZED_STATUS.DECLINADO;
+    if (s.includes('tratamento')) return STANDARDIZED_STATUS.TRATAMENTO;
     if (s.includes('pendente') || s.includes('andamento')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
     return STANDARDIZED_STATUS.OUTRO; // Keep original if no match
 };

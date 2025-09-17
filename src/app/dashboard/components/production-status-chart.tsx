@@ -19,10 +19,12 @@ type ProductionStatusChartProps = {
 };
 
 const chartConfig = {
-  'Fila de produção': { label: 'Fila de produção', color: 'hsl(var(--chart-status-fila))' },
-  'Em produção': { label: 'Em produção', color: 'hsl(var(--chart-status-producao))' },
+  'Fila de Produção': { label: 'Fila de Produção', color: 'hsl(var(--chart-status-fila))' },
+  'Em Produção': { label: 'Em Produção', color: 'hsl(var(--chart-status-producao))' },
   'TBD': { label: 'TBD', color: 'hsl(var(--chart-status-tbd))' },
-  'Encerrada': { label: 'Encerrada', color: 'hsl(var(--chart-status-encerrada))' },
+  'Encerrado': { label: 'Encerrado', color: 'hsl(var(--chart-status-encerrada))' },
+  'Declinado': { label: 'Declinado', color: 'hsl(var(--chart-status-declinado))' },
+  'Tratamento': { label: 'Tratamento', color: 'hsl(var(--chart-status-tratamento))' },
   'Outro': { label: 'Outro', color: 'hsl(var(--chart-status-outro))' },
 };
 
@@ -63,7 +65,7 @@ export function ProductionStatusChart({ records }: ProductionStatusChartProps) {
                 <CardTitle className="text-lg">Distribuição por Status</CardTitle>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-80">
+                <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-64">
                     <PieChart>
                         <ChartTooltip
                             cursor={false}
