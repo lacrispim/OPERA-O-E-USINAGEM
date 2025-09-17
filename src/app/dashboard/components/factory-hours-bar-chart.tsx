@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -50,21 +50,22 @@ export function FactoryHoursBarChart({ records, className }: FactoryHoursBarChar
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
-            <YAxis unit="h" />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} axisLine={false} tickLine={false} />
+            <YAxis unit="h" axisLine={false} tickLine={false} />
             <Tooltip
-              formatter={(value: number) => `${value.toFixed(2)}h`}
+              cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
+              formatter={(value: number) => [`${value.toFixed(2)}h`, 'Total']}
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 borderColor: 'hsl(var(--border))',
+                borderRadius: 'var(--radius)',
               }}
             />
             <Legend />
             <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" strokeWidth={2}>
               <Label value="Limite (60h)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} fontWeight="bold" />
             </ReferenceLine>
-            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" />
+            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
