@@ -31,7 +31,7 @@ const standardizeStatus = (status: string): string => {
 const standardizeFactoryName = (name: string): string => {
     if (!name) return 'N/A';
     const n = name.trim();
-    if (n.toLowerCase() === 'igarassú') return 'Igarassu';
+    if (n.toLowerCase().includes('igarass')) return 'Igarassu';
     return n;
 };
 
@@ -42,14 +42,19 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
     // Attempt to parse the date, default to now if invalid
     let recordDate;
     try {
-      // Assuming format "DD/MM/YYYY"
-      const parts = item.Data.split('/');
-      if (parts.length === 3) {
-        // new Date(year, monthIndex, day)
-        recordDate = new Date(parts[2], parts[1] - 1, parts[0]);
+      if (item.Data && typeof item.Data === 'string') {
+        // Assuming format "DD/MM/YYYY"
+        const parts = item.Data.split('/');
+        if (parts.length === 3) {
+          // new Date(year, monthIndex, day)
+          recordDate = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]);
+        } else {
+          recordDate = new Date(item.Data);
+        }
       } else {
-        recordDate = new Date(item.Data);
+        recordDate = new Date();
       }
+      
       if (isNaN(recordDate.getTime())) {
           recordDate = new Date();
       }
@@ -57,9 +62,9 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
       recordDate = new Date();
     }
 
-    const centroMin = parseFloat(item['Centro (minutos)'] || 0);
-    const tornoMin = parseFloat(item['Torno (minutos)'] || 0);
-    const programacaoMin = parseFloat(item['Programação (minutos)'] || 0);
+    const centroMin = parseFloat(String(item['Centro (minutos)'] || '0').replace(',', '.'));
+    const tornoMin = parseFloat(String(item['Torno (minutos)'] || '0').replace(',', '.'));
+    const programacaoMin = parseFloat(String(item['Programação (minutos)'] || '0').replace(',', '.'));
     
     const manufacturingTimeHours = (centroMin + tornoMin + programacaoMin) / 60;
     const quantity = parseInt(item['Quantidade'] || '0', 10);
