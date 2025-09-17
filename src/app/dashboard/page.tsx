@@ -53,19 +53,23 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const filteredByDate = allRecords.filter(record => {
+    let records = allRecords;
+
+    // Filter by date first
+    records = records.filter(record => {
         const recordDate = new Date(record.date);
         const matchesYear = getYear(recordDate) === parseInt(selectedYear);
         const matchesMonth = getMonth(recordDate) === parseInt(selectedMonth);
         return matchesYear && matchesMonth;
     });
 
-    if (selectedFactory === 'all') {
-        setFilteredRecords(filteredByDate);
-    } else {
-        const filteredByFactory = filteredByDate.filter(record => record.requestingFactory === selectedFactory);
-        setFilteredRecords(filteredByFactory);
+    // Then, filter by factory if not 'all'
+    if (selectedFactory !== 'all') {
+        records = records.filter(record => record.requestingFactory === selectedFactory);
     }
+    
+    setFilteredRecords(records);
+
   }, [allRecords, selectedMonth, selectedYear, selectedFactory]);
 
   return (
@@ -122,10 +126,7 @@ export default function DashboardPage() {
                         <FactoryHoursBarChart records={filteredRecords} />
                     </div>
                     <div className="grid grid-cols-1 gap-8">
-                        <SiteProductionChart records={allRecords.filter(record => {
-                            const recordDate = new Date(record.date);
-                            return getYear(recordDate) === parseInt(selectedYear) && getMonth(recordDate) === parseInt(selectedMonth);
-                        })} />
+                        <SiteProductionChart records={filteredRecords} />
                     </div>
                      <div className="grid gap-8 md:grid-cols-2">
                         <TotalHoursByTypeChart records={filteredRecords} />
