@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -60,17 +60,18 @@ export function PlannedPiecesBarChart({ records, className }: PlannedPiecesBarCh
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
-            <YAxis />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} tickLine={false} axisLine={true} />
+            <YAxis tickLine={false} axisLine={true} />
             <Tooltip
+              cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 borderColor: 'hsl(var(--border))',
+                borderRadius: 'var(--radius)',
               }}
             />
             <Legend />
-            <Bar dataKey="Quantidade" fill="hsl(var(--primary))" name="Quantidade de Peças">
+            <Bar dataKey="Quantidade" fill="hsl(var(--primary))" name="Quantidade de Peças" radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="Quantidade" content={<CustomLabel />} />
             </Bar>
           </BarChart>
