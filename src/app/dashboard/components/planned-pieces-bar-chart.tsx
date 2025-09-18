@@ -71,7 +71,7 @@ export function PlannedPiecesBarChart({ records, className }: PlannedPiecesBarCh
               }}
             />
             <Legend />
-            <Bar dataKey="Quantidade" fill="hsl(var(--muted))" name="Quantidade de Peças" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="Quantidade" fill="hsl(var(--chart-neutral))" name="Quantidade de Peças" radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="Quantidade" content={<CustomLabel />} />
             </Bar>
           </BarChart>
