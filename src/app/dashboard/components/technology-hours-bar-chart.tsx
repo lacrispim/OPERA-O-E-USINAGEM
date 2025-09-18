@@ -48,7 +48,7 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
   return (
     <Card className={cn(className)}>
       <CardHeader>
-        <CardTitle>Horas por Tecnologia</CardTitle>
+        <CardTitle>Horas Planejadas por Tecnologia</CardTitle>
         <CardDescription>Total de horas de produção por tipo de máquina.</CardDescription>
       </CardHeader>
       <CardContent>
