@@ -51,8 +51,8 @@ export function ProgramacaoHoursBarChart({ records, className }: ProgramacaoHour
   return (
     <Card className={cn(className)}>
       <CardHeader>
-        <CardTitle>Horas de Programação por Fábrica</CardTitle>
-        <CardDescription>Total de horas de "Programação" planejadas por fábrica.</CardDescription>
+        <CardTitle>Horas de Programação</CardTitle>
+        <CardDescription>Total de horas por fábrica.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -68,7 +68,7 @@ export function ProgramacaoHoursBarChart({ records, className }: ProgramacaoHour
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--chart-4))" name="Horas de Programação">
+            <Bar dataKey="Horas" fill="hsl(var(--chart-4))" name="Horas de Programação" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>

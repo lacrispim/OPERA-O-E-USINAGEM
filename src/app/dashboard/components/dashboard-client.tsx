@@ -126,18 +126,18 @@ export function DashboardClient({ initialRecords }: DashboardClientProps) {
         <FactoryHoursBarChart records={filteredRecords} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6">
         <PlannedPiecesBarChart records={filteredRecords} />
-        <TechnologyHoursBarChart records={filteredRecords} />
       </div>
-
-       <div className="grid gap-6 lg:grid-cols-2">
-        <CentroHoursBarChart records={filteredRecords} />
-        <TornoHoursBarChart records={filteredRecords} />
+      
+      <div className="grid gap-6 lg:grid-cols-3">
+        <CentroHoursBarChart records={filteredRecords} className="lg:col-span-1"/>
+        <TornoHoursBarChart records={filteredRecords} className="lg:col-span-1"/>
+        <ProgramacaoHoursBarChart records={filteredRecords} className="lg:col-span-1"/>
       </div>
       
       <div className="grid gap-6 lg:grid-cols-2">
-        <ProgramacaoHoursBarChart records={filteredRecords} />
+        <TechnologyHoursBarChart records={filteredRecords} />
         <StatusPieChart records={filteredRecords} />
       </div>
 

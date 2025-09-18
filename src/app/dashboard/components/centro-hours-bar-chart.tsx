@@ -51,8 +51,8 @@ export function CentroHoursBarChart({ records, className }: CentroHoursBarChartP
   return (
     <Card className={cn(className)}>
       <CardHeader>
-        <CardTitle>Horas de Centro por Fábrica</CardTitle>
-        <CardDescription>Total de horas de "Centro" planejadas por fábrica.</CardDescription>
+        <CardTitle>Horas de Centro</CardTitle>
+        <CardDescription>Total de horas por fábrica.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -68,7 +68,7 @@ export function CentroHoursBarChart({ records, className }: CentroHoursBarChartP
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--chart-2))" name="Horas de Centro">
+            <Bar dataKey="Horas" fill="hsl(var(--chart-2))" name="Horas de Centro" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>

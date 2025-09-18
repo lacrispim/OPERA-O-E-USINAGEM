@@ -51,8 +51,8 @@ export function TornoHoursBarChart({ records, className }: TornoHoursBarChartPro
   return (
     <Card className={cn(className)}>
       <CardHeader>
-        <CardTitle>Horas de Torno por Fábrica</CardTitle>
-        <CardDescription>Total de horas de "Torno" planejadas por fábrica.</CardDescription>
+        <CardTitle>Horas de Torno</CardTitle>
+        <CardDescription>Total de horas por fábrica.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -68,7 +68,7 @@ export function TornoHoursBarChart({ records, className }: TornoHoursBarChartPro
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--chart-3))" name="Horas de Torno">
+            <Bar dataKey="Horas" fill="hsl(var(--chart-3))" name="Horas de Torno" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>
