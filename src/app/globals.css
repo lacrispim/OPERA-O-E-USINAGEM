@@ -29,7 +29,7 @@
     --chart-4: 260 82% 57%;
     --chart-5: 210 93% 57%;
     
-    --chart-status-fila: 190 85% 50%; /* Teal */
+    --chart-status-fila: 190 85% 40%; /* Darker Teal */
     --chart-status-producao: 30 95% 55%;  /* Orange */
     --chart-status-tbd: 280 75% 60%; /* Purple */
     --chart-status-encerrada: 120 50% 50%; /* Lime Green */
@@ -65,7 +65,7 @@
     --chart-4: 260 92% 67%;
     --chart-5: 210 100% 67%;
 
-    --chart-status-fila: 190 85% 60%; /* Teal */
+    --chart-status-fila: 190 85% 50%; /* Darker Teal */
     --chart-status-producao: 30 95% 65%;  /* Orange */
     --chart-status-tbd: 280 75% 70%; /* Purple */
     --chart-status-encerrada: 120 50% 60%; /* Lime Green */
