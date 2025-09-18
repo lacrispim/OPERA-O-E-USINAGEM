@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { ProductionRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -54,18 +54,19 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis unit="h" />
+            <XAxis dataKey="name" tickLine={false} axisLine={true} />
+            <YAxis unit="h" tickLine={false} axisLine={true} />
             <Tooltip
-              formatter={(value: number) => `${value.toFixed(2)}h`}
+              cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
+              formatter={(value: number) => [`${value.toFixed(2)}h`, 'Total']}
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 borderColor: 'hsl(var(--border))',
+                borderRadius: 'var(--radius)',
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--primary))">
+            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>
