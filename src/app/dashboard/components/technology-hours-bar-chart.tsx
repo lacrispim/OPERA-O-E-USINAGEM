@@ -64,7 +64,7 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
                 type="category"
                 axisLine={true} 
                 tickLine={false} 
-                width={80}
+                width={100}
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
