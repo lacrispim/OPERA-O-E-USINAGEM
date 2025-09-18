@@ -69,7 +69,7 @@ export function CentroHoursBarChart({ records, className }: CentroHoursBarChartP
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--chart-2))" name="Horas de Centro" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="Horas" fill="hsl(var(--chart-status-fila))" name="Horas de Centro" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>
