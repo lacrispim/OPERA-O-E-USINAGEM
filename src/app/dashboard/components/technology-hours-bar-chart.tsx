@@ -13,10 +13,10 @@ type TechnologyHoursBarChartProps = {
 };
 
 const CustomLabel = (props: any) => {
-  const { x, y, width, value } = props;
+  const { x, y, width, height, value } = props;
   if (value > 0) {
     return (
-      <text x={x + width / 2} y={y} dy={-4} fill="hsl(var(--foreground))" fontSize={12} textAnchor="middle">
+      <text x={x + width + 5} y={y + height / 2} dy={4} fill="hsl(var(--foreground))" fontSize={12} textAnchor="start">
         {value.toFixed(1)}h
       </text>
     );
@@ -42,7 +42,7 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
       { name: 'Centro', 'Horas': totals['Centro'] },
       { name: 'Torno', 'Horas': totals['Torno'] },
       { name: 'Programação', 'Horas': totals['Programação'] },
-    ];
+    ].sort((a,b) => a.Horas - b.Horas); // Sort to have a nice visual flow
   }, [records]);
 
   return (
@@ -53,9 +53,19 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis dataKey="name" tickLine={false} axisLine={true} />
-            <YAxis unit="h" tickLine={false} axisLine={true} />
+          <BarChart 
+            data={chartData} 
+            layout="vertical"
+            margin={{ top: 20, right: 50, left: 20, bottom: 5 }}
+          >
+            <XAxis type="number" unit="h" axisLine={true} tickLine={false} />
+            <YAxis 
+                dataKey="name" 
+                type="category"
+                axisLine={true} 
+                tickLine={false} 
+                width={80}
+            />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
               formatter={(value: number) => [`${value.toFixed(2)}h`, 'Total']}
@@ -66,7 +76,7 @@ export function TechnologyHoursBarChart({ records, className }: TechnologyHoursB
               }}
             />
             <Legend />
-            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="Horas" fill="hsl(var(--primary))" name="Total de Horas" radius={[0, 4, 4, 0]}>
               <LabelList dataKey="Horas" content={<CustomLabel />} />
             </Bar>
           </BarChart>
