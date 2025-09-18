@@ -36,7 +36,7 @@ const renderCustomLegend = (props: any) => {
                 <line x1="0" y1="1" x2="14" y2="1" stroke="hsl(var(--foreground))" strokeWidth="2" strokeDasharray="3 3"/>
             </svg>
          </div>
-         <span>Horas Disponíveis</span>
+         <span>Horas Disponíveis (60h)</span>
       </li>
     </ul>
   );
