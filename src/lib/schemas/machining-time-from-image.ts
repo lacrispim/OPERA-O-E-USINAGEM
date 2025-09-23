@@ -17,9 +17,10 @@ export const EstimateMachiningTimeFromImageInputSchema = z.object({
 export type EstimateMachiningTimeFromImageInput = z.infer<typeof EstimateMachiningTimeFromImageInputSchema>;
 
 export const EstimateMachiningTimeFromImageOutputSchema = z.object({
-  totalTimeMinutes: z.number().describe('O tempo total de produção estimado, em minutos.'),
+  totalTimeMinutes: z.number().describe('O tempo total de produção estimado (soma de setup, usinagem e programação), em minutos.'),
   setupTimeMinutes: z.number().describe('O tempo estimado para preparação e setup da máquina, em minutos.'),
   machiningTimeMinutes: z.number().describe('O tempo de usinagem efetivo, em minutos.'),
+  programmingTimeMinutes: z.number().describe('O tempo de programação CNC estimado, em minutos.'),
   notes: z.string().describe('Observações e análise detalhada do desenho técnico e das operações identificadas.'),
 });
 

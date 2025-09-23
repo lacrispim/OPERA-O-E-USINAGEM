@@ -23,10 +23,11 @@ const prompt = ai.definePrompt({
 
 Analise a imagem do desenho técnico fornecida. Com base nas dimensões, geometria, tolerâncias e operações visíveis (furos, roscas, cavidades, etc.), calcule e forneça:
 
-1.  **Tempo de Setup (minutos)**: Estime o tempo necessário para preparar a máquina, fixar a peça, zerar as ferramentas e carregar o programa, considerando a complexidade inferida do desenho para a máquina selecionada.
-2.  **Tempo de Usinagem (minutos)**: Calcule o tempo de corte efetivo, interpretando as operações de usinagem a partir do desenho. Leve em conta a complexidade da geometria e as capacidades da máquina.
-3.  **Tempo Total (minutos)**: A soma do tempo de setup e de usinagem.
-4.  **Observações**: Forneça uma nota técnica detalhada com sua análise da peça. Descreva as operações de usinagem que você identificou no desenho e justifique sua estimativa de tempo. Mencione quaisquer desafios ou pontos críticos para a produção da peça na máquina escolhida.
+1.  **Tempo de Setup (minutos)**: Estime o tempo necessário para preparar a máquina, fixar a peça, zerar as ferramentas e carregar o programa.
+2.  **Tempo de Usinagem (minutos)**: Calcule o tempo de corte efetivo, interpretando as operações de usinagem a partir do desenho.
+3.  **Tempo de Programação (minutos)**: Estime o tempo necessário para criar o programa CNC para a peça, considerando a complexidade.
+4.  **Tempo Total (minutos)**: A soma do tempo de setup, usinagem e programação.
+5.  **Observações**: Forneça uma nota técnica detalhada com sua análise da peça. Descreva as operações que você identificou e justifique suas estimativas de tempo.
 
 {{#if operationDescription}}
 **Foco da Análise**: Concentre sua análise exclusivamente na seguinte operação descrita pelo usuário. As estimativas de tempo devem ser apenas para esta parte do processo: "{{{operationDescription}}}"

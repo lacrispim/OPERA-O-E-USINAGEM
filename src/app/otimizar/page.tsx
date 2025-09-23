@@ -412,7 +412,7 @@ export default function OtimizarPage() {
                                             <h3 className="text-lg font-medium text-muted-foreground">Tempo Total (Desenho)</h3>
                                             <p className="text-3xl font-bold text-primary">{imageResult.totalTimeMinutes.toFixed(2)} min</p>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 text-center">
+                                        <div className="grid grid-cols-3 gap-4 text-center">
                                             <div className="bg-card border p-3 rounded-md">
                                                 <p className="text-sm text-muted-foreground">Setup</p>
                                                 <p className="text-lg font-semibold">{imageResult.setupTimeMinutes} min</p>
@@ -420,6 +420,10 @@ export default function OtimizarPage() {
                                             <div className="bg-card border p-3 rounded-md">
                                                 <p className="text-sm text-muted-foreground">Usinagem</p>
                                                 <p className="text-lg font-semibold">{imageResult.machiningTimeMinutes} min</p>
+                                            </div>
+                                            <div className="bg-card border p-3 rounded-md">
+                                                <p className="text-sm text-muted-foreground">Programação</p>
+                                                <p className="text-lg font-semibold">{imageResult.programmingTimeMinutes} min</p>
                                             </div>
                                         </div>
                                         <div>
