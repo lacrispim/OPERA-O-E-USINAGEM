@@ -28,6 +28,10 @@ Analise a imagem do desenho técnico fornecida. Com base nas dimensões, geometr
 3.  **Tempo Total (minutos)**: A soma do tempo de setup e de usinagem.
 4.  **Observações**: Forneça uma nota técnica detalhada com sua análise da peça. Descreva as operações de usinagem que você identificou no desenho e justifique sua estimativa de tempo. Mencione quaisquer desafios ou pontos críticos para a produção da peça na máquina escolhida.
 
+{{#if operationDescription}}
+**Foco da Análise**: Concentre sua análise exclusivamente na seguinte operação descrita pelo usuário. As estimativas de tempo devem ser apenas para esta parte do processo: "{{{operationDescription}}}"
+{{/if}}
+
 Seja extremamente analítico e baseie suas estimativas nas práticas e capacidades reais das máquinas especificadas. Retorne a resposta no formato JSON.
 
 **Desenho Técnico para Análise**:

@@ -17,6 +17,7 @@ import { PredictMachiningTimeInput, PredictMachiningTimeOutput, PredictMachining
 import type { EstimateMachiningTimeFromImageOutput } from '@/lib/schemas/machining-time-from-image';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 type FormData = PredictMachiningTimeInput;
 
@@ -29,6 +30,7 @@ export default function OtimizarPage() {
     const [imageResult, setImageResult] = useState<EstimateMachiningTimeFromImageOutput | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
     const [selectedMachineForImage, setSelectedMachineForImage] = useState('Torno CNC - Centur 30');
+    const [operationDescription, setOperationDescription] = useState('');
     
     const { toast } = useToast();
 
@@ -87,6 +89,7 @@ export default function OtimizarPage() {
                 const response = await estimateMachiningTimeFromImage({
                     photoDataUri: dataUri,
                     machineType: selectedMachineForImage as 'Torno CNC - Centur 30' | 'Centro de Usinagem D600',
+                    operationDescription: operationDescription,
                 });
                 setImageResult(response);
             } catch (e) {
@@ -358,7 +361,7 @@ export default function OtimizarPage() {
                             <CardDescription>Envie o desenho técnico da peça para uma estimativa de tempo baseada na geometria.</CardDescription>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                             <form className="space-y-4">
+                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="machine-type-image">Máquina para Análise</Label>
                                      <Select value={selectedMachineForImage} onValueChange={setSelectedMachineForImage}>
@@ -373,6 +376,18 @@ export default function OtimizarPage() {
                                 </div>
                                 
                                 <div className="space-y-2">
+                                    <Label htmlFor="operation-description">
+                                        Descrição da Operação (Opcional)
+                                    </Label>
+                                    <Textarea
+                                        id="operation-description"
+                                        placeholder="Ex: Apenas a operação de furação na face superior."
+                                        value={operationDescription}
+                                        onChange={(e) => setOperationDescription(e.target.value)}
+                                    />
+                                </div>
+                                
+                                <div className="space-y-2">
                                      <Label htmlFor="file-upload">Desenho Técnico</Label>
                                     <Button asChild className="w-full cursor-pointer">
                                         <label htmlFor="file-upload">
@@ -382,7 +397,7 @@ export default function OtimizarPage() {
                                         </label>
                                     </Button>
                                 </div>
-                            </form>
+                            </div>
                             <div className="space-y-6">
                                 {isUploading && (
                                     <div className="flex flex-col items-center justify-center h-full">

@@ -11,6 +11,7 @@ export const EstimateMachiningTimeFromImageInputSchema = z.object({
       "A photo of a technical drawing, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
   machineType: z.enum(['Torno CNC - Centur 30', 'Centro de Usinagem D600']),
+  operationDescription: z.string().optional().describe('Uma descrição específica da operação ou parte do desenho a ser analisada.'),
 });
 
 export type EstimateMachiningTimeFromImageInput = z.infer<typeof EstimateMachiningTimeFromImageInputSchema>;
@@ -23,5 +24,3 @@ export const EstimateMachiningTimeFromImageOutputSchema = z.object({
 });
 
 export type EstimateMachiningTimeFromImageOutput = z.infer<typeof EstimateMachiningTimeFromImageOutputSchema>;
-
-    
