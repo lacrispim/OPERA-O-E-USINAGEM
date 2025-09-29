@@ -47,7 +47,7 @@ const estimateMachiningTimeFromImageFlow = ai.defineFlow(
     outputSchema: EstimateMachiningTimeFromImageOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input, { model: 'googleai/gemini-1.5-flash-latest' });
+    const { output } = await prompt(input);
     return output!;
   }
 );
