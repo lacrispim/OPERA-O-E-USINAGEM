@@ -66,9 +66,8 @@ const predictMachiningTimeFlow = ai.defineFlow(
       },
     };
     
-    // @ts-ignore
-    const { output } = await prompt(promptInput);
-    return output!;
+    const response = await prompt(promptInput as any);
+    return response.output!;
   }
 );
 
