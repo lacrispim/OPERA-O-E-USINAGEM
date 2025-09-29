@@ -54,8 +54,8 @@ export default function OtimizarPage() {
         setResult(null);
         setError(null);
         try {
-            const response = await predictMachiningTime(data);
-            setResult(response);
+            const { output } = await predictMachiningTime(data);
+            setResult(output);
         } catch (e) {
             setError('An error occurred while processing your request.');
             console.error(e);
@@ -86,12 +86,12 @@ export default function OtimizarPage() {
         reader.onload = async () => {
             const dataUri = reader.result as string;
             try {
-                const response = await estimateMachiningTimeFromImage({
+                const { output } = await estimateMachiningTimeFromImage({
                     photoDataUri: dataUri,
                     machineType: selectedMachineForImage as 'Torno CNC - Centur 30' | 'Centro de Usinagem D600',
                     operationDescription: operationDescription,
                 });
-                setImageResult(response);
+                setImageResult(output);
             } catch (e) {
                 setImageError('Ocorreu um erro ao analisar a imagem.');
                 console.error(e);
