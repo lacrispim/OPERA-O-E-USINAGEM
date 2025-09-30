@@ -48,7 +48,7 @@ const estimateMachiningTimeFromImageFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await prompt(input);
-    return response.output!;
+    return response.output;
   }
 );
 
