@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { WandSparkles, FileJson, LayoutDashboard } from 'lucide-react';
+import { WandSparkles, FileJson, LayoutDashboard, Database } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -18,6 +18,7 @@ import { Logo } from '@/components/logo';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/registros-firebase', icon: FileJson, label: 'Visualização de Dados' },
+  { href: '/production-line', icon: Database, label: 'Dados' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
 ];
 
