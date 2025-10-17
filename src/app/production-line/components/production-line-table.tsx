@@ -64,7 +64,7 @@ export function ProductionLineTable() {
           setNodes(allNodes);
           if (allNodes.length > 0 && !selectedNode) {
             // Pre-select 'Página 1' if it exists, otherwise the first node.
-            const defaultNode = allNodes.includes('Página 1') ? 'Página 1' : allNodes[0];
+            const defaultNode = allNodes.includes('Página1') ? 'Página1' : allNodes[0];
             setSelectedNode(defaultNode);
           }
         } else {
@@ -345,7 +345,7 @@ export function ProductionLineTable() {
         </Card>
       </div>
       <div className="lg:col-span-1">
-        {selectedNode === "Página 1" && data.length > 0 && (
+        {selectedNode === "Página1" && data.length > 0 && (
             <RequisicaoList data={data} />
         )}
       </div>

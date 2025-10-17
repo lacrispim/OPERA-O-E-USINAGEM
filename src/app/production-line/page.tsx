@@ -1,19 +1,19 @@
 import { PageHeader } from "@/components/page-header";
-import { ProductionLineTable } from "./components/production-line-table";
+import { FirebaseRecordsTable } from "../registros-firebase/components/firebase-records-table";
 
 export const metadata = {
-  title: "Visualizador de Dados | FabriTrack",
+  title: "Dados da Produção | FabriTrack",
 };
 
 export default function ProductionLinePage() {
   return (
     <>
       <PageHeader
-        title="Linha de Produção"
-        description="Visualize e edite os dados do Firebase Realtime Database."
+        title="Dados da Produção"
+        description="Visualize e filtre os dados do Firebase Realtime Database."
       />
       <main className="px-4 sm:px-6 lg:px-8 pb-8">
-        <ProductionLineTable />
+        <FirebaseRecordsTable />
       </main>
     </>
   );
