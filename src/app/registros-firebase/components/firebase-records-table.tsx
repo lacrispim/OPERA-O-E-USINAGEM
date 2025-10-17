@@ -26,8 +26,8 @@ import { ptBR } from 'date-fns/locale';
 
 
 const PREFERRED_COLUMN_ORDER = [
-    "Site",
-    "Data",
+    "columnA",
+    "columnB",
     "Material",
     "Nome da peça",
     "Quantidade",
@@ -40,7 +40,7 @@ const PREFERRED_COLUMN_ORDER = [
 ];
 
 const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torno (minutos)", "Programação (minutos)"];
-const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação"];
+const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "columnA"];
 const TRUNCATE_LENGTH = 25;
 
 const STANDARDIZED_STATUS = {
@@ -62,7 +62,7 @@ const standardizeStatus = (status: string): string => {
     if (s.includes('tbd')) return STANDARDIZED_STATUS.TBD;
     if (s.includes('declinado')) return STANDARDIZED_STATUS.DECLINADO;
     if (s.includes('tratamento')) return STANDARDIZED_STATUS.TRATAMENTO;
-    if (s.includes('pendente') || s.includes('andamento')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
+    if (s.includes('pendente') || s.includes('andamento')) return STANDARdiZED_STATUS.FILA_PRODUCAO;
     return s; // Keep original-like if no match, but capitalized
 };
 
@@ -179,7 +179,7 @@ export function FirebaseRecordsTable() {
     return () => unsubscribe();
   }, []);
   
-  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.Site).filter(Boolean)))], [data]);
+  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => (d.columnA || d.Site)).filter(Boolean)))], [data]);
   
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set(data.map(d => d.Status).filter(Boolean));
@@ -189,7 +189,8 @@ export function FirebaseRecordsTable() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-        const matchesSite = siteFilter === 'all' || item.Site === siteFilter;
+        const itemSite = item.columnA || item.Site;
+        const matchesSite = siteFilter === 'all' || itemSite === siteFilter;
         const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.Status);
 
         const term = searchTerm.toLowerCase();
@@ -197,7 +198,8 @@ export function FirebaseRecordsTable() {
             String(item['Nome da peça'] || '').toLowerCase().includes(term) ||
             String(item.Material || '').toLowerCase().includes(term);
         
-        const matchesMonth = monthFilter === 'all' || (item.Data && new Date(item.Data.split('/').reverse().join('-')).getMonth() === parseInt(monthFilter));
+        const itemDate = item.columnB || item.Data;
+        const matchesMonth = monthFilter === 'all' || (itemDate && new Date(itemDate.split('/').reverse().join('-')).getMonth() === parseInt(monthFilter));
 
         return matchesSite && matchesStatus && matchesSearch && matchesMonth;
     });
@@ -235,8 +237,8 @@ export function FirebaseRecordsTable() {
         const statusText = String(value ?? 'N/A');
         return <Badge variant={getStatusVariant(statusText)}>{statusText}</Badge>;
     }
-
-    if (header === 'Site') {
+    
+    if (header === 'columnA' || header === 'Site') {
         const siteText = String(value ?? 'N/A');
         return <Badge className={cn("border-transparent hover:opacity-80", getFactoryColor(siteText))}>{siteText}</Badge>;
     }
@@ -315,7 +317,7 @@ export function FirebaseRecordsTable() {
                                     NUMERIC_COLUMNS.includes(header) && "text-center"
                                 )}
                             >
-                                {header}
+                                {header === 'columnA' ? 'Site' : header === 'columnB' ? 'Data' : header}
                             </TableHead>
                             ))}
                         </TableRow>

@@ -42,14 +42,15 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
     // Attempt to parse the date, default to now if invalid
     let recordDate;
     try {
-      if (item.Data && typeof item.Data === 'string') {
+      const dateSource = item.columnB || item.Data;
+      if (dateSource && typeof dateSource === 'string') {
         // Assuming format "DD/MM/YYYY"
-        const parts = item.Data.split('/');
+        const parts = dateSource.split('/');
         if (parts.length === 3) {
           // new Date(year, monthIndex, day)
           recordDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
         } else {
-          recordDate = new Date(item.Data);
+          recordDate = new Date(dateSource);
         }
       } else {
         recordDate = new Date();
@@ -72,7 +73,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
 
     return {
       id: item.id || String(index),
-      requestingFactory: standardizeFactoryName(item.Site),
+      requestingFactory: standardizeFactoryName(item.columnA || item.Site),
       partName: item['Nome da peça'] || 'N/A',
       material: item.Material || 'N/A',
       manufacturingTime: isNaN(manufacturingTimeHours) ? 0 : manufacturingTimeHours,
