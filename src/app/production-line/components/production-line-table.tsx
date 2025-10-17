@@ -22,8 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, ChevronsUpDown } from 'lucide-react';
+import { Loader2, ChevronsUpDown, Search } from 'lucide-react';
 import { RequisicaoList } from './requisicao-list';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const SPREADSHEET_ID = "12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U";
 
 const PREFERRED_COLUMN_ORDER = [
     "Requisição",
@@ -39,8 +44,29 @@ const PREFERRED_COLUMN_ORDER = [
     "Observação"
 ];
 
-const SITE_OPTIONS = ["Vinhedo", "Valinhos", "Campinas", "Site A"];
-const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente", "Em produção"];
+const SITE_OPTIONS = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre", "Site A", "Campinas"];
+const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente", "Em produção", "Encerrado", "Declinado", "Tratamento", "TBD"];
+
+const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "Site"];
+const TRUNCATE_LENGTH = 25;
+
+
+const TruncatedCell = ({ text }: { text: string }) => {
+    if (!text || text.length <= TRUNCATE_LENGTH) {
+        return <>{text || '-'}</>;
+    }
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="cursor-default">{text.substring(0, TRUNCATE_LENGTH)}...</span>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{text}</p>
+            </TooltipContent>
+        </Tooltip>
+    );
+};
 
 
 export function ProductionLineTable() {
@@ -53,9 +79,10 @@ export function ProductionLineTable() {
   const [error, setError] = useState<string | null>(null);
   const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const rootRef = ref(database);
+    const rootRef = ref(database, SPREADSHEET_ID);
     const unsubscribe = onValue(
       rootRef,
       (snapshot) => {
@@ -63,11 +90,11 @@ export function ProductionLineTable() {
           const allNodes = Object.keys(snapshot.val());
           setNodes(allNodes);
           if (allNodes.length > 0 && !selectedNode) {
-            // Pre-select 'Página 1' if it exists, otherwise the first node.
             const defaultNode = allNodes.includes('Página1') ? 'Página1' : allNodes[0];
             setSelectedNode(defaultNode);
           }
         } else {
+          setError(`Nenhum nó encontrado para o Spreadsheet ID: ${SPREADSHEET_ID}`);
           setNodes([]);
         }
         setLoading(false);
@@ -88,7 +115,7 @@ export function ProductionLineTable() {
     setLoadingNode(true);
     setData([]);
     setHeaders([]);
-    const nodeRef = ref(database, selectedNode);
+    const nodeRef = ref(database, `${SPREADSHEET_ID}/${selectedNode}`);
 
     const unsubscribeNode = onValue(
       nodeRef,
@@ -101,7 +128,6 @@ export function ProductionLineTable() {
               ...rawData[key],
             }));
 
-            // Extract headers from all items to handle varying structures
             const allHeaders = new Set<string>();
             dataArray.forEach(item => {
                 Object.keys(item).forEach(key => {
@@ -110,14 +136,15 @@ export function ProductionLineTable() {
                       if (header === 'Centro') header = 'Centro (minutos)';
                       if (header === 'Torno') header = 'Torno (minutos)';
                       if (header === 'Programação') header = 'Programação (minutos)';
+                      if (header === 'columnA') header = 'Site';
+                      if (header === 'columnB') header = 'Data';
                       allHeaders.add(header);
                     }
                 })
             });
             
-            // Reorder headers based on preferred order
              const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
-             const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h));
+             const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h) && h !== 'id');
             
             setHeaders([...sortedHeaders, ...remainingHeaders]);
             setData(dataArray);
@@ -153,13 +180,12 @@ export function ProductionLineTable() {
     const valueToSave = newValue !== undefined ? newValue : editValue;
     
     let originalColumn = column;
-    if (column.endsWith(' (minutos)')) {
-        originalColumn = column.replace(' (minutos)', '');
-    }
-
+    if (column.endsWith(' (minutos)')) originalColumn = column.replace(' (minutos)', '');
+    if (column === 'Site') originalColumn = 'columnA';
+    if (column === 'Data') originalColumn = 'columnB';
 
     try {
-      await update(ref(database, `${selectedNode}/${rowId}`), { [originalColumn]: valueToSave });
+      await update(ref(database, `${SPREADSHEET_ID}/${selectedNode}/${rowId}`), { [originalColumn]: valueToSave });
       toast({
         title: 'Sucesso',
         description: 'Valor atualizado com sucesso.',
@@ -183,11 +209,21 @@ export function ProductionLineTable() {
   };
   
   const getOriginalColumnName = (header: string) => {
-    if (header.endsWith(' (minutos)')) {
-        return header.replace(' (minutos)', '');
-    }
+    if (header.endsWith(' (minutos)')) return header.replace(' (minutos)', '');
+    if (header === 'Site') return 'columnA';
+    if (header === 'Data') return 'columnB';
     return header;
   }
+
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return data;
+    return data.filter(item => {
+        return Object.values(item).some(value => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    });
+  }, [data, searchTerm]);
+
 
   const renderCellContent = (item: any, header: string) => {
     const isEditing = editingCell?.rowId === item.id && editingCell?.column === header;
@@ -241,20 +277,19 @@ export function ProductionLineTable() {
         const displayValue = String(value ?? '-');
         return (
             <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
-                <div className="flex items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-sm h-8">
-                   {displayValue}
-                   <ChevronsUpDown className="h-4 w-4 opacity-50"/>
+                <div className="flex items-center justify-between rounded-md border border-input bg-transparent px-3 py-1.5 text-sm h-8">
+                   <TruncatedCell text={displayValue}/>
+                   <ChevronsUpDown className="h-4 w-4 opacity-50 ml-2"/>
                 </div>
             </div>
         )
     }
-
+    
+    const stringValue = String(value ?? '-');
 
     return (
-        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer flex items-center">
-            {typeof value === 'object' && value !== null
-            ? JSON.stringify(value)
-            : String(value ?? '-')}
+        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer flex items-center p-2">
+            {TRUNCATE_COLUMNS.includes(header) ? <TruncatedCell text={stringValue} /> : stringValue}
         </div>
     )
   };
@@ -281,18 +316,19 @@ export function ProductionLineTable() {
   }
 
   return (
+    <TooltipProvider>
     <div className="grid gap-8 lg:grid-cols-5">
       <div className="lg:col-span-4">
         <Card>
           <CardHeader>
             <CardTitle>Visualizador do Realtime Database</CardTitle>
             <CardDescription>
-                Selecione um nó para visualizar e editar seus dados em tempo real.
+                Selecione uma aba da planilha para visualizar e editar seus dados em tempo real.
             </CardDescription>
-            <div className="w-full md:w-1/3 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                 <Select onValueChange={setSelectedNode} value={selectedNode}>
                     <SelectTrigger id="node-selector" aria-label="Selecione um Nó">
-                        <SelectValue placeholder="Selecione um nó..." />
+                        <SelectValue placeholder="Selecione uma aba..." />
                     </SelectTrigger>
                     <SelectContent>
                         {nodes.map(node => (
@@ -302,30 +338,39 @@ export function ProductionLineTable() {
                         ))}
                     </SelectContent>
                 </Select>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Buscar em toda a tabela..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                    />
+                </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-0 md:p-2">
             {loadingNode ? (
-                <div className="text-center">
+                <div className="text-center p-6">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                    <p className="mt-2 text-muted-foreground">Carregando dados do nó: {selectedNode}...</p>
+                    <p className="mt-2 text-muted-foreground">Carregando dados de: {selectedNode}...</p>
                 </div>
             ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-[#2E8555] hover:bg-[#2E8555]/90">
+                      <TableRow>
                         {headers.map((header) => (
-                          <TableHead key={header} className="text-white">{header}</TableHead>
+                          <TableHead key={header}>{header}</TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.length > 0 ? (
-                        data.map((item) => (
-                          <TableRow key={item.id}>
+                      {filteredData.length > 0 ? (
+                        filteredData.map((item) => (
+                          <TableRow key={item.id} className="even:bg-muted/50">
                             {headers.map((header) => (
-                              <TableCell key={`${item.id}-${header}`}>
+                              <TableCell key={`${item.id}-${header}`} className="p-1">
                                 {renderCellContent(item, header)}
                               </TableCell>))}
                           </TableRow>
@@ -333,7 +378,7 @@ export function ProductionLineTable() {
                       ) : (
                         <TableRow>
                           <TableCell colSpan={headers.length} className="h-24 text-center">
-                            Nenhum dado encontrado para o nó "{selectedNode}".
+                            Nenhum dado encontrado para "{selectedNode}".
                           </TableCell>
                         </TableRow>
                       )}
@@ -350,5 +395,6 @@ export function ProductionLineTable() {
         )}
       </div>
     </div>
+    </TooltipProvider>
   );
 }
