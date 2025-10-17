@@ -18,6 +18,7 @@ import { Logo } from '@/components/logo';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
+  { href: '/dados', icon: Database, label: 'Dados' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
