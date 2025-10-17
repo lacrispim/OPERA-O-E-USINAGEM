@@ -17,7 +17,6 @@ import { Logo } from '@/components/logo';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/production-line', icon: Database, label: 'Dados' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
 ];
 
