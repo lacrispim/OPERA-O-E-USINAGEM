@@ -21,7 +21,8 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Search, RefreshCw } from 'lucide-react';
 import { RequisicaoList } from './requisicao-list';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +87,7 @@ export function ProductionLineTable() {
   const [loadingNode, setLoadingNode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const rootRef = ref(database, SPREADSHEET_ID);
@@ -113,7 +115,7 @@ export function ProductionLineTable() {
     );
 
     return () => off(rootRef);
-  }, [selectedNode]);
+  }, [selectedNode, refreshKey]);
 
   useEffect(() => {
     if (!selectedNode) return;
@@ -166,7 +168,7 @@ export function ProductionLineTable() {
     );
 
     return () => off(nodeRef);
-  }, [selectedNode]);
+  }, [selectedNode, refreshKey]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -224,9 +226,9 @@ export function ProductionLineTable() {
             <CardDescription>
                 Selecione uma aba da planilha para visualizar seus dados em tempo real.
             </CardDescription>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+            <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
                 <Select onValueChange={setSelectedNode} value={selectedNode}>
-                    <SelectTrigger id="node-selector" aria-label="Selecione um Nó">
+                    <SelectTrigger id="node-selector" aria-label="Selecione um Nó" className="w-full md:w-auto">
                         <SelectValue placeholder="Selecione uma aba..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -237,7 +239,7 @@ export function ProductionLineTable() {
                         ))}
                     </SelectContent>
                 </Select>
-                <div className="relative">
+                <div className="relative w-full md:flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Buscar em toda a tabela..."
@@ -246,6 +248,10 @@ export function ProductionLineTable() {
                         className="pl-10"
                     />
                 </div>
+                 <Button variant="outline" onClick={() => setRefreshKey(k => k + 1)}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Atualizar
+                </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0 md:p-2">
