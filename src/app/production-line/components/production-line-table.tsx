@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { database } from '@/lib/firebase';
-import { ref, onValue, off, update } from 'firebase/database';
+import { ref, onValue, off } from 'firebase/database';
 import {
   Table,
   TableBody,
@@ -20,9 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
-import { Loader2, ChevronsUpDown, Search } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { RequisicaoList } from './requisicao-list';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -44,11 +42,20 @@ const PREFERRED_COLUMN_ORDER = [
     "Observação"
 ];
 
-const SITE_OPTIONS = ["Igarassu", "Vinhedo", "Suape", "Aguaí", "Garanhuns", "Indaiatuba", "Valinhos", "Pouso Alegre", "Site A", "Campinas"];
-const STATUS_OPTIONS = ["Fila de produção", "Em andamento", "Concluído", "Pendente", "Em produção", "Encerrado", "Declinado", "Tratamento", "TBD"];
-
 const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "Site"];
 const TRUNCATE_LENGTH = 25;
+
+const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" | "warning" | "error" => {
+    if (!status) return 'outline';
+    const s = status.toLowerCase();
+    if (s.includes('encerrado')) return 'default';
+    if (s === 'em produção') return 'in-progress';
+    if (s === 'fila de produção') return 'secondary';
+    if (s.includes('tratamento')) return 'warning';
+    if (s.includes('declinado')) return 'error';
+    if (s.includes('tbd')) return 'outline';
+    return 'outline';
+}
 
 
 const TruncatedCell = ({ text }: { text: string }) => {
@@ -77,8 +84,6 @@ export function ProductionLineTable() {
   const [loading, setLoading] = useState(true);
   const [loadingNode, setLoadingNode] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
-  const [editValue, setEditValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -167,46 +172,6 @@ export function ProductionLineTable() {
 
     return () => off(nodeRef);
   }, [selectedNode]);
-
-  const handleEditClick = (rowId: string, column: string, value: any) => {
-    setEditingCell({ rowId, column });
-    setEditValue(String(value ?? ''));
-  };
-  
-  const handleSave = async (newValue?: string) => {
-    if (!editingCell || !selectedNode) return;
-
-    const { rowId, column } = editingCell;
-    const valueToSave = newValue !== undefined ? newValue : editValue;
-    
-    let originalColumn = column;
-    if (column.endsWith(' (minutos)')) originalColumn = column.replace(' (minutos)', '');
-    if (column === 'Site') originalColumn = 'columnA';
-    if (column === 'Data') originalColumn = 'columnB';
-
-    try {
-      await update(ref(database, `${SPREADSHEET_ID}/${selectedNode}/${rowId}`), { [originalColumn]: valueToSave });
-      toast({
-        title: 'Sucesso',
-        description: 'Valor atualizado com sucesso.',
-      });
-    } catch (err) {
-      console.error('Failed to update value:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Falha ao atualizar o valor.',
-      });
-    } finally {
-      setEditingCell(null);
-      setEditValue('');
-    }
-  };
-
-  const handleCancel = () => {
-    setEditingCell(null);
-    setEditValue('');
-  };
   
   const getOriginalColumnName = (header: string) => {
     if (header.endsWith(' (minutos)')) return header.replace(' (minutos)', '');
@@ -226,69 +191,16 @@ export function ProductionLineTable() {
 
 
   const renderCellContent = (item: any, header: string) => {
-    const isEditing = editingCell?.rowId === item.id && editingCell?.column === header;
     const originalColumn = getOriginalColumnName(header);
     const value = item[originalColumn];
-
-    if (isEditing) {
-        if (header === "Site") {
-            return (
-                <Select value={editValue} onValueChange={(val) => { setEditValue(val); handleSave(val); }}>
-                    <SelectTrigger className="h-8 bg-background">
-                        <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {SITE_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            )
-        }
-        if (header === "Status") {
-            return (
-                <Select value={editValue} onValueChange={(val) => { setEditValue(val); handleSave(val); }}>
-                    <SelectTrigger className="h-8 bg-background">
-                        <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {STATUS_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            )
-        }
-      return (
-        <div className="flex items-center gap-2">
-            <Input
-                autoFocus
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave();
-                    if (e.key === 'Escape') handleCancel();
-                }}
-                className="h-8"
-            />
-            <Button size="sm" onClick={() => handleSave()}>Salvar</Button>
-            <Button size="sm" variant="outline" onClick={handleCancel}>Cancelar</Button>
-        </div>
-      );
-    }
-    
-    if(header === "Site" || header === "Status"){
-        const displayValue = String(value ?? '-');
-        return (
-            <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer">
-                <div className="flex items-center justify-between rounded-md border border-input bg-transparent px-3 py-1.5 text-sm h-8">
-                   <TruncatedCell text={displayValue}/>
-                   <ChevronsUpDown className="h-4 w-4 opacity-50 ml-2"/>
-                </div>
-            </div>
-        )
-    }
-    
     const stringValue = String(value ?? '-');
-
+    
+    if (header === "Status") {
+        return <Badge variant={getStatusVariant(stringValue)}>{stringValue}</Badge>;
+    }
+    
     return (
-        <div onClick={() => handleEditClick(item.id, header, value)} className="min-h-[2rem] w-full cursor-pointer flex items-center p-2">
+        <div className="min-h-[2rem] w-full flex items-center p-2">
             {TRUNCATE_COLUMNS.includes(header) ? <TruncatedCell text={stringValue} /> : stringValue}
         </div>
     )
@@ -323,7 +235,7 @@ export function ProductionLineTable() {
           <CardHeader>
             <CardTitle>Visualizador do Realtime Database</CardTitle>
             <CardDescription>
-                Selecione uma aba da planilha para visualizar e editar seus dados em tempo real.
+                Selecione uma aba da planilha para visualizar seus dados em tempo real.
             </CardDescription>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                 <Select onValueChange={setSelectedNode} value={selectedNode}>
