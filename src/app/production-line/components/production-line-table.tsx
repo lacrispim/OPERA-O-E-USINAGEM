@@ -146,9 +146,8 @@ export function ProductionLineTable() {
             });
             
              const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
-             const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h) && h !== 'id');
             
-            setHeaders([...sortedHeaders, ...remainingHeaders]);
+            setHeaders([...sortedHeaders]);
             setData(dataArray);
           } else {
              setData([]);
