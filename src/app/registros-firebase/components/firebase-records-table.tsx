@@ -26,21 +26,21 @@ import { ptBR } from 'date-fns/locale';
 
 
 const PREFERRED_COLUMN_ORDER = [
-    "columnA",
-    "columnB",
+    "Requisição",
+    "Site",
+    "Data",
     "Material",
     "Nome da peça",
-    "Quantidade",
-    "Requisição",
-    "Centro (minutos)",
     "Status",
+    "Quantidade",
+    "Centro (minutos)",
     "Torno (minutos)",
     "Programação (minutos)",
     "Observação"
 ];
 
 const NUMERIC_COLUMNS = ["Quantidade", "Requisição", "Centro (minutos)", "Torno (minutos)", "Programação (minutos)"];
-const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "columnA"];
+const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "Site"];
 const TRUNCATE_LENGTH = 25;
 
 const STANDARDIZED_STATUS = {
@@ -62,8 +62,8 @@ const standardizeStatus = (status: string): string => {
     if (s.includes('tbd')) return STANDARDIZED_STATUS.TBD;
     if (s.includes('declinado')) return STANDARDIZED_STATUS.DECLINADO;
     if (s.includes('tratamento')) return STANDARDIZED_STATUS.TRATAMENTO;
-    if (s.includes('pendente') || s.includes('andamento')) return STANDARdiZED_STATUS.FILA_PRODUCAO;
-    return s; // Keep original-like if no match, but capitalized
+    if (s.includes('pendente') || s.includes('andamento')) return STANDARDIZED_STATUS.FILA_PRODUCAO;
+    return STANDARDIZED_STATUS.OUTRO;
 };
 
 
@@ -144,6 +144,7 @@ export function FirebaseRecordsTable() {
               id: key,
               ...item,
               Status: standardizeStatus(item.Status), // Standardize status on data load
+              Site: item.Site || 'N/A' // Ensure site exists
             };
           });
 
@@ -157,7 +158,7 @@ export function FirebaseRecordsTable() {
             });
 
           const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
-          const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h));
+          const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h) && !['columnA', 'columnB'].includes(h));
           const finalHeaders = [...sortedHeaders, ...remainingHeaders];
 
           setHeaders(finalHeaders);
@@ -179,7 +180,7 @@ export function FirebaseRecordsTable() {
     return () => unsubscribe();
   }, []);
   
-  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => (d.columnA || d.Site)).filter(Boolean)))], [data]);
+  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.Site).filter(Boolean)))], [data]);
   
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set(data.map(d => d.Status).filter(Boolean));
@@ -189,8 +190,11 @@ export function FirebaseRecordsTable() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-        const itemSite = item.columnA || item.Site;
-        const matchesSite = siteFilter === 'all' || itemSite === siteFilter;
+        if (!item['Requisição'] || Number(item['Requisição']) <= 0) {
+            return false;
+        }
+
+        const matchesSite = siteFilter === 'all' || item.Site === siteFilter;
         const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.Status);
 
         const term = searchTerm.toLowerCase();
@@ -198,7 +202,7 @@ export function FirebaseRecordsTable() {
             String(item['Nome da peça'] || '').toLowerCase().includes(term) ||
             String(item.Material || '').toLowerCase().includes(term);
         
-        const itemDate = item.columnB || item.Data;
+        const itemDate = item.Data;
         const matchesMonth = monthFilter === 'all' || (itemDate && new Date(itemDate.split('/').reverse().join('-')).getMonth() === parseInt(monthFilter));
 
         return matchesSite && matchesStatus && matchesSearch && matchesMonth;
@@ -238,7 +242,7 @@ export function FirebaseRecordsTable() {
         return <Badge variant={getStatusVariant(statusText)}>{statusText}</Badge>;
     }
     
-    if (header === 'columnA' || header === 'Site') {
+    if (header === 'Site') {
         const siteText = String(value ?? 'N/A');
         return <Badge className={cn("border-transparent hover:opacity-80", getFactoryColor(siteText))}>{siteText}</Badge>;
     }
@@ -317,7 +321,7 @@ export function FirebaseRecordsTable() {
                                     NUMERIC_COLUMNS.includes(header) && "text-center"
                                 )}
                             >
-                                {header === 'columnA' ? 'Site' : header === 'columnB' ? 'Data' : header}
+                                {header}
                             </TableHead>
                             ))}
                         </TableRow>

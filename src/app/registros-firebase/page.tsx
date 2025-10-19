@@ -10,7 +10,7 @@ export default function RegistrosFirebasePage() {
     <>
       <PageHeader
         title="Visualização de Dados"
-        description="Visualize os dados do nó 'Página1' do Firebase Realtime Database."
+        description="Visualize os dados da planilha em tempo real com filtros avançados."
       />
       <main className="px-4 sm:px-6 lg:px-8 pb-8">
         <FirebaseRecordsTable />
