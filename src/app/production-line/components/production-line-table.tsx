@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -137,13 +138,7 @@ export function ProductionLineTable() {
             dataArray.forEach(item => {
                 Object.keys(item).forEach(key => {
                     if(key !== 'id') {
-                      let header = key;
-                      if (header === 'Centro') header = 'Centro (minutos)';
-                      if (header === 'Torno') header = 'Torno (minutos)';
-                      if (header === 'Programação') header = 'Programação (minutos)';
-                      if (header === 'columnA') header = 'Site';
-                      if (header === 'columnB') header = 'Data';
-                      allHeaders.add(header);
+                      allHeaders.add(key);
                     }
                 })
             });
@@ -172,13 +167,6 @@ export function ProductionLineTable() {
 
     return () => off(nodeRef);
   }, [selectedNode]);
-  
-  const getOriginalColumnName = (header: string) => {
-    if (header.endsWith(' (minutos)')) return header.replace(' (minutos)', '');
-    if (header === 'Site') return 'columnA';
-    if (header === 'Data') return 'columnB';
-    return header;
-  }
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -191,8 +179,7 @@ export function ProductionLineTable() {
 
 
   const renderCellContent = (item: any, header: string) => {
-    const originalColumn = getOriginalColumnName(header);
-    const value = item[originalColumn];
+    const value = item[header];
     const stringValue = String(value ?? '-');
     
     if (header === "Status") {
