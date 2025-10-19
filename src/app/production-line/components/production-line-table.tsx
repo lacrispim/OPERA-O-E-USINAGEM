@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -23,7 +24,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Search, RefreshCw } from 'lucide-react';
-import { RequisicaoList } from './requisicao-list';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -218,87 +218,80 @@ export function ProductionLineTable() {
 
   return (
     <TooltipProvider>
-    <div className="grid gap-8 lg:grid-cols-5">
-      <div className="lg:col-span-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Visualizador do Realtime Database</CardTitle>
-            <CardDescription>
-                Selecione uma aba da planilha para visualizar seus dados em tempo real.
-            </CardDescription>
-            <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
-                <Select onValueChange={setSelectedNode} value={selectedNode}>
-                    <SelectTrigger id="node-selector" aria-label="Selecione um Nó" className="w-full md:w-auto">
-                        <SelectValue placeholder="Selecione uma aba..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {nodes.map(node => (
-                            <SelectItem key={node} value={node}>
-                                {node}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <div className="relative w-full md:flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Buscar em toda a tabela..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                    />
-                </div>
-                 <Button variant="outline" onClick={() => setRefreshKey(k => k + 1)}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Atualizar
-                </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0 md:p-2">
-            {loadingNode ? (
-                <div className="text-center p-6">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                    <p className="mt-2 text-muted-foreground">Carregando dados de: {selectedNode}...</p>
-                </div>
-            ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {headers.map((header) => (
-                          <TableHead key={header}>{header}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredData.length > 0 ? (
-                        filteredData.map((item) => (
-                          <TableRow key={item.id} className="even:bg-muted/50">
-                            {headers.map((header) => (
-                              <TableCell key={`${item.id}-${header}`} className="p-1">
-                                {renderCellContent(item, header)}
-                              </TableCell>))}
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={headers.length} className="h-24 text-center">
-                            Nenhum dado encontrado para "{selectedNode}".
-                          </TableCell>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Visualizador do Realtime Database</CardTitle>
+          <CardDescription>
+              Selecione uma aba da planilha para visualizar seus dados em tempo real.
+          </CardDescription>
+          <div className="flex flex-col md:flex-row items-center gap-4 pt-4">
+              <Select onValueChange={setSelectedNode} value={selectedNode}>
+                  <SelectTrigger id="node-selector" aria-label="Selecione um Nó" className="w-full md:w-auto">
+                      <SelectValue placeholder="Selecione uma aba..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {nodes.map(node => (
+                          <SelectItem key={node} value={node}>
+                              {node}
+                          </SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+              <div className="relative w-full md:flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                      placeholder="Buscar em toda a tabela..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                  />
+              </div>
+               <Button variant="outline" onClick={() => setRefreshKey(k => k + 1)}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Atualizar
+              </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 md:p-2">
+          {loadingNode ? (
+              <div className="text-center p-6">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                  <p className="mt-2 text-muted-foreground">Carregando dados de: {selectedNode}...</p>
+              </div>
+          ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {headers.map((header) => (
+                        <TableHead key={header}>{header}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item) => (
+                        <TableRow key={item.id} className="even:bg-muted/50">
+                          {headers.map((header) => (
+                            <TableCell key={`${item.id}-${header}`} className="p-1">
+                              {renderCellContent(item, header)}
+                            </TableCell>))}
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="lg:col-span-1">
-        {selectedNode === "Página1" && data.length > 0 && (
-            <RequisicaoList data={data} />
-        )}
-      </div>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={headers.length} className="h-24 text-center">
+                          Nenhum dado encontrado para "{selectedNode}".
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
     </TooltipProvider>
   );
