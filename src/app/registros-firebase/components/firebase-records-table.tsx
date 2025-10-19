@@ -126,8 +126,10 @@ export function FirebaseRecordsTable() {
   // Filter states
   const [siteFilter, setSiteFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [monthFilter, setMonthFilter] = useState('all');
+  const [reqFilter, setReqFilter] = useState('');
+  const [materialFilter, setMaterialFilter] = useState('');
+  const [partNameFilter, setPartNameFilter] = useState('');
   
   useEffect(() => {
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
@@ -143,10 +145,10 @@ export function FirebaseRecordsTable() {
             return {
               id: key,
               ...item,
-              Status: standardizeStatus(item.Status), // Standardize status on data load
-              Site: item.Site || 'N/A' // Ensure site exists
+              Status: standardizeStatus(item.Status),
+              Site: item.Site || 'N/A' 
             };
-          });
+          }).filter(item => item['Requisição'] && Number(item['Requisição']) > 0);
 
           const allHeaders = new Set<string>();
             dataArray.forEach(item => {
@@ -190,30 +192,27 @@ export function FirebaseRecordsTable() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-        if (!item['Requisição'] || Number(item['Requisição']) <= 0) {
-            return false;
-        }
-
         const matchesSite = siteFilter === 'all' || item.Site === siteFilter;
         const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.Status);
-
-        const term = searchTerm.toLowerCase();
-        const matchesSearch = !term ||
-            String(item['Nome da peça'] || '').toLowerCase().includes(term) ||
-            String(item.Material || '').toLowerCase().includes(term);
         
         const itemDate = item.Data;
         const matchesMonth = monthFilter === 'all' || (itemDate && new Date(itemDate.split('/').reverse().join('-')).getMonth() === parseInt(monthFilter));
 
-        return matchesSite && matchesStatus && matchesSearch && matchesMonth;
+        const matchesReq = !reqFilter || String(item['Requisição']).toLowerCase().includes(reqFilter.toLowerCase());
+        const matchesMaterial = !materialFilter || String(item.Material).toLowerCase().includes(materialFilter.toLowerCase());
+        const matchesPartName = !partNameFilter || String(item['Nome da peça']).toLowerCase().includes(partNameFilter.toLowerCase());
+
+        return matchesSite && matchesStatus && matchesMonth && matchesReq && matchesMaterial && matchesPartName;
     });
-  }, [data, siteFilter, statusFilter, searchTerm, monthFilter]);
+  }, [data, siteFilter, statusFilter, monthFilter, reqFilter, materialFilter, partNameFilter]);
 
   const clearFilters = () => {
     setSiteFilter('all');
     setStatusFilter([]);
-    setSearchTerm('');
     setMonthFilter('all');
+    setReqFilter('');
+    setMaterialFilter('');
+    setPartNameFilter('');
   };
 
   if (loading) {
@@ -266,47 +265,59 @@ export function FirebaseRecordsTable() {
                     <CardDescription>
                         Visualização dos dados em tempo real. Atualizado em: {new Date().toLocaleString('pt-BR')}
                     </CardDescription>
-                    <div className="flex flex-col md:flex-row flex-wrap items-center gap-4 pt-4">
-                         <div className="relative w-full md:max-w-xs">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <div className="flex flex-col gap-4 pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <Input
-                            placeholder="Buscar por peça ou material..."
-                            value={searchTerm}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                            className="pl-10"
+                                placeholder="Filtrar por Requisição..."
+                                value={reqFilter}
+                                onChange={(e) => setReqFilter(e.target.value)}
                             />
+                            <Input
+                                placeholder="Filtrar por Nome da peça..."
+                                value={partNameFilter}
+                                onChange={(e) => setPartNameFilter(e.target.value)}
+                            />
+                            <Input
+                                placeholder="Filtrar por Material..."
+                                value={materialFilter}
+                                onChange={(e) => setMaterialFilter(e.target.value)}
+                            />
+                            <Select value={siteFilter} onValueChange={setSiteFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrar por Site" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {uniqueSites.map(site => (
+                                    <SelectItem key={site} value={site}>
+                                        {site === 'all' ? 'Todos os Sites' : site}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <Select value={siteFilter} onValueChange={setSiteFilter}>
-                            <SelectTrigger className="w-full md:w-[180px]">
-                                <SelectValue placeholder="Filtrar por Site" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {uniqueSites.map(site => (
-                                <SelectItem key={site} value={site}>
-                                    {site === 'all' ? 'Todos os Sites' : site}
-                                </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={monthFilter} onValueChange={setMonthFilter}>
-                            <SelectTrigger className="w-full md:w-[180px]">
-                                <SelectValue placeholder="Filtrar por Mês" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Todos os Meses</SelectItem>
-                                {months.map(month => (
-                                    <SelectItem key={month.value} value={String(month.value)}>{month.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <MultiSelect
-                            options={uniqueStatuses}
-                            onValueChange={setStatusFilter}
-                            defaultValue={statusFilter}
-                            placeholder="Filtrar por Status"
-                            className="w-full md:w-[220px]"
-                        />
-                        <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Select value={monthFilter} onValueChange={setMonthFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrar por Mês" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos os Meses</SelectItem>
+                                    {months.map(month => (
+                                        <SelectItem key={month.value} value={String(month.value)}>{month.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <MultiSelect
+                                options={uniqueStatuses}
+                                onValueChange={setStatusFilter}
+                                defaultValue={statusFilter}
+                                placeholder="Filtrar por Status"
+                                className="w-full"
+                            />
+                            <div className="lg:col-span-2 flex justify-end">
+                                <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
+                            </div>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -360,3 +371,4 @@ export function FirebaseRecordsTable() {
     </TooltipProvider>
   );
 }
+
