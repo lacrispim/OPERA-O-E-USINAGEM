@@ -170,8 +170,11 @@ export function ProductionLineTable() {
   }, [selectedNode, refreshKey]);
 
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data;
-    return data.filter(item => {
+    let baseData = data.filter(item => item['Requisição'] && Number(item['Requisição']) > 0);
+
+    if (!searchTerm) return baseData;
+    
+    return baseData.filter(item => {
         return Object.values(item).some(value => 
             String(value).toLowerCase().includes(searchTerm.toLowerCase())
         );
