@@ -15,7 +15,7 @@ const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
   machineId: z.string().min(1, 'Máquina é obrigatória.'),
   quantityProduced: z.preprocess(
-    (a) => parseInt(z.string().parse(a), 10),
+    (a) => parseInt(z.string().parse(String(a)), 10),
     z.number().positive('A quantidade deve ser positiva.')
   ),
   stopReasonId: z.string().optional(),
@@ -23,7 +23,7 @@ const formSchema = z.object({
 
 type OperatorInputFormProps = {
   stopReasons: StopReason[];
-  onRegister: (data: Omit<OperatorProductionInput, 'timestamp'>) => void;
+  onRegister: (data: Omit<OperatorProductionInput, 'timestamp'>) => Promise<void>;
 };
 
 export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputFormProps) {
@@ -47,11 +47,10 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       stopReasonId: values.stopReasonId === 'none' ? undefined : values.stopReasonId,
     };
 
-    // Call the parent component's function to handle the registration
     await onRegister(submissionData);
     
     form.reset({
-        operatorId: values.operatorId, // Keep operator ID for next entry
+        operatorId: values.operatorId,
         machineId: '',
         quantityProduced: 0,
         stopReasonId: 'none',
