@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
-import type { StopReason, OperatorProductionInput } from '@/lib/types';
+import type { OperatorProductionInput } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 const formSchema = z.object({
@@ -19,17 +19,19 @@ const formSchema = z.object({
     (a) => parseInt(z.string().parse(String(a)), 10),
     z.number().positive('A quantidade deve ser positiva.')
   ),
-  stopReasonId: z.string().optional(),
+  quantityLost: z.preprocess(
+    (a) => parseInt(z.string().parse(String(a)), 10),
+    z.number().min(0, 'A quantidade perdida não pode ser negativa.')
+  ),
   formsNumber: z.string().optional(),
   factory: z.string().min(1, 'Fábrica é obrigatória.'),
 });
 
 type OperatorInputFormProps = {
-  stopReasons: StopReason[];
   onRegister: (data: Omit<OperatorProductionInput, 'timestamp'>) => Promise<void>;
 };
 
-export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputFormProps) {
+export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -40,7 +42,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       operatorId: '',
       machineId: '',
       quantityProduced: 0,
-      stopReasonId: 'none',
+      quantityLost: 0,
       formsNumber: '',
       factory: '',
     },
@@ -61,18 +63,13 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const submissionData = {
-      ...values,
-      stopReasonId: values.stopReasonId === 'none' ? undefined : values.stopReasonId,
-    };
-
-    await onRegister(submissionData);
+    await onRegister(values);
     
     form.reset({
         operatorId: values.operatorId,
         machineId: '',
         quantityProduced: 0,
-        stopReasonId: 'none',
+        quantityLost: 0,
         formsNumber: '',
         factory: values.factory,
     });
@@ -206,25 +203,13 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
         />
         <FormField
           control={form.control}
-          name="stopReasonId"
+          name="quantityLost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Motivo da Parada (se houver)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um motivo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">Nenhuma parada</SelectItem>
-                  {stopReasons.map((reason) => (
-                    <SelectItem key={reason.id} value={reason.id}>
-                      {reason.reason}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Quantidade Perdida</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

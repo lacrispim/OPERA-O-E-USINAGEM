@@ -75,10 +75,10 @@ export default function ShopFloorPage() {
                         <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <OperatorInputForm stopReasons={stopReasons} onRegister={handleRegisterProduction} />
+                        <OperatorInputForm onRegister={handleRegisterProduction} />
                     </CardContent>
                 </Card>
-                <RecentEntriesTable entries={recentEntries} stopReasons={stopReasons} />
+                <RecentEntriesTable entries={recentEntries} />
             </div>
           </TabsContent>
         </Tabs>

@@ -3,22 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { OperatorProductionInput, StopReason } from "@/lib/types";
+import { OperatorProductionInput } from "@/lib/types";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
-  stopReasons: StopReason[];
 };
 
-export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableProps) {
-  const getStopReasonText = (reasonId?: string) => {
-    if (!reasonId) return <span className="text-muted-foreground">-</span>;
-    const reason = stopReasons.find(r => r.id === reasonId);
-    return reason ? <Badge variant="destructive">{reason.reason}</Badge> : <Badge variant="outline">Desconhecido</Badge>;
-  };
-
+export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -34,8 +27,8 @@ export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableP
                 <TableHead>Fábrica</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
-                <TableHead className="text-center">Quantidade</TableHead>
-                <TableHead>Parada</TableHead>
+                <TableHead className="text-center">Produzido</TableHead>
+                <TableHead className="text-center">Perdido</TableHead>
                 <TableHead className="text-right">Horário</TableHead>
               </TableRow>
             </TableHeader>
@@ -48,7 +41,13 @@ export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableP
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
                     <TableCell className="text-center font-mono">{entry.quantityProduced}</TableCell>
-                    <TableCell>{getStopReasonText(entry.stopReasonId)}</TableCell>
+                    <TableCell className="text-center font-mono">
+                        {entry.quantityLost > 0 ? (
+                            <Badge variant="destructive">{entry.quantityLost}</Badge>
+                        ) : (
+                            <span className="text-muted-foreground">{entry.quantityLost}</span>
+                        )}
+                    </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: ptBR })}
                     </TableCell>

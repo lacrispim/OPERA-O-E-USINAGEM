@@ -38,7 +38,7 @@ export type OperatorProductionInput = {
   operatorId: string;
   machineId: string;
   quantityProduced: number;
-  stopReasonId?: string;
+  quantityLost: number;
   timestamp: string; // ISO string
   formsNumber?: string;
   factory: string;
