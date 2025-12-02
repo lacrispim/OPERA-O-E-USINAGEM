@@ -19,6 +19,7 @@ const formSchema = z.object({
     z.number().positive('A quantidade deve ser positiva.')
   ),
   stopReasonId: z.string().optional(),
+  formsNumber: z.string().optional(),
 });
 
 type OperatorInputFormProps = {
@@ -36,6 +37,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       machineId: '',
       quantityProduced: 0,
       stopReasonId: 'none',
+      formsNumber: '',
     },
   });
 
@@ -54,6 +56,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
         machineId: '',
         quantityProduced: 0,
         stopReasonId: 'none',
+        formsNumber: '',
     });
 
     setIsLoading(false);
@@ -70,6 +73,19 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
               <FormLabel>ID do Operador</FormLabel>
               <FormControl>
                 <Input placeholder="Ex: OP-001" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="formsNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Número do forms</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: F-1024" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

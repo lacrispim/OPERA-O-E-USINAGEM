@@ -24,12 +24,12 @@ export default function ShopFloorPage() {
   
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
 
-  const handleRegisterProduction = (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
+  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
     const entryWithTimestamp: OperatorProductionInput = {
       ...newEntry,
       timestamp: new Date().toISOString(),
     };
-    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries]);
+    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10)); // Keep last 10 entries
     
     toast({
       title: "Registro salvo!",

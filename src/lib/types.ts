@@ -40,6 +40,7 @@ export type OperatorProductionInput = {
   quantityProduced: number;
   stopReasonId?: string;
   timestamp: string; // ISO string
+  formsNumber?: string;
 };
 
 export type MachineOEE = {

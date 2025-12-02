@@ -32,6 +32,7 @@ export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableP
               <TableRow>
                 <TableHead>Operador</TableHead>
                 <TableHead>Máquina</TableHead>
+                <TableHead>Nº Forms</TableHead>
                 <TableHead className="text-center">Quantidade</TableHead>
                 <TableHead>Parada</TableHead>
                 <TableHead className="text-right">Horário</TableHead>
@@ -43,6 +44,7 @@ export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableP
                   <TableRow key={index}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
+                    <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
                     <TableCell className="text-center font-mono">{entry.quantityProduced}</TableCell>
                     <TableCell>{getStopReasonText(entry.stopReasonId)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
@@ -52,7 +54,7 @@ export function RecentEntriesTable({ entries, stopReasons }: RecentEntriesTableP
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>
