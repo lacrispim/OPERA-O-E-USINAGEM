@@ -12,9 +12,11 @@ import { RecentEntriesTable } from "./components/recent-entries-table";
 import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
 import type { OperatorProductionInput } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function ShopFloorPage() {
+  const { toast } = useToast();
   const oeeData = getMachineOEE();
   const operatorData = getOperatorProductivity();
   const stopReasonsSummary = getStopReasonsSummary();
@@ -28,6 +30,11 @@ export default function ShopFloorPage() {
       timestamp: new Date().toISOString(),
     };
     setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries]);
+    
+    toast({
+      title: "Registro salvo!",
+      description: `Produção registrada com sucesso para o operador ${newEntry.operatorId}.`,
+    });
   };
 
 

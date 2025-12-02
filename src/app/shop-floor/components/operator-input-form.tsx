@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import type { StopReason, OperatorProductionInput } from '@/lib/types';
 
@@ -29,8 +28,7 @@ type OperatorInputFormProps = {
 
 export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,7 +39,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
     const submissionData = {
@@ -49,22 +47,17 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       stopReasonId: values.stopReasonId === 'none' ? undefined : values.stopReasonId,
     };
 
-    onRegister(submissionData);
+    // Call the parent component's function to handle the registration
+    await onRegister(submissionData);
     
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Registro salvo!",
-        description: `Produção registrada com sucesso para o operador ${values.operatorId}.`,
-      });
-      form.reset({
+    form.reset({
         operatorId: values.operatorId, // Keep operator ID for next entry
         machineId: '',
         quantityProduced: 0,
         stopReasonId: 'none',
-      });
-      setIsLoading(false);
-    }, 500); // Reduced timeout for faster feedback
+    });
+
+    setIsLoading(false);
   }
 
   return (
@@ -89,7 +82,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Máquina</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a máquina" />
@@ -126,7 +119,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Motivo da Parada (se houver)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um motivo" />
