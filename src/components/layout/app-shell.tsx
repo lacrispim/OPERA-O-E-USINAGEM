@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { WandSparkles, LayoutDashboard, Database } from 'lucide-react';
+import { WandSparkles, LayoutDashboard, Database, Monitor } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
   { href: '/registros-firebase', icon: Database, label: 'Dados' },
+  { href: '/shop-floor', icon: Monitor, label: 'Chão de Fábrica' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

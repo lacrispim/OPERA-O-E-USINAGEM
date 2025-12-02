@@ -27,3 +27,32 @@ export type FirebaseProductionRecord = {
   Status: string;
   'Torno (minutos)': number;
 }
+
+export type StopReason = {
+  id: string;
+  reason: string;
+};
+
+export type OperatorProductionInput = {
+  operatorId: string;
+  machineId: string;
+  startTime: string;
+  endTime: string;
+  quantityProduced: number;
+  stopReasonId?: string;
+};
+
+export type MachineOEE = {
+  machineId: string;
+  oee: number;
+  availability: number;
+  performance: number;
+  quality: number;
+};
+
+export type OperatorProductivity = {
+  operatorId: string;
+  name: string;
+  totalProduced: number;
+  efficiency: number; // e.g., pieces per hour
+};
