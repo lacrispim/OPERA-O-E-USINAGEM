@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,19 +9,27 @@ import { OperatorRankingChart } from "./components/operator-ranking-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons, getRecentEntries } from "@/lib/shop-floor-data";
+import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
+import type { OperatorProductionInput } from '@/lib/types';
 
-export const metadata = {
-  title: "Chão de Fábrica | FabriTrack",
-};
 
 export default function ShopFloorPage() {
   const oeeData = getMachineOEE();
   const operatorData = getOperatorProductivity();
   const stopReasonsSummary = getStopReasonsSummary();
   const stopReasons = getStopReasons();
-  const recentEntries = getRecentEntries();
+  
+  const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
+
+  const handleRegisterProduction = (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
+    const entryWithTimestamp: OperatorProductionInput = {
+      ...newEntry,
+      timestamp: new Date().toISOString(),
+    };
+    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries]);
+  };
+
 
   return (
     <>
@@ -57,7 +68,7 @@ export default function ShopFloorPage() {
                         <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <OperatorInputForm stopReasons={stopReasons} />
+                        <OperatorInputForm stopReasons={stopReasons} onRegister={handleRegisterProduction} />
                     </CardContent>
                 </Card>
                 <RecentEntriesTable entries={recentEntries} stopReasons={stopReasons} />

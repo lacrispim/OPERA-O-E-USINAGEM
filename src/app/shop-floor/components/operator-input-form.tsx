@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import type { StopReason } from '@/lib/types';
+import type { StopReason, OperatorProductionInput } from '@/lib/types';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -24,9 +24,10 @@ const formSchema = z.object({
 
 type OperatorInputFormProps = {
   stopReasons: StopReason[];
+  onRegister: (data: Omit<OperatorProductionInput, 'timestamp'>) => void;
 };
 
-export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
+export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -48,7 +49,7 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
       stopReasonId: values.stopReasonId === 'none' ? undefined : values.stopReasonId,
     };
 
-    console.log(submissionData);
+    onRegister(submissionData);
     
     // Simulate API call
     setTimeout(() => {
@@ -63,7 +64,7 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
         stopReasonId: 'none',
       });
       setIsLoading(false);
-    }, 1000);
+    }, 500); // Reduced timeout for faster feedback
   }
 
   return (
