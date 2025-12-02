@@ -9,10 +9,11 @@ import { OperatorRankingChart } from "./components/operator-ranking-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
+import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
-import type { OperatorProductionInput } from '@/lib/types';
+import type { OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { LossInputForm } from './components/loss-input-form';
 
 
 export default function ShopFloorPage() {
@@ -20,22 +21,36 @@ export default function ShopFloorPage() {
   const oeeData = getMachineOEE();
   const operatorData = getOperatorProductivity();
   const stopReasonsSummary = getStopReasonsSummary();
-  const stopReasons = getStopReasons();
   
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
+  const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
 
   const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
     const entryWithTimestamp: OperatorProductionInput = {
       ...newEntry,
       timestamp: new Date().toISOString(),
     };
-    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10)); // Keep last 10 entries
+    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10));
     
     toast({
-      title: "Registro salvo!",
-      description: `Produção registrada com sucesso para o operador ${newEntry.operatorId}.`,
+      title: "Produção Registrada!",
+      description: `${newEntry.quantityProduced} peças registradas para ${newEntry.operatorId}.`,
     });
   };
+
+  const handleRegisterLoss = async (newLoss: Omit<ProductionLossInput, 'timestamp'>) => {
+    const lossWithTimestamp: ProductionLossInput = {
+        ...newLoss,
+        timestamp: new Date().toISOString(),
+    };
+    setRecentLosses(prevLosses => [lossWithTimestamp, ...prevLosses]);
+    
+    toast({
+        variant: 'destructive',
+        title: "Perda Registrada!",
+        description: `${newLoss.quantityLost} peças perdidas foram registradas.`,
+    });
+  }
 
 
   return (
@@ -68,16 +83,27 @@ export default function ShopFloorPage() {
           </TabsContent>
 
           <TabsContent value="operator">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mt-6">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Registro de Produção</CardTitle>
-                        <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <OperatorInputForm onRegister={handleRegisterProduction} />
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto mt-6">
+                <div className="space-y-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Registro de Produção</CardTitle>
+                            <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <OperatorInputForm onRegister={handleRegisterProduction} />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Registro de Perda</CardTitle>
+                            <CardDescription>Registre peças perdidas e o tempo de inatividade.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <LossInputForm onRegister={handleRegisterLoss} />
+                        </CardContent>
+                    </Card>
+                </div>
                 <RecentEntriesTable entries={recentEntries} />
             </div>
           </TabsContent>

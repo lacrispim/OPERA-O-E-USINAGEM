@@ -38,11 +38,20 @@ export type OperatorProductionInput = {
   operatorId: string;
   machineId: string;
   quantityProduced: number;
-  quantityLost: number;
   timestamp: string; // ISO string
   formsNumber?: string;
   factory: string;
 };
+
+export type ProductionLossInput = {
+  operatorId: string;
+  factory: string;
+  machineId: string;
+  quantityLost: number;
+  reasonId: string;
+  timeLostMinutes: number;
+  timestamp: string; // ISO string
+}
 
 export type MachineOEE = {
   machineId: string;

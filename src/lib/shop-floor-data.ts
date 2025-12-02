@@ -1,4 +1,4 @@
-import type { MachineOEE, OperatorProductivity, StopReason, OperatorProductionInput } from '@/lib/types';
+import type { MachineOEE, OperatorProductivity, StopReason, OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 
 // Mock data, in a real app this would come from a database.
 
@@ -48,8 +48,8 @@ export function getStopReasonsSummary(): { name: string; value: number }[] {
 
 export function getRecentEntries(): OperatorProductionInput[] {
     return [
-        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro D600-01', quantityProduced: 50, quantityLost: 1, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023' },
-        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC-01', quantityProduced: 75, quantityLost: 3, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022' },
-        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC-02', quantityProduced: 120, quantityLost: 0, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro D600-01', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023' },
+        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC-01', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022' },
+        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC-02', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
     ]
 }

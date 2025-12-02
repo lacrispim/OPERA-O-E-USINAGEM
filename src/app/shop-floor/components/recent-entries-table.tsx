@@ -15,8 +15,8 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Registros Recentes</CardTitle>
-        <CardDescription>Últimas entradas de produção registradas.</CardDescription>
+        <CardTitle>Registros de Produção Recentes</CardTitle>
+        <CardDescription>Últimas entradas de produção bem-sucedida.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -28,7 +28,6 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
                 <TableHead className="text-center">Produzido</TableHead>
-                <TableHead className="text-center">Perdido</TableHead>
                 <TableHead className="text-right">Horário</TableHead>
               </TableRow>
             </TableHeader>
@@ -40,14 +39,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                     <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
-                    <TableCell className="text-center font-mono">{entry.quantityProduced}</TableCell>
-                    <TableCell className="text-center font-mono">
-                        {entry.quantityLost > 0 ? (
-                            <Badge variant="destructive">{entry.quantityLost}</Badge>
-                        ) : (
-                            <span className="text-muted-foreground">{entry.quantityLost}</span>
-                        )}
-                    </TableCell>
+                    <TableCell className="text-center font-mono text-green-500 font-bold">{entry.quantityProduced}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: ptBR })}
                     </TableCell>
@@ -55,7 +47,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>
