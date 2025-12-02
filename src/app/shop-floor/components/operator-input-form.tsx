@@ -20,6 +20,7 @@ const formSchema = z.object({
   ),
   stopReasonId: z.string().optional(),
   formsNumber: z.string().optional(),
+  factory: z.string().min(1, 'Fábrica é obrigatória.'),
 });
 
 type OperatorInputFormProps = {
@@ -38,6 +39,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       quantityProduced: 0,
       stopReasonId: 'none',
       formsNumber: '',
+      factory: '',
     },
   });
 
@@ -57,6 +59,7 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
         quantityProduced: 0,
         stopReasonId: 'none',
         formsNumber: '',
+        factory: values.factory,
     });
 
     setIsLoading(false);
@@ -74,6 +77,33 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
               <FormControl>
                 <Input placeholder="Ex: OP-001" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="factory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fábrica</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a fábrica" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Igarassu">Igarassu</SelectItem>
+                  <SelectItem value="Vinhedo">Vinhedo</SelectItem>
+                  <SelectItem value="Suape">Suape</SelectItem>
+                  <SelectItem value="Aguaí">Aguaí</SelectItem>
+                  <SelectItem value="Garanhuns">Garanhuns</SelectItem>
+                  <SelectItem value="Indaiatuba">Indaiatuba</SelectItem>
+                  <SelectItem value="Valinhos">Valinhos</SelectItem>
+                  <SelectItem value="Pouso Alegre">Pouso Alegre</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

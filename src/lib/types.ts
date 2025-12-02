@@ -41,6 +41,7 @@ export type OperatorProductionInput = {
   stopReasonId?: string;
   timestamp: string; // ISO string
   formsNumber?: string;
+  factory: string;
 };
 
 export type MachineOEE = {
