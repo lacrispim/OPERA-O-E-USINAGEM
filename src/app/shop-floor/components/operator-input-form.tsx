@@ -36,13 +36,19 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
       operatorId: '',
       machineId: '',
       quantityProduced: 0,
-      stopReasonId: '',
+      stopReasonId: 'none',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log(values);
+    
+    const submissionData = {
+      ...values,
+      stopReasonId: values.stopReasonId === 'none' ? undefined : values.stopReasonId,
+    };
+
+    console.log(submissionData);
     
     // Simulate API call
     setTimeout(() => {
@@ -77,7 +83,7 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Máquina</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a máquina" />
@@ -102,7 +108,7 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
             <FormItem>
               <FormLabel>Quantidade Produzida</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,14 +120,14 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Motivo da Parada (se houver)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um motivo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma parada</SelectItem>
+                  <SelectItem value="none">Nenhuma parada</SelectItem>
                   {stopReasons.map((reason) => (
                     <SelectItem key={reason.id} value={reason.id}>
                       {reason.reason}
