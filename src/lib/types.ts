@@ -38,6 +38,7 @@ export type OperatorProductionInput = {
   operatorId: string;
   machineId: string;
   quantityProduced: number;
+  productionTimeSeconds: number;
   timestamp: string; // ISO string
   formsNumber?: string;
   factory: string;

@@ -11,6 +11,14 @@ type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
 };
 
+const formatTime = (totalSeconds: number) => {
+    if (totalSeconds === undefined || totalSeconds === null) return '-';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
 export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
   return (
     <Card>
@@ -24,10 +32,10 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Operador</TableHead>
-                <TableHead>Fábrica</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
                 <TableHead className="text-center">Produzido</TableHead>
+                <TableHead>Tempo de Usinagem</TableHead>
                 <TableHead className="text-right">Horário</TableHead>
               </TableRow>
             </TableHeader>
@@ -36,10 +44,10 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 entries.map((entry, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
-                    <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
                     <TableCell className="text-center font-mono text-green-500 font-bold">{entry.quantityProduced}</TableCell>
+                    <TableCell className="font-mono">{formatTime(entry.productionTimeSeconds)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: ptBR })}
                     </TableCell>

@@ -58,7 +58,10 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    await onRegister(values);
+    await onRegister({
+      ...values,
+      productionTimeSeconds: seconds,
+    });
     
     form.reset({
         operatorId: values.operatorId,
