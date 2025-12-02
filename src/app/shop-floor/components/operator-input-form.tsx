@@ -56,7 +56,12 @@ export function OperatorInputForm({ stopReasons }: OperatorInputFormProps) {
         title: "Registro salvo!",
         description: `Produção registrada com sucesso para o operador ${values.operatorId}.`,
       });
-      form.reset();
+      form.reset({
+        operatorId: values.operatorId, // Keep operator ID for next entry
+        machineId: '',
+        quantityProduced: 0,
+        stopReasonId: 'none',
+      });
       setIsLoading(false);
     }, 1000);
   }

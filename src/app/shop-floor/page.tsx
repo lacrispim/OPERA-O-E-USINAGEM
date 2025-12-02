@@ -5,7 +5,8 @@ import { OeeChart } from "./components/oee-chart";
 import { OperatorRankingChart } from "./components/operator-ranking-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
-import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons } from "@/lib/shop-floor-data";
+import { RecentEntriesTable } from "./components/recent-entries-table";
+import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getStopReasons, getRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
 
 export const metadata = {
@@ -17,6 +18,7 @@ export default function ShopFloorPage() {
   const operatorData = getOperatorProductivity();
   const stopReasonsSummary = getStopReasonsSummary();
   const stopReasons = getStopReasons();
+  const recentEntries = getRecentEntries();
 
   return (
     <>
@@ -48,15 +50,18 @@ export default function ShopFloorPage() {
           </TabsContent>
 
           <TabsContent value="operator">
-             <Card className="max-w-2xl mx-auto mt-6">
-                <CardHeader>
-                    <CardTitle>Registro de Produção</CardTitle>
-                    <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <OperatorInputForm stopReasons={stopReasons} />
-                </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mt-6">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Registro de Produção</CardTitle>
+                        <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <OperatorInputForm stopReasons={stopReasons} />
+                    </CardContent>
+                </Card>
+                <RecentEntriesTable entries={recentEntries} stopReasons={stopReasons} />
+            </div>
           </TabsContent>
         </Tabs>
       </main>

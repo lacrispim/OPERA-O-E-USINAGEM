@@ -1,4 +1,4 @@
-import type { MachineOEE, OperatorProductivity, StopReason } from '@/lib/types';
+import type { MachineOEE, OperatorProductivity, StopReason, OperatorProductionInput } from '@/lib/types';
 
 // Mock data, in a real app this would come from a database.
 
@@ -44,4 +44,12 @@ export function getStopReasonsSummary(): { name: string; value: number }[] {
         { name: 'Troca de ferramenta', value: 10 },
         { name: 'Outro', value: 10 },
     ];
+}
+
+export function getRecentEntries(): OperatorProductionInput[] {
+    return [
+        { operatorId: 'OP-005', machineId: 'Centro D600-01', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString() },
+        { operatorId: 'OP-001', machineId: 'Torno CNC-01', quantityProduced: 75, stopReasonId: '4', timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
+        { operatorId: 'OP-003', machineId: 'Torno CNC-02', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+    ]
 }

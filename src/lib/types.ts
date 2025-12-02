@@ -1,4 +1,5 @@
 
+
 export type ProductionRecord = {
   id: string;
   requestingFactory: string;
@@ -36,10 +37,9 @@ export type StopReason = {
 export type OperatorProductionInput = {
   operatorId: string;
   machineId: string;
-  startTime: string;
-  endTime: string;
   quantityProduced: number;
   stopReasonId?: string;
+  timestamp: string; // ISO string
 };
 
 export type MachineOEE = {
