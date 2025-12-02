@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import type { StopReason, OperatorProductionInput } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -30,6 +31,8 @@ type OperatorInputFormProps = {
 
 export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +45,18 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
       factory: '',
     },
   });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isRunning) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -61,9 +76,18 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
         formsNumber: '',
         factory: values.factory,
     });
+    setSeconds(0);
+    setIsRunning(false);
 
     setIsLoading(false);
   }
+
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   return (
     <Form {...form}>
@@ -145,6 +169,28 @@ export function OperatorInputForm({ stopReasons, onRegister }: OperatorInputForm
             </FormItem>
           )}
         />
+        
+        <Card>
+            <CardContent className="pt-6 space-y-4">
+                 <div className="text-center">
+                    <FormLabel>Cronômetro</FormLabel>
+                    <div className="text-5xl font-mono tracking-tighter font-bold text-center mt-2">
+                        {formatTime(seconds)}
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button type="button" variant={isRunning ? "destructive" : "default"} onClick={() => setIsRunning(!isRunning)}>
+                        {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                        {isRunning ? 'Pausar' : 'Iniciar'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setSeconds(0)} disabled={isRunning}>
+                        <TimerReset className="mr-2 h-4 w-4" />
+                        Zerar
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+
         <FormField
           control={form.control}
           name="quantityProduced"
