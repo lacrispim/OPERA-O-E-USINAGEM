@@ -21,7 +21,13 @@ const formSchema = z.object({
   ),
   formsNumber: z.string().optional(),
   factory: z.string().min(1, 'Fábrica é obrigatória.'),
+  productionTimeMinutes: z.preprocess(
+    (a) => (String(a) === '' ? 0 : parseInt(z.string().parse(String(a)), 10)),
+    z.number().min(0, 'O tempo não pode ser negativo.').optional()
+  ),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 type OperatorInputFormProps = {
   onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'productionTimeSeconds'> & { productionTimeSeconds: number }) => Promise<void>;
@@ -32,7 +38,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       operatorId: '',
@@ -40,22 +46,37 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
       quantityProduced: 0,
       formsNumber: '',
       factory: '',
+      productionTimeMinutes: 0,
     },
   });
+
+  const productionTimeMinutes = form.watch('productionTimeMinutes');
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds + 1);
+        setSeconds((prevSeconds) => {
+            const newSeconds = prevSeconds + 1;
+            form.setValue('productionTimeMinutes', Math.floor(newSeconds / 60));
+            return newSeconds;
+        });
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning]);
+  }, [isRunning, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useEffect(() => {
+    // When manual input changes, stop the timer and update seconds
+    if (productionTimeMinutes !== undefined && !isRunning) {
+        setSeconds(productionTimeMinutes * 60);
+    }
+  }, [productionTimeMinutes, isRunning]);
+
+
+  async function onSubmit(values: FormData) {
     setIsLoading(true);
     
     await onRegister({
@@ -69,6 +90,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
         quantityProduced: 0,
         formsNumber: '',
         factory: values.factory,
+        productionTimeMinutes: 0,
     });
     setSeconds(0);
     setIsRunning(false);
@@ -82,6 +104,17 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
     const secs = totalSeconds % 60;
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
+
+  const handleManualTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const minutes = value === '' ? 0 : parseInt(value, 10);
+    if (!isNaN(minutes)) {
+        setIsRunning(false);
+        setSeconds(minutes * 60);
+        form.setValue('productionTimeMinutes', minutes);
+    }
+  }
+
 
   return (
     <Form {...form}>
@@ -175,6 +208,20 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="productionTimeMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tempo de Usinagem (minutos)</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} onChange={handleManualTimeChange} placeholder="Digite os minutos ou use o cronômetro"/>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Card>
             <CardContent className="pt-6 space-y-4">
                  <div className="text-center">
@@ -188,7 +235,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
                         {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                         {isRunning ? 'Pausar' : 'Iniciar'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setSeconds(0)} disabled={isRunning}>
+                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); form.setValue('productionTimeMinutes', 0); }}>
                         <TimerReset className="mr-2 h-4 w-4" />
                         Zerar
                     </Button>
