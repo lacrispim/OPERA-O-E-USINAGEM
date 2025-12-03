@@ -33,6 +33,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 <TableHead>Fábrica</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
+                <TableHead className="text-center">Nº Operações</TableHead>
                 <TableHead className="text-center">Produzido</TableHead>
                 <TableHead>Tempo de Usinagem</TableHead>
                 <TableHead className="text-right">Data e Horário</TableHead>
@@ -46,6 +47,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                     <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
+                    <TableCell className="text-center">{entry.operationCount || '-'}</TableCell>
                     <TableCell className="text-center font-mono text-green-500 font-bold">{entry.quantityProduced}</TableCell>
                     <TableCell className="font-mono">{formatTime(entry.productionTimeSeconds)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
@@ -55,7 +57,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>

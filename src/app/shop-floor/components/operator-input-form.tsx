@@ -25,6 +25,10 @@ const formSchema = z.object({
     (a) => (String(a) === '' ? 0 : parseInt(z.string().parse(String(a)), 10)),
     z.number().min(0, 'O tempo não pode ser negativo.').optional()
   ),
+  operationCount: z.preprocess(
+    (a) => (String(a) === '' ? undefined : parseInt(z.string().parse(String(a)), 10)),
+    z.number().int().positive('O número de operações deve ser positivo.').optional()
+  ),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -47,6 +51,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
       formsNumber: '',
       factory: '',
       productionTimeMinutes: 0,
+      operationCount: undefined,
     },
   });
 
@@ -95,6 +100,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
         formsNumber: '',
         factory: values.factory,
         productionTimeMinutes: 0,
+        operationCount: undefined
     });
     setSeconds(0);
     setIsRunning(false);
@@ -210,6 +216,20 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
               <FormMessage />
             </FormItem>
           )}
+        />
+
+        <FormField
+            control={form.control}
+            name="operationCount"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Número de Operações</FormLabel>
+                <FormControl>
+                    <Input type="number" placeholder="Ex: 5" {...field} value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/>
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
         />
 
         <FormField

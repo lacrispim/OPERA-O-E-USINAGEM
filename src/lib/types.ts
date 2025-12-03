@@ -42,6 +42,7 @@ export type OperatorProductionInput = {
   timestamp: string; // ISO string
   formsNumber?: string;
   factory: string;
+  operationCount?: number;
 };
 
 export type ProductionLossInput = {
