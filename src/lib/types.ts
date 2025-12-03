@@ -1,6 +1,6 @@
 
 
-export const productionStatuses = ['Fila de produção', 'Rejeitado', 'Em produção', 'Finalizado', 'Enviado'] as const;
+export const productionStatuses = ['Fila de produção', 'Rejeitado', 'Em produção', 'Encerrado', 'Enviado'] as const;
 export type ProductionStatus = typeof productionStatuses[number];
 
 

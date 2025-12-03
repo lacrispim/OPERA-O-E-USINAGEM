@@ -36,7 +36,7 @@ export function getStopReasonsSummary(): { name: string; value: number }[] {
 export function getRecentEntries(): OperatorProductionInput[] {
     return [
         { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro de Usinagem D600', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200, status: 'Em produção' },
-        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC - Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850, status: 'Finalizado' },
+        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC - Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850, status: 'Encerrado' },
         { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC - Centur 30', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400, status: 'Fila de produção' },
     ]
 }
