@@ -5,11 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OeeChart } from "./components/oee-chart";
-import { OperatorRankingChart } from "./components/operator-ranking-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { getMachineOEE, getOperatorProductivity, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
+import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
 import type { OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +18,6 @@ import { LossInputForm } from './components/loss-input-form';
 export default function ShopFloorPage() {
   const { toast } = useToast();
   const oeeData = getMachineOEE();
-  const operatorData = getOperatorProductivity();
   const stopReasonsSummary = getStopReasonsSummary();
   
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
@@ -74,9 +72,8 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
             <div className="grid gap-6 mt-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                 <OeeChart data={oeeData} />
-                <OperatorRankingChart data={operatorData} />
                 <StopReasonsPieChart data={stopReasonsSummary} />
               </div>
             </div>

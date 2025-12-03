@@ -1,4 +1,4 @@
-import type { MachineOEE, OperatorProductivity, StopReason, OperatorProductionInput, ProductionLossInput } from '@/lib/types';
+import type { MachineOEE, StopReason, OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 
 // Mock data, in a real app this would come from a database.
 
@@ -24,16 +24,6 @@ export function getMachineOEE(): MachineOEE[] {
     { machineId: 'Centro D600-02', oee: 65, availability: 80, performance: 85, quality: 95 },
     { machineId: 'Prensa-01', oee: 88, availability: 92, performance: 96, quality: 99 },
   ];
-}
-
-export function getOperatorProductivity(): OperatorProductivity[] {
-  return [
-    { operatorId: 'OP-001', name: 'Ana Silva', totalProduced: 350, efficiency: 58 },
-    { operatorId: 'OP-002', name: 'Bruno Costa', totalProduced: 320, efficiency: 53 },
-    { operatorId: 'OP-003', name: 'Carlos Dias', totalProduced: 380, efficiency: 63 },
-    { operatorId: 'OP-004', name: 'Daniela Lima', totalProduced: 290, efficiency: 48 },
-    { operatorId: 'OP-005', name: 'Eduardo Reis', totalProduced: 410, efficiency: 68 },
-  ].sort((a,b) => b.totalProduced - a.totalProduced);
 }
 
 export function getStopReasonsSummary(): { name: string; value: number }[] {

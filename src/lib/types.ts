@@ -61,10 +61,3 @@ export type MachineOEE = {
   performance: number;
   quality: number;
 };
-
-export type OperatorProductivity = {
-  operatorId: string;
-  name: string;
-  totalProduced: number;
-  efficiency: number; // e.g., pieces per hour
-};
