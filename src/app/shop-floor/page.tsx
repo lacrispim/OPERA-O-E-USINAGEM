@@ -23,12 +23,9 @@ export default function ShopFloorPage() {
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
   const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
 
-  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp' | 'productionTimeSeconds'>) => {
-    // This function will be properly implemented in a future step
-    // For now, we'll just show a success message and add to a local state
+  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
     const entryWithTimestamp: OperatorProductionInput = {
       ...newEntry,
-      productionTimeSeconds: 0, // Placeholder
       timestamp: new Date().toISOString(),
     };
     setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10));
@@ -83,8 +80,8 @@ export default function ShopFloorPage() {
           </TabsContent>
 
           <TabsContent value="operator">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto mt-6">
-                <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-8 max-w-7xl mx-auto mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Card>
                         <CardHeader>
                             <CardTitle>Registro de Produção</CardTitle>
@@ -104,7 +101,7 @@ export default function ShopFloorPage() {
                         </CardContent>
                     </Card>
                 </div>
-                <div className="lg:col-span-1">
+                <div>
                     <RecentEntriesTable entries={recentEntries} />
                 </div>
             </div>
