@@ -101,7 +101,9 @@ export default function ShopFloorPage() {
                         </CardContent>
                     </Card>
                 </div>
-                <RecentEntriesTable entries={recentEntries} />
+                <div className="lg:col-span-1">
+                    <RecentEntriesTable entries={recentEntries} />
+                </div>
             </div>
           </TabsContent>
         </Tabs>
