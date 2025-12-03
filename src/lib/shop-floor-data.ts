@@ -10,7 +10,8 @@ const MOCK_STOP_REASONS: StopReason[] = [
   { id: '5', reason: 'Problema de qualidade' },
   { id: '6', reason: 'Pausa para refeição' },
   { id: '7', reason: 'Limpeza da área' },
-  { id: '8', reason: 'Outro' },
+  { id: '8', reason: 'Ajuste de óleo na maquina' },
+  { id: '9', reason: 'Outro' },
 ];
 
 export function getStopReasons(): StopReason[] {
