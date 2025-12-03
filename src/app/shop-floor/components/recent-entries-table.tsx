@@ -4,8 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { OperatorProductionInput } from "@/lib/types";
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
@@ -32,11 +30,12 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Operador</TableHead>
+                <TableHead>Fábrica</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
                 <TableHead className="text-center">Produzido</TableHead>
                 <TableHead>Tempo de Usinagem</TableHead>
-                <TableHead className="text-right">Horário</TableHead>
+                <TableHead className="text-right">Data e Horário</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -44,18 +43,19 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 entries.map((entry, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
+                    <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
                     <TableCell className="text-center font-mono text-green-500 font-bold">{entry.quantityProduced}</TableCell>
                     <TableCell className="font-mono">{formatTime(entry.productionTimeSeconds)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: ptBR })}
+                      {new Date(entry.timestamp).toLocaleString('pt-BR')}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>
