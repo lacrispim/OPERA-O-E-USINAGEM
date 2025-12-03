@@ -152,11 +152,8 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Torno CNC-01">Torno CNC-01</SelectItem>
-                  <SelectItem value="Torno CNC-02">Torno CNC-02</SelectItem>
-                  <SelectItem value="Centro D600-01">Centro D600-01</SelectItem>
-                  <SelectItem value="Centro D600-02">Centro D600-02</SelectItem>
-                  <SelectItem value="Prensa-01">Prensa-01</SelectItem>
+                  <SelectItem value="Torno CNC Centur 30">Torno CNC Centur 30</SelectItem>
+                  <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

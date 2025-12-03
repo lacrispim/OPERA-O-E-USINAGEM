@@ -18,11 +18,8 @@ export function getStopReasons(): StopReason[] {
 
 export function getMachineOEE(): MachineOEE[] {
   return [
-    { machineId: 'Torno CNC-01', oee: 82, availability: 90, performance: 95, quality: 96 },
-    { machineId: 'Torno CNC-02', oee: 75, availability: 85, performance: 90, quality: 98 },
-    { machineId: 'Centro D600-01', oee: 91, availability: 95, performance: 98, quality: 98 },
-    { machineId: 'Centro D600-02', oee: 65, availability: 80, performance: 85, quality: 95 },
-    { machineId: 'Prensa-01', oee: 88, availability: 92, performance: 96, quality: 99 },
+    { machineId: 'Torno CNC Centur 30', oee: 82, availability: 90, performance: 95, quality: 96 },
+    { machineId: 'Centro de Usinagem D600', oee: 91, availability: 95, performance: 98, quality: 98 },
   ];
 }
 
@@ -38,8 +35,8 @@ export function getStopReasonsSummary(): { name: string; value: number }[] {
 
 export function getRecentEntries(): OperatorProductionInput[] {
     return [
-        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro D600-01', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200 },
-        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC-01', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850 },
-        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC-02', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400 },
+        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro de Usinagem D600', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200 },
+        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850 },
+        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC Centur 30', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400 },
     ]
 }
