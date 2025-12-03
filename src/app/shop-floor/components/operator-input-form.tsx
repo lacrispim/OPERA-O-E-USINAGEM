@@ -24,7 +24,7 @@ const formSchema = z.object({
 });
 
 type OperatorInputFormProps = {
-  onRegister: (data: Omit<OperatorProductionInput, 'timestamp'>) => Promise<void>;
+  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'productionTimeSeconds'> & { productionTimeSeconds: number }) => Promise<void>;
 };
 
 export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
@@ -161,6 +161,20 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
           )}
         />
         
+        <FormField
+          control={form.control}
+          name="quantityProduced"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Quantidade Produzida</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Card>
             <CardContent className="pt-6 space-y-4">
                  <div className="text-center">
@@ -181,20 +195,6 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
                 </div>
             </CardContent>
         </Card>
-
-        <FormField
-          control={form.control}
-          name="quantityProduced"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantidade Produzida</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
