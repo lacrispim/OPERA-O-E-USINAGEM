@@ -9,7 +9,8 @@ const MOCK_STOP_REASONS: StopReason[] = [
   { id: '4', reason: 'Troca de ferramenta' },
   { id: '5', reason: 'Problema de qualidade' },
   { id: '6', reason: 'Pausa para refeição' },
-  { id: '7', reason: 'Outro' },
+  { id: '7', reason: 'Limpeza da área' },
+  { id: '8', reason: 'Outro' },
 ];
 
 export function getStopReasons(): StopReason[] {
@@ -28,6 +29,7 @@ export function getStopReasonsSummary(): { name: string; value: number }[] {
         { name: 'Setup de máquina', value: 40 },
         { name: 'Falta de material', value: 25 },
         { name: 'Manutenção corretiva', value: 15 },
+        { name: 'Limpeza da área', value: 5 },
         { name: 'Troca de ferramenta', value: 10 },
         { name: 'Outro', value: 10 },
     ];
