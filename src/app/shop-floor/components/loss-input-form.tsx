@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import type { ProductionLossInput } from '@/lib/types';
 import { getStopReasons } from '@/lib/shop-floor-data';
+import { Card, CardContent } from '@/components/ui/card';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -22,10 +23,12 @@ const formSchema = z.object({
   ),
   reasonId: z.string().min(1, 'O motivo da perda é obrigatório.'),
   timeLostMinutes: z.preprocess(
-    (a) => parseInt(z.string().parse(String(a)), 10),
-    z.number().min(0, 'O tempo perdido não pode ser negativo.')
+    (a) => (String(a) === '' ? 0 : parseInt(z.string().parse(String(a)), 10)),
+    z.number().min(0, 'O tempo perdido não pode ser negativo.').optional()
   ),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 type LossInputFormProps = {
   onRegister: (data: Omit<ProductionLossInput, 'timestamp'>) => Promise<void>;
@@ -33,9 +36,11 @@ type LossInputFormProps = {
 
 export function LossInputForm({ onRegister }: LossInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
   const stopReasons = getStopReasons();
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       operatorId: '',
@@ -47,9 +52,36 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const timeLostMinutes = form.watch('timeLostMinutes');
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isRunning) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => {
+            const newSeconds = prevSeconds + 1;
+            form.setValue('timeLostMinutes', Math.floor(newSeconds / 60));
+            return newSeconds;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, form]);
+
+  useEffect(() => {
+    if (timeLostMinutes !== undefined && !isRunning) {
+        setSeconds(timeLostMinutes * 60);
+    }
+  }, [timeLostMinutes, isRunning]);
+
+  async function onSubmit(values: FormData) {
     setIsLoading(true);
-    await onRegister(values);
+    await onRegister({
+        ...values,
+        timeLostMinutes: Math.floor(seconds / 60),
+    });
     form.reset({
         ...values,
         machineId: '',
@@ -57,8 +89,28 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
         reasonId: '',
         timeLostMinutes: 0,
     });
+    setSeconds(0);
+    setIsRunning(false);
     setIsLoading(false);
   }
+
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const handleManualTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const minutes = value === '' ? 0 : parseInt(value, 10);
+    if (!isNaN(minutes)) {
+        setIsRunning(false);
+        setSeconds(minutes * 60);
+        form.setValue('timeLostMinutes', minutes);
+    }
+  }
+
 
   return (
     <Form {...form}>
@@ -116,7 +168,7 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Torno CNC Centur 30">Torno CNC Centur 30</SelectItem>
+                  <SelectItem value="Torno CNC - Centur 30">Torno CNC - Centur 30</SelectItem>
                   <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                 </SelectContent>
               </Select>
@@ -166,12 +218,34 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
             <FormItem>
               <FormLabel>Tempo Perdido (minutos)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                <Input type="number" {...field} onChange={handleManualTimeChange} placeholder="Digite os minutos ou use o cronômetro"/>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <Card>
+            <CardContent className="pt-6 space-y-4">
+                 <div className="text-center">
+                    <FormLabel>Cronômetro de Perda</FormLabel>
+                    <div className="text-5xl font-mono tracking-tighter font-bold text-center mt-2">
+                        {formatTime(seconds)}
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button type="button" variant={isRunning ? "destructive" : "default"} onClick={() => setIsRunning(!isRunning)}>
+                        {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                        {isRunning ? 'Pausar' : 'Iniciar'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); form.setValue('timeLostMinutes', 0); }}>
+                        <TimerReset className="mr-2 h-4 w-4" />
+                        Zerar
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+
         <Button type="submit" variant="destructive" disabled={isLoading} className="w-full">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Registrar Perda
