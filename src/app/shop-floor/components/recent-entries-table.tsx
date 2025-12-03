@@ -23,8 +23,9 @@ const formatTime = (totalSeconds: number) => {
 const getStatusBadgeVariant = (status: ProductionStatus) => {
     switch (status) {
         case 'Encerrado':
-        case 'Enviado':
             return 'default';
+        case 'Enviado':
+            return 'sent';
         case 'Em produção':
             return 'in-progress';
         case 'Fila de produção':
@@ -76,7 +77,8 @@ export function RecentEntriesTable({ entries, onUpdateStatus }: RecentEntriesTab
                             onValueChange={(newStatus) => onUpdateStatus(index, newStatus as ProductionStatus)}
                         >
                             <SelectTrigger className={cn("w-[180px] h-8 text-xs", 
-                                (entry.status === 'Encerrado' || entry.status === 'Enviado') && "bg-green-600/20 border-green-600 text-green-700",
+                                (entry.status === 'Encerrado') && "bg-green-600/20 border-green-600 text-green-700",
+                                (entry.status === 'Enviado') && "bg-violet-600/20 border-violet-500 text-violet-600",
                                 entry.status === 'Em produção' && "bg-orange-500/20 border-orange-500 text-orange-600",
                                 entry.status === 'Fila de produção' && "bg-blue-500/20 border-blue-500 text-blue-600",
                                 entry.status === 'Rejeitado' && "bg-red-600/20 border-red-500 text-red-600",
