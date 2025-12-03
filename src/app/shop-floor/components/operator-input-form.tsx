@@ -56,17 +56,21 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-            const newSeconds = prevSeconds + 1;
-            form.setValue('productionTimeMinutes', Math.floor(newSeconds / 60));
-            return newSeconds;
-        });
+        setSeconds((prevSeconds) => prevSeconds + 1);
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, form]);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (!isRunning) {
+        form.setValue('productionTimeMinutes', Math.floor(seconds / 60));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, seconds]);
+
 
   useEffect(() => {
     // When manual input changes, stop the timer and update seconds
@@ -185,7 +189,7 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Torno CNC Centur 30">Torno CNC Centur 30</SelectItem>
+                  <SelectItem value="Torno CNC - Centur 30">Torno CNC - Centur 30</SelectItem>
                   <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                 </SelectContent>
               </Select>

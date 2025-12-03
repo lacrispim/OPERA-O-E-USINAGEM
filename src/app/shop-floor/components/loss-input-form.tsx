@@ -58,17 +58,21 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-            const newSeconds = prevSeconds + 1;
-            form.setValue('timeLostMinutes', Math.floor(newSeconds / 60));
-            return newSeconds;
-        });
+        setSeconds((prevSeconds) => prevSeconds + 1);
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, form]);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (!isRunning) {
+        form.setValue('timeLostMinutes', Math.floor(seconds / 60));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, seconds]);
+
 
   useEffect(() => {
     if (timeLostMinutes !== undefined && !isRunning) {
