@@ -1,5 +1,9 @@
 
 
+export const productionStatuses = ['Fila de produção', 'Rejeitado', 'Em produção', 'Finalizado Enviado'] as const;
+export type ProductionStatus = typeof productionStatuses[number];
+
+
 export type ProductionRecord = {
   id: string;
   requestingFactory: string;
@@ -43,6 +47,7 @@ export type OperatorProductionInput = {
   formsNumber?: string;
   factory: string;
   operationCount?: number;
+  status: ProductionStatus;
 };
 
 export type ProductionLossInput = {

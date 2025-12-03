@@ -3,10 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { OperatorProductionInput } from "@/lib/types";
+import { OperatorProductionInput, ProductionStatus, productionStatuses } from "@/lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
+  onUpdateStatus: (index: number, newStatus: ProductionStatus) => void;
 };
 
 const formatTime = (totalSeconds: number) => {
@@ -17,7 +20,22 @@ const formatTime = (totalSeconds: number) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
+const getStatusBadgeVariant = (status: ProductionStatus) => {
+    switch (status) {
+        case 'Finalizado Enviado':
+            return 'default';
+        case 'Em produção':
+            return 'in-progress';
+        case 'Fila de produção':
+            return 'secondary';
+        case 'Rejeitado':
+            return 'error';
+        default:
+            return 'outline';
+    }
+}
+
+export function RecentEntriesTable({ entries, onUpdateStatus }: RecentEntriesTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -36,6 +54,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 <TableHead className="text-center">Nº Operações</TableHead>
                 <TableHead className="text-center">Produzido</TableHead>
                 <TableHead>Tempo de Usinagem</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Data e Horário</TableHead>
               </TableRow>
             </TableHeader>
@@ -50,6 +69,30 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                     <TableCell className="text-center">{entry.operationCount || '-'}</TableCell>
                     <TableCell className="text-center font-mono text-green-500 font-bold">{entry.quantityProduced}</TableCell>
                     <TableCell className="font-mono">{formatTime(entry.productionTimeSeconds)}</TableCell>
+                    <TableCell>
+                        <Select 
+                            value={entry.status} 
+                            onValueChange={(newStatus) => onUpdateStatus(index, newStatus as ProductionStatus)}
+                        >
+                            <SelectTrigger className={cn("w-[180px] h-8 text-xs", 
+                                entry.status === 'Finalizado Enviado' && "bg-green-600/20 border-green-600 text-green-700",
+                                entry.status === 'Em produção' && "bg-orange-500/20 border-orange-500 text-orange-600",
+                                entry.status === 'Fila de produção' && "bg-blue-500/20 border-blue-500 text-blue-600",
+                                entry.status === 'Rejeitado' && "bg-red-600/20 border-red-500 text-red-600",
+                            )}>
+                                <SelectValue>
+                                    <Badge variant={getStatusBadgeVariant(entry.status)} className="text-xs">{entry.status}</Badge>
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {productionStatuses.map(status => (
+                                    <SelectItem key={status} value={status}>
+                                        {status}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {new Date(entry.timestamp).toLocaleString('pt-BR')}
                     </TableCell>
@@ -57,7 +100,7 @@ export function RecentEntriesTable({ entries }: RecentEntriesTableProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>

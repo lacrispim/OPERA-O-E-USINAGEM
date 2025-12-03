@@ -10,7 +10,7 @@ import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
 import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries, getStopReasons } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
-import type { OperatorProductionInput, ProductionLossInput } from '@/lib/types';
+import type { OperatorProductionInput, ProductionLossInput, ProductionStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
@@ -25,10 +25,11 @@ export default function ShopFloorPage() {
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
   const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
 
-  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
+  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp' | 'status'>) => {
     const entryWithTimestamp: OperatorProductionInput = {
       ...newEntry,
       timestamp: new Date().toISOString(),
+      status: 'Em produção',
     };
     setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10));
     
@@ -36,6 +37,14 @@ export default function ShopFloorPage() {
       title: "Produção Registrada!",
       description: `${newEntry.quantityProduced} peças registradas para ${newEntry.operatorId}.`,
     });
+  };
+
+  const handleUpdateStatus = (index: number, newStatus: ProductionStatus) => {
+    setRecentEntries(currentEntries => 
+      currentEntries.map((entry, i) => 
+        i === index ? { ...entry, status: newStatus } : entry
+      )
+    );
   };
 
   const handleRegisterLoss = async (newLoss: Omit<ProductionLossInput, 'timestamp'>) => {
@@ -112,7 +121,7 @@ export default function ShopFloorPage() {
                     </Card>
                 </div>
                 <div className="space-y-8">
-                    <RecentEntriesTable entries={recentEntries} />
+                    <RecentEntriesTable entries={recentEntries} onUpdateStatus={handleUpdateStatus} />
                     <RecentLossesTable entries={lossesWithReasonText} />
                 </div>
             </div>

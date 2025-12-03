@@ -34,7 +34,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 type OperatorInputFormProps = {
-  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'productionTimeSeconds'> & { productionTimeSeconds: number }) => Promise<void>;
+  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'status'>) => Promise<void>;
 };
 
 export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
