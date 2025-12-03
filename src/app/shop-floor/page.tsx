@@ -23,9 +23,12 @@ export default function ShopFloorPage() {
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
   const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
 
-  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp'>) => {
+  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp' | 'productionTimeSeconds'>) => {
+    // This function will be properly implemented in a future step
+    // For now, we'll just show a success message and add to a local state
     const entryWithTimestamp: OperatorProductionInput = {
       ...newEntry,
+      productionTimeSeconds: 0, // Placeholder
       timestamp: new Date().toISOString(),
     };
     setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10));
@@ -71,7 +74,7 @@ export default function ShopFloorPage() {
           </TabsList>
           
           <TabsContent value="supervisor">
-            <div className="grid gap-6 mt-6">
+            <div className="grid gap-6 mt-6 max-w-7xl mx-auto">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                 <OeeChart data={oeeData} />
                 <StopReasonsPieChart data={stopReasonsSummary} />
