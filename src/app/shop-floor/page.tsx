@@ -8,17 +8,19 @@ import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
+import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries, getStopReasons } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
 import type { OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
+import { RecentLossesTable } from './components/recent-losses-table';
 
 
 export default function ShopFloorPage() {
   const { toast } = useToast();
   const oeeData = getMachineOEE();
   const stopReasonsSummary = getStopReasonsSummary();
+  const stopReasons = getStopReasons();
   
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
   const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
@@ -41,7 +43,7 @@ export default function ShopFloorPage() {
         ...newLoss,
         timestamp: new Date().toISOString(),
     };
-    setRecentLosses(prevLosses => [lossWithTimestamp, ...prevLosses]);
+    setRecentLosses(prevLosses => [lossWithTimestamp, ...prevLosses].slice(0,10));
     
     toast({
         variant: 'destructive',
@@ -49,6 +51,14 @@ export default function ShopFloorPage() {
         description: `${newLoss.quantityLost} peças perdidas foram registradas.`,
     });
   }
+
+  const lossesWithReasonText = recentLosses.map(loss => {
+    const reason = stopReasons.find(r => r.id === loss.reasonId);
+    return {
+      ...loss,
+      reason: reason ? reason.reason : 'Desconhecido',
+    };
+  });
 
 
   return (
@@ -80,7 +90,7 @@ export default function ShopFloorPage() {
           </TabsContent>
 
           <TabsContent value="operator">
-            <div className="grid grid-cols-1 gap-8 max-w-7xl mx-auto mt-6">
+            <div className="max-w-7xl mx-auto mt-6 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Card>
                         <CardHeader>
@@ -101,8 +111,9 @@ export default function ShopFloorPage() {
                         </CardContent>
                     </Card>
                 </div>
-                <div>
+                <div className="space-y-8">
                     <RecentEntriesTable entries={recentEntries} />
+                    <RecentLossesTable entries={lossesWithReasonText} />
                 </div>
             </div>
           </TabsContent>
