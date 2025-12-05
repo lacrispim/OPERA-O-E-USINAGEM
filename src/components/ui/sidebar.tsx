@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -544,7 +545,7 @@ const SidebarMenuButton = React.forwardRef<
   (
     {
       asChild = false,
-      isActive = false,
+      isActive: isActiveProp = false,
       variant = "default",
       size = "default",
       tooltip,
@@ -555,6 +556,11 @@ const SidebarMenuButton = React.forwardRef<
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
+    const [isActive, setIsActive] = React.useState(false)
+
+    React.useEffect(() => {
+      setIsActive(isActiveProp)
+    }, [isActiveProp])
 
     const button = (
       <Comp
