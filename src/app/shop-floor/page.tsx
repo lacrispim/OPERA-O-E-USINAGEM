@@ -14,6 +14,7 @@ import type { OperatorProductionInput, ProductionLossInput, ProductionStatus } f
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
+import { OperatorHoursSummary } from './components/operator-hours-summary';
 
 
 export default function ShopFloorPage() {
@@ -30,7 +31,7 @@ export default function ShopFloorPage() {
       timestamp: new Date().toISOString(),
       status: 'Em produção',
     };
-    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 10));
+    setRecentEntries(prevEntries => [entryWithTimestamp, ...prevEntries].slice(0, 50));
     
     toast({
       title: "Produção Registrada!",
@@ -99,9 +100,10 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
             <div className="grid gap-6 mt-6 max-w-7xl mx-auto">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <OeeChart data={oeeData} />
                 <StopReasonsPieChart data={stopReasonsSummary} />
+                <OperatorHoursSummary entries={recentEntries} />
               </div>
             </div>
           </TabsContent>
