@@ -1,4 +1,4 @@
-import type { MachineOEE, StopReason, OperatorProductionInput, ProductionLossInput } from '@/lib/types';
+import type { StopReason, OperatorProductionInput } from '@/lib/types';
 
 // Mock data, in a real app this would come from a database.
 
@@ -18,28 +18,10 @@ export function getStopReasons(): StopReason[] {
   return MOCK_STOP_REASONS;
 }
 
-export function getMachineOEE(): MachineOEE[] {
-  return [
-    { machineId: 'Torno CNC - Centur 30', oee: 82, availability: 90, performance: 95, quality: 96 },
-    { machineId: 'Centro de Usinagem D600', oee: 91, availability: 95, performance: 98, quality: 98 },
-  ];
-}
-
-export function getStopReasonsSummary(): { name: string; value: number }[] {
-    return [
-        { name: 'Setup de máquina', value: 40 },
-        { name: 'Falta de material', value: 25 },
-        { name: 'Manutenção corretiva', value: 15 },
-        { name: 'Limpeza da área', value: 5 },
-        { name: 'Troca de ferramenta', value: 10 },
-        { name: 'Outro', value: 10 },
-    ];
-}
-
 export function getRecentEntries(): OperatorProductionInput[] {
     return [
-        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro de Usinagem D600', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200, status: 'Em produção' },
-        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC - Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850, status: 'Encerrado' },
-        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC - Centur 30', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400, status: 'Fila de produção' },
+        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro de Usinagem D600', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200, status: 'Em produção', operationCount: 4 },
+        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC - Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850, status: 'Encerrado', operationCount: 2 },
+        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC - Centur 30', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400, status: 'Fila de produção', operationCount: 6 },
     ]
 }
