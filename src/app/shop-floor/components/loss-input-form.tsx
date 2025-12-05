@@ -19,7 +19,7 @@ const formSchema = z.object({
   machineId: z.string().min(1, 'Máquina é obrigatória.'),
   quantityLost: z.preprocess(
     (a) => parseInt(z.string().parse(String(a)), 10),
-    z.number().min(1, 'A quantidade perdida deve ser maior que zero.')
+    z.number().min(0, 'A quantidade perdida não pode ser negativa.')
   ),
   reason: z.string().min(1, 'O motivo da perda é obrigatório.'),
   timeLostMinutes: z.preprocess(
