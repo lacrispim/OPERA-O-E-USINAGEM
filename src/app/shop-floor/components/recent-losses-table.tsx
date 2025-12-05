@@ -35,7 +35,7 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
                 <TableHead>Fábrica</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Motivo</TableHead>
-                <TableHead className="text-center">Qtd. Perdida</TableHead>
+                <TableHead className="text-center">Qtd. Peças Mortas</TableHead>
                 <TableHead>Tempo Perdido</TableHead>
                 <TableHead className="text-right">Data e Horário</TableHead>
                 <TableHead className="text-center">Ações</TableHead>

@@ -196,7 +196,7 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
           name="quantityLost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quantidade Perdida</FormLabel>
+              <FormLabel>Quantidade de Peças Mortas</FormLabel>
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
               </FormControl>
