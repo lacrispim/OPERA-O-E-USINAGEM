@@ -4,12 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
-import { getStopReasons } from "@/lib/shop-floor-data";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 type RecentLossesTableProps = {
-  entries: (ProductionLossInput & { reason: string })[];
+  entries: ProductionLossInput[];
   onDelete: (index: number) => void;
 };
 

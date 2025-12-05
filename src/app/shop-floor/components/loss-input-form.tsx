@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import type { ProductionLossInput } from '@/lib/types';
-import { getStopReasons } from '@/lib/shop-floor-data';
 import { Card, CardContent } from '@/components/ui/card';
 
 const formSchema = z.object({
@@ -21,7 +20,7 @@ const formSchema = z.object({
     (a) => parseInt(z.string().parse(String(a)), 10),
     z.number().min(1, 'A quantidade perdida deve ser maior que zero.')
   ),
-  reasonId: z.string().min(1, 'O motivo da perda é obrigatório.'),
+  reason: z.string().min(1, 'O motivo da perda é obrigatório.'),
   timeLostMinutes: z.preprocess(
     (a) => (String(a) === '' ? 0 : parseInt(z.string().parse(String(a)), 10)),
     z.number().min(0, 'O tempo perdido não pode ser negativo.').optional()
@@ -38,7 +37,6 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const stopReasons = getStopReasons();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -47,7 +45,7 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
       factory: '',
       machineId: '',
       quantityLost: 0,
-      reasonId: '',
+      reason: '',
       timeLostMinutes: 0,
     },
   });
@@ -90,7 +88,7 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
         ...values,
         machineId: '',
         quantityLost: 0,
-        reasonId: '',
+        reason: '',
         timeLostMinutes: 0,
     });
     setSeconds(0);
@@ -182,22 +180,13 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
         />
          <FormField
           control={form.control}
-          name="reasonId"
+          name="reason"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Motivo da Perda</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o motivo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {stopReasons.map(reason => (
-                    <SelectItem key={reason.id} value={reason.id}>{reason.reason}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <Input placeholder="Descreva o motivo da perda" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

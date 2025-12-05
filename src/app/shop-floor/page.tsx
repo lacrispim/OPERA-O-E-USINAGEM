@@ -8,7 +8,7 @@ import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries, getStopReasons } from "@/lib/shop-floor-data";
+import { getMachineOEE, getStopReasonsSummary, getRecentEntries as getInitialRecentEntries } from "@/lib/shop-floor-data";
 import { Monitor, Tablet } from "lucide-react";
 import type { OperatorProductionInput, ProductionLossInput, ProductionStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +20,6 @@ export default function ShopFloorPage() {
   const { toast } = useToast();
   const oeeData = getMachineOEE();
   const stopReasonsSummary = getStopReasonsSummary();
-  const stopReasons = getStopReasons();
   
   const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>(getInitialRecentEntries());
   const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
@@ -79,15 +78,6 @@ export default function ShopFloorPage() {
     });
   };
 
-  const lossesWithReasonText = recentLosses.map(loss => {
-    const reason = stopReasons.find(r => r.id === loss.reasonId);
-    return {
-      ...loss,
-      reason: reason ? reason.reason : 'Desconhecido',
-    };
-  });
-
-
   return (
     <>
       <PageHeader
@@ -140,7 +130,7 @@ export default function ShopFloorPage() {
                 </div>
                 <div className="space-y-8">
                     <RecentEntriesTable entries={recentEntries} onUpdateStatus={handleUpdateStatus} onDelete={handleDeleteProduction} />
-                    <RecentLossesTable entries={lossesWithReasonText} onDelete={handleDeleteLoss} />
+                    <RecentLossesTable entries={recentLosses} onDelete={handleDeleteLoss} />
                 </div>
             </div>
           </TabsContent>

@@ -55,7 +55,7 @@ export type ProductionLossInput = {
   factory: string;
   machineId: string;
   quantityLost: number;
-  reasonId: string;
+  reason: string;
   timeLostMinutes: number;
   timestamp: string; // ISO string
 }
