@@ -556,11 +556,13 @@ const SidebarMenuButton = React.forwardRef<
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
-    const [isActive, setIsActive] = React.useState(false)
+    const [isActive, setIsActive] = React.useState(isActiveProp);
 
     React.useEffect(() => {
-      setIsActive(isActiveProp)
-    }, [isActiveProp])
+      // Update isActive state only on the client-side after initial render
+      setIsActive(isActiveProp);
+    }, [isActiveProp]);
+
 
     const button = (
       <Comp
