@@ -3,9 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import dynamic from 'next/dynamic';
-
-const ClientAppShell = dynamic(() => import('@/components/layout/client-app-shell').then(mod => mod.ClientAppShell), { ssr: false });
+import { ClientAppShell } from '@/components/layout/client-app-shell';
 
 
 export const metadata: Metadata = {
