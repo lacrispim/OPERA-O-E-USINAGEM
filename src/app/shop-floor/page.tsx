@@ -207,8 +207,8 @@ export default function ShopFloorPage() {
   return (
     <>
       <PageHeader
-        title="Monitoramento de Chão de Fábrica"
-        description="Acompanhe a produção em tempo real e registre novas atividades."
+        title="Registro de Produção"
+        description="Monitore a produção, registre novas atividades e perdas."
       />
       <main className="px-4 sm:px-6 lg:px-8 pb-8">
         <Tabs defaultValue="supervisor" className="w-full">

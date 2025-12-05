@@ -18,7 +18,7 @@ import { Logo } from '@/components/logo';
 const navItems = [
   { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
   { href: '/registros-firebase', icon: Database, label: 'Dados' },
-  { href: '/shop-floor', icon: Monitor, label: 'Chão de Fábrica' },
+  { href: '/shop-floor', icon: Monitor, label: 'Registro de Produção' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
