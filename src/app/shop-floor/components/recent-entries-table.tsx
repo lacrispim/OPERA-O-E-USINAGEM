@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { OperatorProductionInput, ProductionStatus, productionStatuses } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
   onUpdateStatus: (index: number, newStatus: ProductionStatus) => void;
+  onDelete: (index: number) => void;
 };
 
 const formatTime = (totalSeconds: number) => {
@@ -37,7 +40,7 @@ const getStatusBadgeVariant = (status: ProductionStatus) => {
     }
 }
 
-export function RecentEntriesTable({ entries, onUpdateStatus }: RecentEntriesTableProps) {
+export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: RecentEntriesTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -58,6 +61,7 @@ export function RecentEntriesTable({ entries, onUpdateStatus }: RecentEntriesTab
                 <TableHead>Tempo de Usinagem</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Data e Horário</TableHead>
+                <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,11 +103,16 @@ export function RecentEntriesTable({ entries, onUpdateStatus }: RecentEntriesTab
                     <TableCell className="text-right text-muted-foreground">
                       {new Date(entry.timestamp).toLocaleString('pt-BR')}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
+                  <TableCell colSpan={10} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>

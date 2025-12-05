@@ -5,9 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
 import { getStopReasons } from "@/lib/shop-floor-data";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 type RecentLossesTableProps = {
   entries: (ProductionLossInput & { reason: string })[];
+  onDelete: (index: number) => void;
 };
 
 const formatTime = (totalMinutes: number) => {
@@ -17,7 +20,7 @@ const formatTime = (totalMinutes: number) => {
     return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
 };
 
-export function RecentLossesTable({ entries }: RecentLossesTableProps) {
+export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -36,6 +39,7 @@ export function RecentLossesTable({ entries }: RecentLossesTableProps) {
                 <TableHead className="text-center">Qtd. Perdida</TableHead>
                 <TableHead>Tempo Perdido</TableHead>
                 <TableHead className="text-right">Data e Horário</TableHead>
+                <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -53,11 +57,16 @@ export function RecentLossesTable({ entries }: RecentLossesTableProps) {
                     <TableCell className="text-right text-muted-foreground">
                       {new Date(entry.timestamp).toLocaleString('pt-BR')}
                     </TableCell>
+                    <TableCell className="text-center">
+                        <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum registro de perda recente.
                   </TableCell>
                 </TableRow>

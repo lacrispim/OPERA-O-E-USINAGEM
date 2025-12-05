@@ -47,6 +47,15 @@ export default function ShopFloorPage() {
     );
   };
 
+  const handleDeleteProduction = (indexToDelete: number) => {
+    setRecentEntries(prevEntries => prevEntries.filter((_, index) => index !== indexToDelete));
+    toast({
+      variant: 'destructive',
+      title: "Registro Removido!",
+      description: "O registro de produção foi removido.",
+    });
+  };
+
   const handleRegisterLoss = async (newLoss: Omit<ProductionLossInput, 'timestamp'>) => {
     const lossWithTimestamp: ProductionLossInput = {
         ...newLoss,
@@ -60,6 +69,15 @@ export default function ShopFloorPage() {
         description: `${newLoss.quantityLost} peças perdidas foram registradas.`,
     });
   }
+
+  const handleDeleteLoss = (indexToDelete: number) => {
+    setRecentLosses(prevLosses => prevLosses.filter((_, index) => index !== indexToDelete));
+    toast({
+        variant: 'destructive',
+        title: "Registro de Perda Removido!",
+        description: "O registro de perda foi removido.",
+    });
+  };
 
   const lossesWithReasonText = recentLosses.map(loss => {
     const reason = stopReasons.find(r => r.id === loss.reasonId);
@@ -121,8 +139,8 @@ export default function ShopFloorPage() {
                     </Card>
                 </div>
                 <div className="space-y-8">
-                    <RecentEntriesTable entries={recentEntries} onUpdateStatus={handleUpdateStatus} />
-                    <RecentLossesTable entries={lossesWithReasonText} />
+                    <RecentEntriesTable entries={recentEntries} onUpdateStatus={handleUpdateStatus} onDelete={handleDeleteProduction} />
+                    <RecentLossesTable entries={lossesWithReasonText} onDelete={handleDeleteLoss} />
                 </div>
             </div>
           </TabsContent>
