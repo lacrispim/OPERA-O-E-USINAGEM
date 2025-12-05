@@ -1,9 +1,12 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { AppShell } from '@/components/layout/app-shell';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import dynamic from 'next/dynamic';
+
+const ClientAppShell = dynamic(() => import('@/components/layout/client-app-shell').then(mod => mod.ClientAppShell), { ssr: false });
+
 
 export const metadata: Metadata = {
   title: 'FabriTrack',
@@ -27,7 +30,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <FirebaseClientProvider>
-          <AppShell>{children}</AppShell>
+          <ClientAppShell>{children}</ClientAppShell>
         </FirebaseClientProvider>
         <Toaster />
       </body>
