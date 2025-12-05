@@ -14,7 +14,7 @@ import type { OperatorProductionInput, ProductionLossInput, ProductionStatus } f
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
-import { OperatorHoursSummary } from './components/operator-hours-summary';
+import { MachineHoursSummary } from './components/machine-hours-summary';
 
 
 export default function ShopFloorPage() {
@@ -103,7 +103,7 @@ export default function ShopFloorPage() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <OeeChart data={oeeData} />
                 <StopReasonsPieChart data={stopReasonsSummary} />
-                <OperatorHoursSummary entries={recentEntries} />
+                <MachineHoursSummary entries={recentEntries} />
               </div>
             </div>
           </TabsContent>
