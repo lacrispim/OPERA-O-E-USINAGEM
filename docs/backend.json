@@ -1,0 +1,105 @@
+
+{
+  "entities": {
+    "operatorProductionInput": {
+      "title": "Operator Production Input",
+      "description": "Represents a single production entry from an operator.",
+      "type": "object",
+      "properties": {
+        "operatorId": {
+          "type": "string",
+          "description": "The ID of the operator."
+        },
+        "factory": {
+          "type": "string",
+          "description": "The factory where the production happened."
+        },
+        "machineId": {
+          "type": "string",
+          "description": "The ID of the machine used."
+        },
+        "quantityProduced": {
+          "type": "number",
+          "description": "The number of units produced."
+        },
+        "productionTimeSeconds": {
+          "type": "number",
+          "description": "The time taken for production in seconds."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of the entry."
+        },
+        "formsNumber": {
+          "type": "string",
+          "description": "The associated forms number."
+        },
+        "operationCount": {
+          "type": "number",
+          "description": "The number of operations."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Fila de produção", "Rejeitado", "Em produção", "Encerrado", "Enviado"],
+          "description": "The status of the production."
+        }
+      },
+      "required": ["operatorId", "factory", "machineId", "quantityProduced", "productionTimeSeconds", "timestamp", "status"]
+    },
+    "productionLossInput": {
+      "title": "Production Loss Input",
+      "description": "Represents a single production loss entry.",
+      "type": "object",
+      "properties": {
+        "operatorId": {
+          "type": "string",
+          "description": "The ID of the operator."
+        },
+        "factory": {
+          "type": "string",
+          "description": "The factory where the loss happened."
+        },
+        "machineId": {
+          "type": "string",
+          "description": "The ID of the machine used."
+        },
+        "quantityLost": {
+          "type": "number",
+          "description": "The number of units lost."
+        },
+        "reason": {
+          "type": "string",
+          "description": "The reason for the loss."
+        },
+        "timeLostMinutes": {
+          "type": "number",
+          "description": "The time lost in minutes."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of the entry."
+        }
+      },
+      "required": ["operatorId", "factory", "machineId", "quantityLost", "reason", "timeLostMinutes", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/production-entries": {
+      "schema": {
+        "$ref": "#/entities/operatorProductionInput"
+      },
+      "description": "Collection of production entries from operators."
+    },
+    "/production-losses": {
+      "schema": {
+        "$ref": "#/entities/productionLossInput"
+      },
+      "description": "Collection of production loss entries."
+    }
+  }
+}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -34,7 +35,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 type OperatorInputFormProps = {
-  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'status'>) => Promise<void>;
+  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'status' | 'id'>) => Promise<void>;
 };
 
 export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {

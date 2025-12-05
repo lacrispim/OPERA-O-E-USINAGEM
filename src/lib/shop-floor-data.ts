@@ -1,4 +1,6 @@
+
 import type { StopReason, OperatorProductionInput } from '@/lib/types';
+import { Timestamp } from 'firebase/firestore';
 
 // Mock data, in a real app this would come from a database.
 
@@ -19,9 +21,7 @@ export function getStopReasons(): StopReason[] {
 }
 
 export function getRecentEntries(): OperatorProductionInput[] {
-    return [
-        { operatorId: 'OP-005', factory: 'Igarassu', machineId: 'Centro de Usinagem D600', quantityProduced: 50, timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), formsNumber: 'F-1023', productionTimeSeconds: 1200, status: 'Em produção', operationCount: 4 },
-        { operatorId: 'OP-001', factory: 'Vinhedo', machineId: 'Torno CNC - Centur 30', quantityProduced: 75, timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), formsNumber: 'F-1022', productionTimeSeconds: 1850, status: 'Encerrado', operationCount: 2 },
-        { operatorId: 'OP-003', factory: 'Suape', machineId: 'Torno CNC - Centur 30', quantityProduced: 120, timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), productionTimeSeconds: 2400, status: 'Fila de produção', operationCount: 6 },
-    ]
+    // This function is now deprecated as we are fetching from Firebase.
+    // It's kept for reference or potential fallback.
+    return [];
 }

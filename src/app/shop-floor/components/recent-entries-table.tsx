@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { Timestamp } from 'firebase/firestore';
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
-  onUpdateStatus: (index: number, newStatus: ProductionStatus) => void;
-  onDelete: (index: number) => void;
+  onUpdateStatus: (id: string, newStatus: ProductionStatus) => void;
+  onDelete: (id: string) => void;
 };
 
 const formatTime = (totalSeconds: number) => {
@@ -40,6 +42,18 @@ const getStatusBadgeVariant = (status: ProductionStatus) => {
     }
 }
 
+const formatDate = (timestamp: Timestamp | string) => {
+  if (!timestamp) return 'N/A';
+  if (typeof timestamp === 'string') {
+    return new Date(timestamp).toLocaleString('pt-BR');
+  }
+  if (timestamp.toDate) {
+    return timestamp.toDate().toLocaleString('pt-BR');
+  }
+  return 'Data inválida';
+}
+
+
 export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: RecentEntriesTableProps) {
   return (
     <Card>
@@ -66,8 +80,8 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
             </TableHeader>
             <TableBody>
               {entries.length > 0 ? (
-                entries.map((entry, index) => (
-                  <TableRow key={index}>
+                entries.map((entry) => (
+                  <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
                     <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
@@ -78,7 +92,7 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
                     <TableCell>
                         <Select 
                             value={entry.status} 
-                            onValueChange={(newStatus) => onUpdateStatus(index, newStatus as ProductionStatus)}
+                            onValueChange={(newStatus) => onUpdateStatus(entry.id, newStatus as ProductionStatus)}
                         >
                             <SelectTrigger className={cn("w-[180px] h-8 text-xs", 
                                 (entry.status === 'Encerrado') && "bg-green-600/20 border-green-600 text-green-700",
@@ -101,10 +115,10 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
                         </Select>
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {new Date(entry.timestamp).toLocaleString('pt-BR')}
+                      {formatDate(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
+                      <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </TableCell>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { Timestamp } from 'firebase/firestore';
 
 type RecentLossesTableProps = {
   entries: ProductionLossInput[];
-  onDelete: (index: number) => void;
+  onDelete: (id: string) => void;
 };
 
 const formatTime = (totalMinutes: number) => {
@@ -18,6 +20,18 @@ const formatTime = (totalMinutes: number) => {
     const minutes = totalMinutes % 60;
     return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
 };
+
+const formatDate = (timestamp: Timestamp | string) => {
+  if (!timestamp) return 'N/A';
+  if (typeof timestamp === 'string') {
+    return new Date(timestamp).toLocaleString('pt-BR');
+  }
+  if (timestamp.toDate) {
+    return timestamp.toDate().toLocaleString('pt-BR');
+  }
+  return 'Data inválida';
+}
+
 
 export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps) {
   return (
@@ -43,8 +57,8 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
             </TableHeader>
             <TableBody>
               {entries.length > 0 ? (
-                entries.map((entry, index) => (
-                  <TableRow key={index}>
+                entries.map((entry) => (
+                  <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
                     <TableCell>{entry.factory}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
@@ -54,10 +68,10 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
                     <TableCell className="text-center font-mono text-red-500 font-bold">{entry.quantityLost}</TableCell>
                     <TableCell className="font-mono">{formatTime(entry.timeLostMinutes)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {new Date(entry.timestamp).toLocaleString('pt-BR')}
+                      {formatDate(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-center">
-                        <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
+                        <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                     </TableCell>

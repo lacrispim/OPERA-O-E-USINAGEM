@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,7 +31,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 type LossInputFormProps = {
-  onRegister: (data: Omit<ProductionLossInput, 'timestamp'>) => Promise<void>;
+  onRegister: (data: Omit<ProductionLossInput, 'timestamp' | 'id'>) => Promise<void>;
 };
 
 export function LossInputForm({ onRegister }: LossInputFormProps) {
