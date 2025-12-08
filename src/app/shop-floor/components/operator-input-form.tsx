@@ -98,7 +98,8 @@ export function OperatorInputForm() {
     setIsLoading(true);
     
     try {
-      await addDoc(collection(firestore, 'production-entries'), {
+      const entriesCollection = collection(firestore, 'production-entries');
+      await addDoc(entriesCollection, {
         ...values,
         productionTimeSeconds: seconds,
         timestamp: serverTimestamp(),

@@ -90,7 +90,8 @@ export function LossInputForm() {
     }
     setIsLoading(true);
     try {
-        await addDoc(collection(firestore, 'production-losses'), {
+        const lossesCollection = collection(firestore, 'production-losses');
+        await addDoc(lossesCollection, {
             ...values,
             timeLostMinutes: Math.floor(seconds / 60),
             timestamp: serverTimestamp(),
