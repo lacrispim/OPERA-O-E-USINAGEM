@@ -11,14 +11,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { WandSparkles, Database, Monitor } from 'lucide-react';
+import { Database, Monitor } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 
 const navItems = [
   { href: '/shop-floor', icon: Monitor, label: 'Registro de Produção' },
-  { href: '/otimizar', icon: WandSparkles, label: 'Otimizar Produção' },
   { href: '/registros-firebase', icon: Database, label: 'Dados' },
 ];
 
