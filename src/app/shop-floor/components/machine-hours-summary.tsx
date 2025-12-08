@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -10,7 +11,7 @@ type MachineHoursSummaryProps = {
   entries: OperatorProductionInput[];
 };
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 const getDayOfWeek = (date: Date): string => {
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -25,25 +26,27 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
 
     const machineIds = new Set<string>();
 
-    entries.forEach(entry => {
-      let entryDate: Date;
-      if (entry.timestamp instanceof Timestamp) {
-        entryDate = entry.timestamp.toDate();
-      } else if (typeof entry.timestamp === 'string') {
-        entryDate = new Date(entry.timestamp);
-      } else {
-        return; // Skip if timestamp is invalid
-      }
-      
-      const dayOfWeek = getDayOfWeek(entryDate);
-      const hours = (entry.productionTimeSeconds || 0) / 3600;
-      
-      if (!dataByDay[dayOfWeek][entry.machineId]) {
-        dataByDay[dayOfWeek][entry.machineId] = 0;
-      }
-      dataByDay[dayOfWeek][entry.machineId] += hours;
-      machineIds.add(entry.machineId);
-    });
+    if (entries) {
+        entries.forEach(entry => {
+          let entryDate: Date;
+          if (entry.timestamp instanceof Timestamp) {
+            entryDate = entry.timestamp.toDate();
+          } else if (typeof entry.timestamp === 'string') {
+            entryDate = new Date(entry.timestamp);
+          } else {
+            return; // Skip if timestamp is invalid
+          }
+          
+          const dayOfWeek = getDayOfWeek(entryDate);
+          const hours = (entry.productionTimeSeconds || 0) / 3600;
+          
+          if (!dataByDay[dayOfWeek][entry.machineId]) {
+            dataByDay[dayOfWeek][entry.machineId] = 0;
+          }
+          dataByDay[dayOfWeek][entry.machineId] += hours;
+          machineIds.add(entry.machineId);
+        });
+    }
     
     const formattedData = Object.entries(dataByDay).map(([day, machineData]) => {
         const dayData: { day: string, [key: string]: any } = { day };
@@ -74,7 +77,7 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
               <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
-              <YAxis unit="h" domain={[0, 24]} tick={{ fontSize: 12 }} />
+              <YAxis unit="h" domain={[0, 'dataMax + 2']} allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value.toFixed(1)}h`, name]}
                 contentStyle={{
@@ -89,6 +92,7 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
                   key={machineId}
                   type="monotone"
                   dataKey={machineId}
+                  name={machineId}
                   stroke={COLORS[index % COLORS.length]}
                   strokeWidth={2}
                   dot={{ r: 4 }}
@@ -100,7 +104,7 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
         ) : (
           <div className="flex items-center justify-center h-[300px]">
             <p className="text-sm text-muted-foreground">
-              Nenhum tempo de produção registrado ainda.
+              Nenhum tempo de produção registrado ainda para gerar o gráfico.
             </p>
           </div>
         )}
