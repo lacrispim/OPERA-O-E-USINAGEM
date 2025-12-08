@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { ProductionRecord } from '@/lib/types';
+import type { OperatorProductionInput, ProductionStatus } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -19,10 +19,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const TRUNCATE_COLUMNS = ["Nome da peça", "Material", "Observação", "Site"];
+const TRUNCATE_COLUMNS = ["Nº Forms"];
 const TRUNCATE_LENGTH = 25;
 
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "in-progress" | "warning" | "error" => {
@@ -31,7 +32,7 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     if (s === 'em produção') return 'in-progress';
     if (s === 'fila de produção') return 'secondary';
     if (s.includes('tratamento')) return 'warning';
-    if (s.includes('declinado')) return 'error';
+    if (s.includes('rejeitado')) return 'error';
     if (s.includes('tbd')) return 'outline';
     return 'outline';
 }
@@ -74,56 +75,61 @@ const months = Array.from({ length: 12 }, (_, i) => ({
     label: format(new Date(0, i), "MMMM", { locale: ptBR }),
 }));
 
-const PREFERRED_COLUMN_ORDER = [
-    "requestId",
-    "requestingFactory",
-    "date",
-    "material",
-    "partName",
+const PREFERRED_COLUMN_ORDER: (keyof OperatorProductionInput)[] = [
+    "operatorId",
+    "factory",
+    "machineId",
+    "formsNumber",
+    "quantityProduced",
+    "productionTimeSeconds",
     "status",
-    "quantity",
-    "centroTime",
-    "tornoTime",
-    "programacaoTime",
-    "Observação" 
+    "timestamp",
 ];
 
-const COLUMN_HEADERS: Record<keyof ProductionRecord, string> = {
-    id: "ID",
-    requestId: "Requisição",
-    requestingFactory: "Site",
-    date: "Data",
-    material: "Material",
-    partName: "Nome da peça",
+const COLUMN_HEADERS: Record<string, string> = {
+    operatorId: "Operador",
+    factory: "Fábrica",
+    machineId: "Máquina",
+    formsNumber: "Nº Forms",
+    quantityProduced: "Produzido",
+    productionTimeSeconds: "Tempo de Usinagem",
     status: "Status",
-    quantity: "Quantidade",
-    centroTime: "Centro (h)",
-    tornoTime: "Torno (h)",
-    programacaoTime: "Programação (h)",
-    manufacturingTime: "Tempo Total (h)",
-    Observação: "Observação"
+    timestamp: "Data e Horário",
+    operationCount: "Nº Operações",
 };
 
-const NUMERIC_COLUMNS = ["quantity", "requestId", "centroTime", "tornoTime", "programacaoTime", "manufacturingTime"];
+const NUMERIC_COLUMNS = ["quantityProduced", "productionTimeSeconds", "operationCount"];
 
 interface FirebaseRecordsTableProps {
-  initialData: ProductionRecord[];
-  initialHeaders: (keyof ProductionRecord)[];
+  initialData: OperatorProductionInput[];
 }
 
-export function FirebaseRecordsTable({ initialData, initialHeaders }: FirebaseRecordsTableProps) {
-  const [data] = useState<ProductionRecord[]>(initialData);
-  const [headers] = useState<(keyof ProductionRecord)[]>(initialHeaders);
+export function FirebaseRecordsTable({ initialData }: FirebaseRecordsTableProps) {
+  const [data] = useState<OperatorProductionInput[]>(initialData);
+  const headers = useMemo(() => {
+    if (data.length === 0) return PREFERRED_COLUMN_ORDER;
+    const allHeaders = new Set<keyof OperatorProductionInput>();
+      data.forEach(item => {
+          (Object.keys(item) as (keyof OperatorProductionInput)[]).forEach(key => {
+              if(key !== 'id') {
+                allHeaders.add(key);
+              }
+          })
+      });
+  
+    const sortedHeaders = PREFERRED_COLUMN_ORDER.filter(h => allHeaders.has(h));
+    const remainingHeaders = Array.from(allHeaders).filter(h => !PREFERRED_COLUMN_ORDER.includes(h));
+    return [...sortedHeaders, ...remainingHeaders];
+  }, [data]);
   
   // Filter states
-  const [siteFilter, setSiteFilter] = useState('all');
+  const [factoryFilter, setFactoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [monthFilter, setMonthFilter] = useState('all');
-  const [reqFilter, setReqFilter] = useState('');
-  const [materialFilter, setMaterialFilter] = useState('');
-  const [partNameFilter, setPartNameFilter] = useState('');
+  const [operatorIdFilter, setOperatorIdFilter] = useState('');
+  const [machineIdFilter, setMachineIdFilter] = useState('');
   
-  const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.requestingFactory).filter(Boolean)))], [data]);
+  const uniqueFactories = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.factory).filter(Boolean)))], [data]);
   
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set(data.map(d => d.status).filter(Boolean));
@@ -133,59 +139,73 @@ export function FirebaseRecordsTable({ initialData, initialHeaders }: FirebaseRe
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-        const matchesSite = siteFilter === 'all' || item.requestingFactory === siteFilter;
+        const matchesFactory = factoryFilter === 'all' || item.factory === factoryFilter;
         const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.status);
         
-        const itemDate = new Date(item.date);
+        let itemDate: Date | null = null;
+        if (item.timestamp) {
+            if (item.timestamp instanceof Timestamp) {
+                itemDate = item.timestamp.toDate();
+            } else if (typeof item.timestamp === 'string') {
+                itemDate = new Date(item.timestamp);
+            }
+        }
+
         const matchesMonth = monthFilter === 'all' || (itemDate && itemDate.getMonth() === parseInt(monthFilter));
 
-        const matchesReq = !reqFilter || (item.requestId && String(item.requestId).toLowerCase().includes(reqFilter.toLowerCase()));
-        const matchesMaterial = !materialFilter || String(item.material).toLowerCase().includes(materialFilter.toLowerCase());
-        const matchesPartName = !partNameFilter || String(item.partName).toLowerCase().includes(partNameFilter.toLowerCase());
+        const matchesOperator = !operatorIdFilter || String(item.operatorId).toLowerCase().includes(operatorIdFilter.toLowerCase());
+        const matchesMachine = !machineIdFilter || String(item.machineId).toLowerCase().includes(machineIdFilter.toLowerCase());
 
-        return matchesSite && matchesStatus && matchesMonth && matchesReq && matchesMaterial && matchesPartName;
+        return matchesFactory && matchesStatus && matchesMonth && matchesOperator && matchesMachine;
     });
-  }, [data, siteFilter, statusFilter, monthFilter, reqFilter, materialFilter, partNameFilter]);
+  }, [data, factoryFilter, statusFilter, monthFilter, operatorIdFilter, machineIdFilter]);
 
   const clearFilters = () => {
-    setSiteFilter('all');
+    setFactoryFilter('all');
     setStatusFilter([]);
     setMonthFilter('all');
-    setReqFilter('');
-    setMaterialFilter('');
-    setPartNameFilter('');
+    setOperatorIdFilter('');
+    setMachineIdFilter('');
   };
 
-  const getColumnValue = (item: ProductionRecord, header: keyof ProductionRecord) => {
+  const getColumnValue = (item: OperatorProductionInput, header: keyof OperatorProductionInput) => {
     const value = item[header];
 
-    if (header === 'date') {
-        return format(new Date(value as string), 'dd/MM/yyyy');
+    if (header === 'timestamp') {
+        if (!value) return 'N/A';
+        const date = value instanceof Timestamp ? value.toDate() : new Date(value as string);
+        return format(date, 'dd/MM/yyyy HH:mm');
     }
 
     const stringValue = String(value ?? '-');
 
     if (header === 'status') {
-        return <Badge variant={getStatusVariant(stringValue)}>{stringValue}</Badge>;
+        return <Badge variant={getStatusVariant(stringValue as ProductionStatus)}>{stringValue}</Badge>;
     }
     
-    if (header === 'requestingFactory') {
+    if (header === 'factory') {
         return <Badge className={cn("border-transparent hover:opacity-80", getFactoryColor(stringValue))}>{stringValue}</Badge>;
     }
     
     if (TRUNCATE_COLUMNS.includes(COLUMN_HEADERS[header])) {
         return <TruncatedCell text={stringValue} />;
     }
+
+    if (header === 'productionTimeSeconds') {
+        const totalSeconds = Number(value);
+        if (isNaN(totalSeconds)) return '-';
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
     
     if (NUMERIC_COLUMNS.includes(header)) {
         const num = Number(value);
-        if (header.includes('Time')) { // Format hours
-            return isNaN(num) ? '-' : num.toFixed(2);
-        }
         return isNaN(num) ? '-' : num;
     }
 
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'object' && value !== null && !(value instanceof Timestamp)) {
       return JSON.stringify(value);
     }
     return stringValue;
@@ -196,41 +216,34 @@ export function FirebaseRecordsTable({ initialData, initialHeaders }: FirebaseRe
         <div className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>JobTracker – Dados de Produção</CardTitle>
+                    <CardTitle>Dados de Produção</CardTitle>
                     <CardDescription>
-                        Visualização dos dados carregados do servidor. Atualizado em: {new Date().toLocaleString('pt-BR')}
+                        Visualização dos dados de produção salvos no Firestore. Atualizado em: {new Date().toLocaleString('pt-BR')}
                     </CardDescription>
                     <div className="flex flex-col gap-4 pt-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <Input
-                                placeholder="Filtrar por Requisição..."
-                                value={reqFilter}
-                                onChange={(e) => setReqFilter(e.target.value)}
+                                placeholder="Filtrar por Operador..."
+                                value={operatorIdFilter}
+                                onChange={(e) => setOperatorIdFilter(e.target.value)}
                             />
                             <Input
-                                placeholder="Filtrar por Nome da peça..."
-                                value={partNameFilter}
-                                onChange={(e) => setPartNameFilter(e.target.value)}
+                                placeholder="Filtrar por Máquina..."
+                                value={machineIdFilter}
+                                onChange={(e) => setMachineIdFilter(e.target.value)}
                             />
-                            <Input
-                                placeholder="Filtrar por Material..."
-                                value={materialFilter}
-                                onChange={(e) => setMaterialFilter(e.target.value)}
-                            />
-                            <Select value={siteFilter} onValueChange={setSiteFilter}>
+                             <Select value={factoryFilter} onValueChange={setFactoryFilter}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Filtrar por Site" />
+                                    <SelectValue placeholder="Filtrar por Fábrica" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {uniqueSites.map(site => (
+                                    {uniqueFactories.map(site => (
                                     <SelectItem key={site} value={site}>
-                                        {site === 'all' ? 'Todos os Sites' : site}
+                                        {site === 'all' ? 'Todas as Fábricas' : site}
                                     </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <Select value={monthFilter} onValueChange={setMonthFilter}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filtrar por Mês" />
@@ -242,14 +255,16 @@ export function FirebaseRecordsTable({ initialData, initialHeaders }: FirebaseRe
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <MultiSelect
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                           <MultiSelect
                                 options={uniqueStatuses}
                                 onValueChange={setStatusFilter}
                                 defaultValue={statusFilter}
                                 placeholder="Filtrar por Status"
                                 className="w-full"
                             />
-                            <div className="lg:col-span-2 flex justify-end">
+                            <div className="lg:col-span-3 flex justify-end">
                                 <Button variant="outline" onClick={clearFilters}>Limpar Filtros</Button>
                             </div>
                         </div>
@@ -282,7 +297,6 @@ export function FirebaseRecordsTable({ initialData, initialHeaders }: FirebaseRe
                                         className={cn(
                                             "py-2 px-4",
                                             NUMERIC_COLUMNS.includes(header) && "text-center font-mono",
-                                            (header === 'partName') && "font-bold"
                                         )}
                                     >
                                         {getColumnValue(item, header)}
