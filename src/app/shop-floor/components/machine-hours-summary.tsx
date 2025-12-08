@@ -35,12 +35,22 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
           } else if (typeof entry.timestamp === 'string') {
             entryDate = parseISO(entry.timestamp);
           } else {
-            return; // Skip if timestamp is invalid
+            // If the entry comes from a server render before hydration, it might be an object
+            // This is a workaround to handle that case.
+            try {
+                entryDate = new Date((entry.timestamp as any).seconds * 1000);
+            } catch (e) {
+                 console.error("Invalid timestamp format for entry:", entry.id, entry.timestamp);
+                 return; // Skip if timestamp is invalid
+            }
           }
           
           const dayOfWeek = getDayOfWeek(entryDate);
           const hours = (entry.productionTimeSeconds || 0) / 3600;
           
+          if (!dataByDay[dayOfWeek]) {
+              dataByDay[dayOfWeek] = {};
+          }
           if (!dataByDay[dayOfWeek][entry.machineId]) {
             dataByDay[dayOfWeek][entry.machineId] = 0;
           }
@@ -71,11 +81,11 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
         <CardDescription>Total de horas de usinagem por equipamento para a semana selecionada.</CardDescription>
       </CardHeader>
       <CardContent>
-        {chartData.machines.length > 0 ? (
+        {(entries && entries.length > 0 && chartData.machines.length > 0) ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
               <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
-              <YAxis unit="h" domain={[0, 24]} allowDecimals={false} tick={{ fontSize: 12 }} />
+              <YAxis unit="h" domain={[0, 'dataMax + 2']} allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value.toFixed(1)}h`, name]}
                 contentStyle={{
@@ -110,5 +120,3 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
     </Card>
   );
 }
-
-    

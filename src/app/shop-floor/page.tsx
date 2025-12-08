@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { collection, addDoc, serverTimestamp, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { useCollection, query, orderBy, limit } from '@/firebase/firestore/use-collection';
+import { collection, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, query, orderBy, limit } from 'firebase/firestore';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import { firestore } from '@/lib/firebase';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -53,20 +53,20 @@ export default function ShopFloorPage() {
   const weekOptions = useMemo(() => generateWeekOptions(), []);
 
   
-  const { data: recentEntries, loading: loadingEntries } = useCollection<OperatorProductionInput>('production-entries', {
-    constraints: [orderBy('timestamp', 'desc'), limit(200)] // Fetch more entries for filtering
-  });
+  const { data: recentEntries, loading: loadingEntries } = useCollection<OperatorProductionInput>(
+    'production-entries',
+    { constraints: [orderBy('timestamp', 'desc'), limit(200)] }
+  );
 
-  const { data: recentLosses, loading: loadingLosses } = useCollection<ProductionLossInput>('production-losses', {
-    constraints: [orderBy('timestamp', 'desc'), limit(50)]
-  });
+  const { data: recentLosses, loading: loadingLosses } = useCollection<ProductionLossInput>(
+      'production-losses',
+      { constraints: [orderBy('timestamp', 'desc'), limit(50)] }
+  );
 
   const filteredEntriesForWeek = useMemo(() => {
     if (!recentEntries) return [];
 
     const year = new Date().getFullYear();
-    // Week numbers in date-fns are tricky. We create a date in the middle of the year
-    // and then set the week.
     const startOfTheWeek = startOfWeek(new Date(year, 0, 4 + (selectedWeek - 1) * 7), { weekStartsOn: 1 });
     const endOfTheWeek = endOfWeek(startOfTheWeek, { weekStartsOn: 1 });
     
