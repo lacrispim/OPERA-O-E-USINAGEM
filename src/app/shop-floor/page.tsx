@@ -17,7 +17,7 @@ import type { OperatorProductionInput, ProductionLossInput, ProductionStatus, Ma
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
-import { TotalHoursCard } from './components/total-hours-card';
+import { MonthlyHoursChart } from './components/monthly-hours-chart';
 
 // OEE Calculation Constants
 const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
@@ -233,7 +233,7 @@ export default function ShopFloorPage() {
           <TabsContent value="supervisor">
              <div className="max-w-7xl mx-auto mt-6 space-y-6">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                     <TotalHoursCard 
+                     <MonthlyHoursChart 
                       totalHours={TOTAL_MONTHLY_HOURS} 
                       usedHours={totalUsedHours} 
                     />
@@ -276,7 +276,3 @@ export default function ShopFloorPage() {
     </>
   );
 }
-
-    
-
-    
