@@ -3,7 +3,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Monitor, Tablet } from "lucide-react";
+import { Loader2, Monitor, Tablet } from "lucide-react";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { LossInputForm } from "./components/loss-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
@@ -26,14 +26,18 @@ export default function ShopFloorPage() {
     const firestore = useFirestore();
     const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>([]);
     const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!firestore) return;
+
+        setIsLoading(true);
 
         const entriesQuery = query(collection(firestore, "production-entries"), orderBy("timestamp", "desc"), limit(500));
         const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
             setRecentEntries(data);
+            setIsLoading(false);
         });
 
         const lossesQuery = query(collection(firestore, "production-losses"), orderBy("timestamp", "desc"), limit(200));
@@ -164,14 +168,21 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
              <div className="max-w-7xl mx-auto mt-6 space-y-6">
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                     <MonthlyHoursChart 
-                      totalHours={TOTAL_MONTHLY_HOURS} 
-                      usedHours={totalUsedHours} 
-                    />
-                    <OeeChart data={oeeData} />
-                    <StopReasonsPieChart data={stopReasonsSummary} totalMinutes={totalLostMinutes} />
-                 </div>
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-4 text-muted-foreground">Carregando dados do dashboard...</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      <MonthlyHoursChart 
+                        totalHours={TOTAL_MONTHLY_HOURS} 
+                        usedHours={totalUsedHours} 
+                      />
+                      <OeeChart data={oeeData} />
+                      <StopReasonsPieChart data={stopReasonsSummary} totalMinutes={totalLostMinutes} />
+                  </div>
+                )}
             </div>
           </TabsContent>
 
