@@ -8,6 +8,8 @@ import type { OperatorProductionInput } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 
 export default function RegistrosFirebasePage() {
@@ -32,13 +34,18 @@ export default function RegistrosFirebasePage() {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
         setRecords(data);
         setLoading(false);
-    }, (err) => {
-        console.error("Firebase data fetching error:", err);
+    }, (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: q.toString(),
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Firebase data fetching error:", serverError);
         setError("Falha ao carregar os dados do banco de dados.");
         toast({
             variant: "destructive",
             title: "Erro ao carregar dados",
-            description: "Não foi possível buscar os registros do Firestore."
+            description: serverError.message || "Não foi possível buscar os registros do Firestore."
         })
         setLoading(false);
     });
@@ -88,3 +95,5 @@ export default function RegistrosFirebasePage() {
     </>
   );
 }
+
+    

@@ -14,6 +14,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -89,13 +91,16 @@ export function LossInputForm() {
       return;
     }
     setIsLoading(true);
-    try {
-        const lossesCollection = collection(firestore, 'production-losses');
-        await addDoc(lossesCollection, {
-            ...values,
-            timeLostMinutes: Math.floor(seconds / 60),
-            timestamp: serverTimestamp(),
-        });
+    
+    const lossesCollection = collection(firestore, 'production-losses');
+    const dataToSave = {
+        ...values,
+        timeLostMinutes: Math.floor(seconds / 60),
+        timestamp: serverTimestamp(),
+    };
+
+    addDoc(lossesCollection, dataToSave)
+      .then(() => {
         toast({
             variant: 'destructive',
             title: "Perda Registrada!",
@@ -110,16 +115,24 @@ export function LossInputForm() {
         });
         setSeconds(0);
         setIsRunning(false);
-    } catch (error) {
-        console.error("Error adding document: ", error);
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: lossesCollection.path,
+          operation: 'create',
+          requestResourceData: dataToSave,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error adding document: ", serverError);
         toast({
             variant: 'destructive',
             title: "Erro ao registrar perda",
-            description: "Não foi possível salvar os dados de perda.",
+            description: serverError.message || "Não foi possível salvar os dados de perda.",
         });
-    } finally {
+      })
+      .finally(() => {
         setIsLoading(false);
-    }
+      });
   }
 
   const formatTime = (totalSeconds: number) => {
@@ -273,3 +286,5 @@ export function LossInputForm() {
     </Form>
   );
 }
+
+    

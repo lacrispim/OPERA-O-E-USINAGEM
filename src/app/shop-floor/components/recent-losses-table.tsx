@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from "react";
@@ -11,6 +12,8 @@ import { Timestamp, doc, deleteDoc, collection, query, orderBy, limit, onSnapsho
 import { parseISO } from "date-fns";
 import { useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 type RecentLossesTableProps = {
   onDelete?: (id: string) => void;
@@ -49,12 +52,17 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
         setEntries(data);
-    }, (error) => {
-        console.error("Error fetching recent losses: ", error);
+    }, (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: q.toString(),
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error fetching recent losses: ", serverError);
         toast({
             variant: 'destructive',
             title: 'Erro ao carregar perdas',
-            description: 'Não foi possível buscar os registros de perdas recentes.'
+            description: serverError.message || 'Não foi possível buscar os registros de perdas recentes.'
         })
     });
 
@@ -62,28 +70,34 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
   }, [firestore, toast]);
 
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (onDelete) {
         onDelete(id);
         return;
     }
     if (!firestore) return;
     const lossRef = doc(firestore, 'production-losses', id);
-    try {
-      await deleteDoc(lossRef);
-      toast({
+    deleteDoc(lossRef)
+      .then(() => {
+        toast({
+            variant: 'destructive',
+            title: "Registro de Perda Removido!",
+            description: "O registro de perda foi removido.",
+        });
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: lossRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error deleting document: ", serverError);
+        toast({
           variant: 'destructive',
-          title: "Registro de Perda Removido!",
-          description: "O registro de perda foi removido.",
+          title: "Erro ao remover",
+          description: serverError.message || "Não foi possível remover o registro de perda.",
+        });
       });
-    } catch(error) {
-      console.error("Error deleting document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao remover",
-        description: "Não foi possível remover o registro de perda.",
-      });
-    }
   };
 
 
@@ -144,3 +158,5 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
     </Card>
   );
 }
+
+    

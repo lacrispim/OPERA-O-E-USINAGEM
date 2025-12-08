@@ -14,6 +14,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -96,40 +98,50 @@ export function OperatorInputForm() {
       return;
     }
     setIsLoading(true);
+
+    const entriesCollection = collection(firestore, 'production-entries');
+    const dataToSave = {
+      ...values,
+      productionTimeSeconds: seconds,
+      timestamp: serverTimestamp(),
+      status: 'Em produção',
+    };
     
-    try {
-      const entriesCollection = collection(firestore, 'production-entries');
-      await addDoc(entriesCollection, {
-        ...values,
-        productionTimeSeconds: seconds,
-        timestamp: serverTimestamp(),
-        status: 'Em produção',
+    addDoc(entriesCollection, dataToSave)
+      .then(() => {
+        toast({
+          title: "Produção Registrada!",
+          description: `${values.quantityProduced} peças registradas para ${values.operatorId}.`,
+        });
+        form.reset({
+            operatorId: values.operatorId,
+            machineId: '',
+            quantityProduced: 0,
+            formsNumber: '',
+            factory: values.factory,
+            productionTimeMinutes: 0,
+            operationCount: undefined
+        });
+        setSeconds(0);
+        setIsRunning(false);
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: entriesCollection.path,
+          operation: 'create',
+          requestResourceData: dataToSave,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error adding document: ", serverError); // Keep for debugging
+        toast({
+          variant: "destructive",
+          title: "Erro ao registrar",
+          description: serverError.message || "Não foi possível salvar os dados de produção.",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-      toast({
-        title: "Produção Registrada!",
-        description: `${values.quantityProduced} peças registradas para ${values.operatorId}.`,
-      });
-      form.reset({
-          operatorId: values.operatorId,
-          machineId: '',
-          quantityProduced: 0,
-          formsNumber: '',
-          factory: values.factory,
-          productionTimeMinutes: 0,
-          operationCount: undefined
-      });
-      setSeconds(0);
-      setIsRunning(false);
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao registrar",
-        description: "Não foi possível salvar os dados de produção.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   const formatTime = (totalSeconds: number) => {
@@ -299,3 +311,5 @@ export function OperatorInputForm() {
     </Form>
   );
 }
+
+    

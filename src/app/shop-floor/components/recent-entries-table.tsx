@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from "react";
@@ -13,6 +14,8 @@ import { Timestamp, doc, updateDoc, deleteDoc, collection, query, orderBy, limit
 import { parseISO } from 'date-fns';
 import { useFirestore } from '@/firebase';
 import { useToast } from "@/hooks/use-toast";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 const formatTime = (totalSeconds: number) => {
     if (totalSeconds === undefined || totalSeconds === null) return '-';
@@ -66,12 +69,17 @@ export function RecentEntriesTable() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
         setEntries(data);
-    }, (error) => {
-        console.error("Error fetching recent entries: ", error);
+    }, (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: q.toString(),
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error fetching recent entries: ", serverError);
         toast({
             variant: 'destructive',
             title: 'Erro ao carregar registros',
-            description: 'Não foi possível buscar as entradas recentes.'
+            description: serverError.message || 'Não foi possível buscar as entradas recentes.'
         })
     });
 
@@ -79,39 +87,50 @@ export function RecentEntriesTable() {
   }, [firestore, toast]);
 
 
-  const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
+  const handleUpdateStatus = (id: string, newStatus: ProductionStatus) => {
     if (!firestore) return;
     const entryRef = doc(firestore, 'production-entries', id);
-    try {
-      await updateDoc(entryRef, { status: newStatus });
-    } catch (error) {
-       console.error("Error updating document: ", error);
-       toast({
-        variant: 'destructive',
-        title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o status.",
+    updateDoc(entryRef, { status: newStatus })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: entryRef.path,
+          operation: 'update',
+          requestResourceData: { status: newStatus },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error updating document: ", serverError);
+        toast({
+          variant: 'destructive',
+          title: "Erro ao atualizar",
+          description: serverError.message || "Não foi possível atualizar o status.",
+        });
       });
-    }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!firestore) return;
     const entryRef = doc(firestore, 'production-entries', id);
-    try {
-      await deleteDoc(entryRef);
-      toast({
-        variant: 'destructive',
-        title: "Registro Removido!",
-        description: "O registro de produção foi removido.",
+    deleteDoc(entryRef)
+      .then(() => {
+        toast({
+          variant: 'destructive',
+          title: "Registro Removido!",
+          description: "O registro de produção foi removido.",
+        });
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: entryRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error deleting document: ", serverError);
+        toast({
+          variant: 'destructive',
+          title: "Erro ao remover",
+          description: serverError.message || "Não foi possível remover o registro.",
+        });
       });
-    } catch (error) {
-      console.error("Error deleting document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao remover",
-        description: "Não foi possível remover o registro.",
-      });
-    }
   };
 
   return (
@@ -197,3 +216,5 @@ export function RecentEntriesTable() {
     </Card>
   );
 }
+
+    

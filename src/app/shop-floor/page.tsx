@@ -16,6 +16,8 @@ import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
 import { useFirestore } from "@/firebase";
 import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 
 const TOTAL_MONTHLY_HOURS = 540;
@@ -39,8 +41,10 @@ export default function ShopFloorPage() {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
             setRecentEntries(data);
             setIsLoading(false); 
-        }, (error) => {
-            console.error("Error fetching entries:", error);
+        }, (serverError) => {
+            const permissionError = new FirestorePermissionError({ path: entriesQuery.toString(), operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
+            console.error("Error fetching entries:", serverError);
             setIsLoading(false);
         });
 
@@ -48,8 +52,10 @@ export default function ShopFloorPage() {
         const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
             setRecentLosses(data);
-        }, (error) => {
-            console.error("Error fetching losses:", error);
+        }, (serverError) => {
+            const permissionError = new FirestorePermissionError({ path: lossesQuery.toString(), operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
+            console.error("Error fetching losses:", serverError);
         });
 
         return () => {
@@ -225,3 +231,5 @@ export default function ShopFloorPage() {
     </>
   );
 }
+
+    
