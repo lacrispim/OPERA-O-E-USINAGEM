@@ -12,6 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import type { OperatorProductionInput } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -34,11 +37,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-type OperatorInputFormProps = {
-  onRegister: (data: Omit<OperatorProductionInput, 'timestamp' | 'status' | 'id'>) => Promise<void>;
-};
-
-export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
+export function OperatorInputForm() {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -89,24 +89,38 @@ export function OperatorInputForm({ onRegister }: OperatorInputFormProps) {
   async function onSubmit(values: FormData) {
     setIsLoading(true);
     
-    await onRegister({
-      ...values,
-      productionTimeSeconds: seconds,
-    });
-    
-    form.reset({
-        operatorId: values.operatorId,
-        machineId: '',
-        quantityProduced: 0,
-        formsNumber: '',
-        factory: values.factory,
-        productionTimeMinutes: 0,
-        operationCount: undefined
-    });
-    setSeconds(0);
-    setIsRunning(false);
-
-    setIsLoading(false);
+    try {
+      await addDoc(collection(firestore, 'production-entries'), {
+        ...values,
+        productionTimeSeconds: seconds,
+        timestamp: serverTimestamp(),
+        status: 'Em produção',
+      });
+      toast({
+        title: "Produção Registrada!",
+        description: `${values.quantityProduced} peças registradas para ${values.operatorId}.`,
+      });
+      form.reset({
+          operatorId: values.operatorId,
+          machineId: '',
+          quantityProduced: 0,
+          formsNumber: '',
+          factory: values.factory,
+          productionTimeMinutes: 0,
+          operationCount: undefined
+      });
+      setSeconds(0);
+      setIsRunning(false);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      toast({
+        variant: 'destructive',
+        title: "Erro ao registrar",
+        description: "Não foi possível salvar os dados de produção.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const formatTime = (totalSeconds: number) => {

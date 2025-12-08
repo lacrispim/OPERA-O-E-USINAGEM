@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from "date-fns";
+import { useCollection, orderBy, limit } from "@/firebase/firestore/use-collection";
+import { firestore } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 type RecentLossesTableProps = {
-  entries: ProductionLossInput[];
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 };
 
 const formatTime = (totalMinutes: number) => {
@@ -36,12 +38,42 @@ const formatDate = (timestamp: Timestamp | string) => {
 }
 
 
-export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps) {
+export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
+  const { toast } = useToast();
+  const { data: entries } = useCollection<ProductionLossInput>(
+    'production-losses',
+    { constraints: [orderBy('timestamp', 'desc'), limit(10)] }
+  );
+
+  const handleDelete = async (id: string) => {
+    if (onDelete) {
+        onDelete(id);
+        return;
+    }
+    const lossRef = doc(firestore, 'production-losses', id);
+    try {
+      await deleteDoc(lossRef);
+      toast({
+          variant: 'destructive',
+          title: "Registro de Perda Removido!",
+          description: "O registro de perda foi removido.",
+      });
+    } catch(error) {
+      console.error("Error deleting document: ", error);
+      toast({
+        variant: 'destructive',
+        title: "Erro ao remover",
+        description: "Não foi possível remover o registro de perda.",
+      });
+    }
+  };
+
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Registros de Perdas Recentes</CardTitle>
-        <CardDescription>Últimas entradas de perdas de produção.</CardDescription>
+        <CardDescription>Últimas 10 entradas de perdas de produção.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -59,7 +91,7 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries.length > 0 ? (
+              {entries && entries.length > 0 ? (
                 entries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
@@ -74,7 +106,7 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
                       {formatDate(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-center">
-                        <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(entry.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                     </TableCell>
@@ -94,5 +126,3 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
     </Card>
   );
 }
-
-    

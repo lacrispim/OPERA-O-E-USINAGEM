@@ -9,14 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
-
-type RecentEntriesTableProps = {
-  entries: OperatorProductionInput[];
-  onUpdateStatus: (id: string, newStatus: ProductionStatus) => void;
-  onDelete: (id: string) => void;
-};
+import { useCollection, orderBy, limit } from "@/firebase/firestore/use-collection";
+import { firestore } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 const formatTime = (totalSeconds: number) => {
     if (totalSeconds === undefined || totalSeconds === null) return '-';
@@ -57,12 +54,51 @@ const formatDate = (timestamp: Timestamp | string) => {
 }
 
 
-export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: RecentEntriesTableProps) {
+export function RecentEntriesTable() {
+  const { toast } = useToast();
+  const { data: entries } = useCollection<OperatorProductionInput>(
+    'production-entries',
+    { constraints: [orderBy('timestamp', 'desc'), limit(10)] }
+  );
+
+  const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
+    const entryRef = doc(firestore, 'production-entries', id);
+    try {
+      await updateDoc(entryRef, { status: newStatus });
+    } catch (error) {
+       console.error("Error updating document: ", error);
+       toast({
+        variant: 'destructive',
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o status.",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const entryRef = doc(firestore, 'production-entries', id);
+    try {
+      await deleteDoc(entryRef);
+      toast({
+        variant: 'destructive',
+        title: "Registro Removido!",
+        description: "O registro de produção foi removido.",
+      });
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+      toast({
+        variant: 'destructive',
+        title: "Erro ao remover",
+        description: "Não foi possível remover o registro.",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Registros de Produção Recentes</CardTitle>
-        <CardDescription>Últimas entradas de produção bem-sucedida.</CardDescription>
+        <CardDescription>Últimas 10 entradas de produção bem-sucedida.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -82,7 +118,7 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries.length > 0 ? (
+              {entries && entries.length > 0 ? (
                 entries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
@@ -95,7 +131,7 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
                     <TableCell>
                         <Select 
                             value={entry.status} 
-                            onValueChange={(newStatus) => onUpdateStatus(entry.id, newStatus as ProductionStatus)}
+                            onValueChange={(newStatus) => handleUpdateStatus(entry.id, newStatus as ProductionStatus)}
                         >
                             <SelectTrigger className={cn("w-[180px] h-8 text-xs", 
                                 (entry.status === 'Encerrado') && "bg-green-600/20 border-green-600 text-green-700",
@@ -121,7 +157,7 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
                       {formatDate(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(entry.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </TableCell>
@@ -141,5 +177,3 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
     </Card>
   );
 }
-
-    

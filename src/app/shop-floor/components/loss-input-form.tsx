@@ -12,6 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import type { ProductionLossInput } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -30,11 +33,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-type LossInputFormProps = {
-  onRegister: (data: Omit<ProductionLossInput, 'timestamp' | 'id'>) => Promise<void>;
-};
-
-export function LossInputForm({ onRegister }: LossInputFormProps) {
+export function LossInputForm() {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -81,20 +81,36 @@ export function LossInputForm({ onRegister }: LossInputFormProps) {
 
   async function onSubmit(values: FormData) {
     setIsLoading(true);
-    await onRegister({
-        ...values,
-        timeLostMinutes: Math.floor(seconds / 60),
-    });
-    form.reset({
-        ...values,
-        machineId: '',
-        quantityLost: 0,
-        reason: '',
-        timeLostMinutes: 0,
-    });
-    setSeconds(0);
-    setIsRunning(false);
-    setIsLoading(false);
+    try {
+        await addDoc(collection(firestore, 'production-losses'), {
+            ...values,
+            timeLostMinutes: Math.floor(seconds / 60),
+            timestamp: serverTimestamp(),
+        });
+        toast({
+            variant: 'destructive',
+            title: "Perda Registrada!",
+            description: `${values.quantityLost} peças perdidas foram registradas.`,
+        });
+        form.reset({
+            ...values,
+            machineId: '',
+            quantityLost: 0,
+            reason: '',
+            timeLostMinutes: 0,
+        });
+        setSeconds(0);
+        setIsRunning(false);
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        toast({
+            variant: 'destructive',
+            title: "Erro ao registrar perda",
+            description: "Não foi possível salvar os dados de perda.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
   }
 
   const formatTime = (totalSeconds: number) => {

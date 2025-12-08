@@ -1,41 +1,36 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import { collection, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, query, orderBy, limit, Timestamp } from 'firebase/firestore';
-import { useCollection } from '@/firebase/firestore/use-collection';
-import { firestore } from '@/lib/firebase';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Monitor, Tablet } from "lucide-react";
+import { OperatorInputForm } from "./components/operator-input-form";
+import { LossInputForm } from "./components/loss-input-form";
+import { RecentEntriesTable } from "./components/recent-entries-table";
+import { RecentLossesTable } from "./components/recent-losses-table";
 import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
-import { OperatorInputForm } from "./components/operator-input-form";
-import { RecentEntriesTable } from "./components/recent-entries-table";
-import { Monitor, Tablet } from "lucide-react";
-import type { OperatorProductionInput, ProductionLossInput, ProductionStatus, MachineOEE } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-import { LossInputForm } from './components/loss-input-form';
-import { RecentLossesTable } from './components/recent-losses-table';
-import { MonthlyHoursChart } from './components/monthly-hours-chart';
+import { MonthlyHoursChart } from "./components/monthly-hours-chart";
+import { useCollection } from "@/firebase/firestore/use-collection";
+import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
+import { useMemo } from "react";
 
-// OEE Calculation Constants
+
+const TOTAL_MONTHLY_HOURS = 540;
 const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
 const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
-const TOTAL_MONTHLY_HOURS = 540;
 
 
 export default function ShopFloorPage() {
-  const { toast } = useToast();
-
-  const { data: recentEntries, loading: loadingEntries } = useCollection<OperatorProductionInput>(
+  const { data: recentEntries } = useCollection<OperatorProductionInput>(
     'production-entries',
-    { constraints: [orderBy('timestamp', 'desc'), limit(500)] }
+    { constraints: [ {type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 500} ] }
   );
 
-  const { data: recentLosses, loading: loadingLosses } = useCollection<ProductionLossInput>(
+  const { data: recentLosses } = useCollection<ProductionLossInput>(
       'production-losses',
-      { constraints: [orderBy('timestamp', 'desc'), limit(200)] }
+      { constraints: [ {type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 200} ] }
   );
 
   const { stopReasonsSummary, totalLostMinutes } = useMemo(() => {
@@ -67,6 +62,7 @@ export default function ShopFloorPage() {
     const machines = new Set([...entries.map(e => e.machineId), ...losses.map(l => l.machineId)]);
 
     machines.forEach(machineId => {
+      if (!machineId) return;
       machineData[machineId] = {
         totalProduced: 0,
         totalLost: 0,
@@ -91,7 +87,7 @@ export default function ShopFloorPage() {
       }
     });
 
-    const oeeByMachine: MachineOEE[] = Object.entries(machineData).map(([machineId, data]) => {
+    const oeeByMachine: any[] = Object.entries(machineData).map(([machineId, data]) => {
       const plannedProductionTime = TOTAL_AVAILABLE_TIME_SECONDS - data.downTime;
       
       const availability = (plannedProductionTime / TOTAL_AVAILABLE_TIME_SECONDS) * 100;
@@ -122,99 +118,6 @@ export default function ShopFloorPage() {
     };
   }, [recentEntries, recentLosses]);
 
-  const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp' | 'status' | 'id'>) => {
-    try {
-      await addDoc(collection(firestore, 'production-entries'), {
-        ...newEntry,
-        timestamp: serverTimestamp(),
-        status: 'Em produção',
-      });
-      toast({
-        title: "Produção Registrada!",
-        description: `${newEntry.quantityProduced} peças registradas para ${newEntry.operatorId}.`,
-      });
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao registrar",
-        description: "Não foi possível salvar os dados de produção.",
-      });
-    }
-  };
-
-  const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
-    const entryRef = doc(firestore, 'production-entries', id);
-    try {
-      await updateDoc(entryRef, { status: newStatus });
-    } catch (error) {
-       console.error("Error updating document: ", error);
-       toast({
-        variant: 'destructive',
-        title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o status.",
-      });
-    }
-  };
-
-  const handleDeleteProduction = async (id: string) => {
-    const entryRef = doc(firestore, 'production-entries', id);
-    try {
-      await deleteDoc(entryRef);
-      toast({
-        variant: 'destructive',
-        title: "Registro Removido!",
-        description: "O registro de produção foi removido.",
-      });
-    } catch (error) {
-      console.error("Error deleting document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao remover",
-        description: "Não foi possível remover o registro.",
-      });
-    }
-  };
-
-  const handleRegisterLoss = async (newLoss: Omit<ProductionLossInput, 'timestamp' | 'id'>) => {
-    try {
-      await addDoc(collection(firestore, 'production-losses'), {
-        ...newLoss,
-        timestamp: serverTimestamp(),
-      });
-      toast({
-          variant: 'destructive',
-          title: "Perda Registrada!",
-          description: `${newLoss.quantityLost} peças perdidas foram registradas.`,
-      });
-    } catch (error) {
-       console.error("Error adding document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao registrar perda",
-        description: "Não foi possível salvar os dados de perda.",
-      });
-    }
-  }
-
-  const handleDeleteLoss = async (id: string) => {
-    const lossRef = doc(firestore, 'production-losses', id);
-    try {
-      await deleteDoc(lossRef);
-      toast({
-          variant: 'destructive',
-          title: "Registro de Perda Removido!",
-          description: "O registro de perda foi removido.",
-      });
-    } catch(error) {
-      console.error("Error deleting document: ", error);
-      toast({
-        variant: 'destructive',
-        title: "Erro ao remover",
-        description: "Não foi possível remover o registro de perda.",
-      });
-    }
-  };
 
   return (
     <>
@@ -257,7 +160,7 @@ export default function ShopFloorPage() {
                             <CardDescription>Insira os dados de produção da sua atividade.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <OperatorInputForm onRegister={handleRegisterProduction} />
+                            <OperatorInputForm />
                         </CardContent>
                     </Card>
                     <Card>
@@ -266,13 +169,13 @@ export default function ShopFloorPage() {
                             <CardDescription>Registre peças perdidas e o tempo de inatividade.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                           <LossInputForm onRegister={handleRegisterLoss} />
+                           <LossInputForm />
                         </CardContent>
                     </Card>
                 </div>
                 <div className="space-y-8">
-                    <RecentEntriesTable entries={recentEntries || []} onUpdateStatus={handleUpdateStatus} onDelete={handleDeleteProduction} />
-                    <RecentLossesTable entries={recentLosses || []} onDelete={handleDeleteLoss} />
+                    <RecentEntriesTable />
+                    <RecentLossesTable />
                 </div>
             </div>
           </TabsContent>
