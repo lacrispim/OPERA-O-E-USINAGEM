@@ -12,7 +12,7 @@ import { Trash2 } from "lucide-react";
 import { Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { useFirestore } from "@/firebase";
+import { useFirestore } from '@/firebase';
 import { useToast } from "@/hooks/use-toast";
 
 const formatTime = (totalSeconds: number) => {

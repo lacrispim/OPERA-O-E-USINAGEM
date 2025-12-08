@@ -22,7 +22,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { MultiSelect } from '@/components/ui/multi-select';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { database } from '@/lib/firebase';
+import { useFirebase } from '@/firebase';
 
 
 const PREFERRED_COLUMN_ORDER = [
@@ -118,6 +118,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 
 
 export function FirebaseRecordsTable() {
+  const { database } = useFirebase();
   const [data, setData] = useState<any[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +133,11 @@ export function FirebaseRecordsTable() {
   const [partNameFilter, setPartNameFilter] = useState('');
   
   useEffect(() => {
+    if (!database) {
+      setLoading(false);
+      setError("Conexão com o banco de dados não estabelecida.");
+      return;
+    }
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
     const nodeRef = ref(database, nodePath);
 
@@ -180,7 +186,7 @@ export function FirebaseRecordsTable() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [database]);
   
   const uniqueSites = useMemo(() => ['all', ...Array.from(new Set(data.map(d => d.Site).filter(Boolean)))], [data]);
   
