@@ -10,6 +10,7 @@ import {
   useFirebaseApp,
   useFirestore,
   useAuth,
+  useDatabase,
 } from './provider';
 import { FirebaseClientProvider } from './client-provider';
 import { useCollection } from './firestore/use-collection';
@@ -38,4 +39,5 @@ export {
   useFirebaseApp,
   useFirestore,
   useAuth,
+  useDatabase,
 };

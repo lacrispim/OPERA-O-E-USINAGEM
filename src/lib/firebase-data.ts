@@ -91,6 +91,9 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
 
 export async function getFirebaseProductionRecords(database: Database): Promise<ProductionRecord[]> {
   try {
+    if (!database) {
+      throw new Error("Database instance is not provided.");
+    }
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
     const nodeRef = ref(database, nodePath);
     const snapshot = await get(nodeRef);
