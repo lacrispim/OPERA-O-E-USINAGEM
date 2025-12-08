@@ -38,7 +38,7 @@ export default function ShopFloorPage() {
         const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
             setRecentEntries(data);
-            setIsLoading(false); // Set loading to false after data is fetched
+            setIsLoading(false); 
         }, (error) => {
             console.error("Error fetching entries:", error);
             setIsLoading(false);
