@@ -16,6 +16,7 @@ import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import type { ProductionStatus } from '@/lib/types';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
@@ -34,6 +35,7 @@ const formSchema = z.object({
     (a) => (String(a) === '' ? undefined : parseInt(z.string().parse(String(a)), 10)),
     z.number().int().positive('O número de operações deve ser positivo.').optional()
   ),
+  status: z.string().optional(), // Now includes status
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,6 +57,7 @@ export function OperatorInputForm() {
       factory: '',
       productionTimeMinutes: 0,
       operationCount: undefined,
+      status: 'Em produção',
     },
   });
 
@@ -104,8 +107,11 @@ export function OperatorInputForm() {
       ...values,
       productionTimeSeconds: seconds,
       timestamp: serverTimestamp(),
-      status: 'Em produção',
+      status: values.status || 'Fila de produção',
     };
+    
+    // Remove the temporary client-side field
+    delete (dataToSave as any).productionTimeMinutes;
     
     addDoc(entriesCollection, dataToSave)
       .then(() => {
@@ -120,7 +126,8 @@ export function OperatorInputForm() {
             formsNumber: '',
             factory: values.factory,
             productionTimeMinutes: 0,
-            operationCount: undefined
+            operationCount: undefined,
+            status: 'Em produção',
         });
         setSeconds(0);
         setIsRunning(false);
@@ -311,5 +318,3 @@ export function OperatorInputForm() {
     </Form>
   );
 }
-
-    
