@@ -232,7 +232,7 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
             <div className="grid gap-6 mt-6 max-w-7xl mx-auto">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                 <TotalHoursCard 
                   totalHours={TOTAL_MONTHLY_HOURS} 
                   usedHours={totalUsedHours} 
