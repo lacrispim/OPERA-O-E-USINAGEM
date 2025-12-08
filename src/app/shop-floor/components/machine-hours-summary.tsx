@@ -2,63 +2,108 @@
 
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Line, LineChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { OperatorProductionInput } from '@/lib/types';
+import { Timestamp } from 'firebase/firestore';
 
 type MachineHoursSummaryProps = {
   entries: OperatorProductionInput[];
 };
 
-const MONTHLY_HOURS_PER_MACHINE = 270; // 540h / 2 machines
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
+
+const getDayOfWeek = (date: Date): string => {
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  return days[date.getDay()];
+};
 
 export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
-  const machineHours = useMemo(() => {
-    const hoursByMachine: Record<string, number> = {};
+  const chartData = useMemo(() => {
+    const dataByDay: Record<string, Record<string, number>> = {
+      'Dom': {}, 'Seg': {}, 'Ter': {}, 'Qua': {}, 'Qui': {}, 'Sex': {}, 'Sáb': {}
+    };
+
+    const machineIds = new Set<string>();
 
     entries.forEach(entry => {
-      const hours = (entry.productionTimeSeconds || 0) / 3600;
-      if (hoursByMachine[entry.machineId]) {
-        hoursByMachine[entry.machineId] += hours;
+      let entryDate: Date;
+      if (entry.timestamp instanceof Timestamp) {
+        entryDate = entry.timestamp.toDate();
+      } else if (typeof entry.timestamp === 'string') {
+        entryDate = new Date(entry.timestamp);
       } else {
-        hoursByMachine[entry.machineId] = hours;
+        return; // Skip if timestamp is invalid
       }
+      
+      const dayOfWeek = getDayOfWeek(entryDate);
+      const hours = (entry.productionTimeSeconds || 0) / 3600;
+      
+      if (!dataByDay[dayOfWeek][entry.machineId]) {
+        dataByDay[dayOfWeek][entry.machineId] = 0;
+      }
+      dataByDay[dayOfWeek][entry.machineId] += hours;
+      machineIds.add(entry.machineId);
+    });
+    
+    const formattedData = Object.entries(dataByDay).map(([day, machineData]) => {
+        const dayData: { day: string, [key: string]: any } = { day };
+        machineIds.forEach(id => {
+            dayData[id] = machineData[id] || 0;
+        });
+        return dayData;
     });
 
-    return Object.entries(hoursByMachine)
-      .map(([machineId, totalHours]) => ({
-        machineId,
-        totalHours,
-        percentage: (totalHours / MONTHLY_HOURS_PER_MACHINE) * 100,
-      }))
-      .sort((a, b) => b.totalHours - a.totalHours);
+    const dayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    formattedData.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+
+    return {
+        data: formattedData,
+        machines: Array.from(machineIds)
+    };
+
   }, [entries]);
 
   return (
-    <Card className="lg:col-span-1">
+    <Card className="lg:col-span-2">
       <CardHeader>
         <CardTitle>Horas Consumidas por Máquina</CardTitle>
-        <CardDescription>Total de horas de usinagem registradas por equipamento.</CardDescription>
+        <CardDescription>Total de horas de usinagem registradas por equipamento ao longo da semana.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {machineHours.length > 0 ? (
-            machineHours.map(({ machineId, totalHours, percentage }) => (
-              <div key={machineId} className="space-y-1">
-                <div className="flex justify-between items-baseline">
-                  <p className="text-sm font-medium">{machineId}</p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-bold text-foreground">{totalHours.toFixed(1)}h</span> / {MONTHLY_HOURS_PER_MACHINE}h
-                  </p>
-                </div>
-                <Progress value={percentage} className="h-2" />
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center pt-8">
+        {chartData.machines.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+              <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+              <YAxis unit="h" domain={[0, 24]} tick={{ fontSize: 12 }} />
+              <Tooltip
+                formatter={(value: number, name: string) => [`${value.toFixed(1)}h`, name]}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  borderColor: 'hsl(var(--border))',
+                  borderRadius: 'var(--radius)',
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
+              {chartData.machines.map((machineId, index) => (
+                <Line
+                  key={machineId}
+                  type="monotone"
+                  dataKey={machineId}
+                  stroke={COLORS[index % COLORS.length]}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-[300px]">
+            <p className="text-sm text-muted-foreground">
               Nenhum tempo de produção registrado ainda.
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

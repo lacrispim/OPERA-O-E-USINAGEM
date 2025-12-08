@@ -268,7 +268,7 @@ export default function ShopFloorPage() {
                 </div>
                 <div className="space-y-8">
                     <RecentEntriesTable entries={recentEntries || []} onUpdateStatus={handleUpdateStatus} onDelete={handleDeleteProduction} />
-                    <RecentLossesTable entries={recentLosses || []} onDelete={handleDeleteLoss} />
+                    <RecentLossesTable entries={recentEntries || []} onDelete={handleDeleteLoss} />
                 </div>
             </div>
           </TabsContent>
