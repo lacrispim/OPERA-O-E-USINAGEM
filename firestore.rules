@@ -3,14 +3,18 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite acesso de leitura e escrita à coleção de registros de produção
+    // Permite que a aplicação liste os documentos da coleção e crie novos.
     match /production-entries/{entryId} {
-      allow read, write: if true;
+      allow list, create: if true;
+      // Permite que a aplicação leia, atualize ou delete documentos individuais.
+      allow get, update, delete: if true;
     }
 
-    // Permite acesso de leitura e escrita à coleção de registros de perdas
+    // Permite que a aplicação liste os documentos da coleção e crie novos.
     match /production-losses/{lossId} {
-      allow read, write: if true;
+      allow list, create: if true;
+      // Permite que a aplicação leia, atualize ou delete documentos individuais.
+      allow get, update, delete: if true;
     }
   }
 }
