@@ -3,54 +3,85 @@
 
 import { PageHeader } from "@/components/page-header";
 import { FirebaseRecordsTable } from "./components/firebase-records-table";
+import { FirebaseLossesTable } from "./components/firebase-losses-table"; // Import the new component
 import { useFirestore } from "@/firebase";
-import type { OperatorProductionInput } from "@/lib/types";
+import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 
 export default function RegistrosFirebasePage() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [records, setRecords] = useState<OperatorProductionInput[]>([]);
+  const [productionRecords, setProductionRecords] = useState<OperatorProductionInput[]>([]);
+  const [lossRecords, setLossRecords] = useState<ProductionLossInput[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!firestore) {
-      // Firestore might not be available on first render.
       return;
     }
     
     setLoading(true);
     setError(null);
+    let activeListeners = 2;
 
-    const q = query(collection(firestore, 'production-entries'), orderBy('timestamp', 'desc'));
+    const handleLoad = () => {
+        activeListeners--;
+        if (activeListeners === 0) {
+            setLoading(false);
+        }
+    };
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
-        setRecords(data);
-        setLoading(false);
-    }, (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: q.toString(),
-          operation: 'list',
-        });
+    const handleError = (err: any, type: string) => {
+        const permissionError = new FirestorePermissionError({ path: `Query for ${type}`, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
-        console.error("Firebase data fetching error:", serverError);
-        setError("Falha ao carregar os dados do banco de dados.");
+        console.error(`Error fetching ${type}:`, err);
+        setError(`Failed to load ${type}.`);
+        setLoading(false);
+    };
+
+    // Fetch production entries
+    const productionQuery = query(collection(firestore, 'production-entries'), orderBy('timestamp', 'desc'));
+    const productionUnsubscribe = onSnapshot(productionQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
+        setProductionRecords(data);
+        handleLoad();
+    }, (serverError) => {
+        handleError(serverError, "production entries");
         toast({
             variant: "destructive",
-            title: "Erro ao carregar dados",
+            title: "Erro ao carregar dados de produção",
             description: serverError.message || "Não foi possível buscar os registros do Firestore."
         })
-        setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Fetch production losses
+    const lossesQuery = query(collection(firestore, 'production-losses'), orderBy('timestamp', 'desc'));
+    const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
+        setLossRecords(data);
+        handleLoad();
+    }, (serverError) => {
+        handleError(serverError, "production losses");
+        toast({
+            variant: "destructive",
+            title: "Erro ao carregar dados de perdas",
+            description: serverError.message || "Não foi possível buscar os registros de perdas."
+        })
+    });
+
+
+    return () => {
+      productionUnsubscribe();
+      lossesUnsubscribe();
+    };
   }, [firestore, toast]);
 
 
@@ -58,11 +89,18 @@ export default function RegistrosFirebasePage() {
       return (
           <>
             <PageHeader
-                title="Dados de Produção"
-                description="Visualize os dados de produção em tempo real com filtros avançados."
+                title="Dados de Produção e Perdas"
+                description="Visualize os dados em tempo real com filtros avançados."
             />
             <main className="px-4 sm:px-6 lg:px-8 pb-8">
-                <p>Carregando dados do Firestore...</p>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col items-center justify-center h-64">
+                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                            <p className="mt-4 text-muted-foreground">Carregando dados do Firestore...</p>
+                        </div>
+                    </CardContent>
+                </Card>
             </main>
           </>
       )
@@ -72,11 +110,15 @@ export default function RegistrosFirebasePage() {
       return (
           <>
             <PageHeader
-                title="Dados de Produção"
-                description="Visualize os dados de produção em tempo real com filtros avançados."
+                title="Dados de Produção e Perdas"
+                description="Visualize os dados em tempo real com filtros avançados."
             />
             <main className="px-4 sm:px-6 lg:px-8 pb-8">
-                <p className="text-destructive">{error}</p>
+                <Card>
+                    <CardContent className="pt-6">
+                        <p className="text-destructive text-center">{error}</p>
+                     </CardContent>
+                </Card>
             </main>
           </>
       )
@@ -86,14 +128,13 @@ export default function RegistrosFirebasePage() {
   return (
     <>
       <PageHeader
-        title="Dados de Produção"
-        description="Visualize os dados de produção em tempo real com filtros avançados."
+        title="Dados de Produção e Perdas"
+        description="Visualize todos os dados de produção e perdas em tempo real com filtros avançados."
       />
-      <main className="px-4 sm:px-6 lg:px-8 pb-8">
-        <FirebaseRecordsTable initialData={records} />
+      <main className="px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
+        <FirebaseRecordsTable initialData={productionRecords} />
+        <FirebaseLossesTable initialData={lossRecords} />
       </main>
     </>
   );
 }
-
-    
