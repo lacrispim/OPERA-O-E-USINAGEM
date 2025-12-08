@@ -96,7 +96,7 @@ export function OperatorInputForm() {
       toast({
         variant: 'destructive',
         title: "Erro de Conexão",
-        description: "Não foi possível conectar ao banco de dados.",
+        description: "A conexão com o banco de dados não está disponível. Os dados não foram salvos.",
       });
       return;
     }

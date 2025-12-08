@@ -1,7 +1,7 @@
 
 {
   "entities": {
-    "operatorProductionInput": {
+    "OperatorProductionInput": {
       "title": "Operator Production Input",
       "description": "Represents a single production entry from an operator.",
       "type": "object",
@@ -9,10 +9,6 @@
         "operatorId": {
           "type": "string",
           "description": "The ID of the operator."
-        },
-        "factory": {
-          "type": "string",
-          "description": "The factory where the production happened."
         },
         "machineId": {
           "type": "string",
@@ -29,40 +25,44 @@
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "description": "The timestamp of the entry."
+          "description": "The server timestamp of the entry."
         },
         "formsNumber": {
           "type": "string",
-          "description": "The associated forms number."
+          "description": "Optional forms number associated with the production."
+        },
+        "factory": {
+          "type": "string",
+          "description": "The factory where the production took place."
         },
         "operationCount": {
           "type": "number",
-          "description": "The number of operations."
+          "description": "The number of operations performed."
         },
         "status": {
           "type": "string",
-          "enum": ["Fila de produção", "Em produção", "Encerrado", "Rejeitado", "Enviado"],
-          "description": "The status of the production."
+          "description": "The current status of the production entry.",
+          "enum": ["Fila de produção", "Em produção", "Encerrado", "Rejeitado", "Enviado"]
         }
       },
-      "required": ["operatorId", "factory", "machineId", "quantityProduced", "productionTimeSeconds", "timestamp", "status"]
+      "required": ["operatorId", "machineId", "quantityProduced", "productionTimeSeconds", "timestamp", "factory", "status"]
     },
-    "productionLossInput": {
+    "ProductionLossInput": {
       "title": "Production Loss Input",
-      "description": "Represents a single production loss entry.",
+      "description": "Represents a single entry for production loss.",
       "type": "object",
       "properties": {
         "operatorId": {
           "type": "string",
-          "description": "The ID of the operator."
+          "description": "The ID of the operator reporting the loss."
         },
         "factory": {
           "type": "string",
-          "description": "The factory where the loss happened."
+          "description": "The factory where the loss occurred."
         },
         "machineId": {
           "type": "string",
-          "description": "The ID of the machine used."
+          "description": "The ID of the machine related to the loss."
         },
         "quantityLost": {
           "type": "number",
@@ -70,16 +70,16 @@
         },
         "reason": {
           "type": "string",
-          "description": "The reason for the loss."
+          "description": "The reason for the production loss."
         },
         "timeLostMinutes": {
           "type": "number",
-          "description": "The time lost in minutes."
+          "description": "The downtime in minutes due to the loss."
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "description": "The timestamp of the entry."
+          "description": "The server timestamp of the loss entry."
         }
       },
       "required": ["operatorId", "factory", "machineId", "quantityLost", "reason", "timeLostMinutes", "timestamp"]
@@ -89,17 +89,17 @@
     "providers": []
   },
   "firestore": {
-    "/production-entries": {
+    "/production-entries/{entryId}": {
       "schema": {
-        "$ref": "#/entities/operatorProductionInput"
+        "$ref": "#/entities/OperatorProductionInput"
       },
-      "description": "Collection of production entries from operators."
+      "description": "Stores records of production entries from operators."
     },
-    "/production-losses": {
+    "/production-losses/{lossId}": {
       "schema": {
-        "$ref": "#/entities/productionLossInput"
+        "$ref": "#/entities/ProductionLossInput"
       },
-      "description": "Collection of production loss entries."
+      "description": "Stores records of production losses."
     }
   }
 }

@@ -35,7 +35,11 @@ export default function ShopFloorPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!firestore) return;
+      if (!firestore) {
+        setIsLoading(false);
+        setError("A conexão com o Firebase não está disponível. Os dados não serão salvos ou carregados.");
+        return;
+      };
 
         setIsLoading(true);
         setError(null);

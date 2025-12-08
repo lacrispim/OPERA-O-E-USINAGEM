@@ -25,21 +25,19 @@ export default function RegistrosFirebasePage() {
 
   useEffect(() => {
     if (!firestore) {
-      // Firebase might not be initialized yet. The effect will re-run when it is.
+      setError("A conexão com o Firebase não está disponível.");
+      setLoading(false);
       return;
     }
     
-    // This remains true until both listeners have fetched their initial data.
     setLoading(true);
     setError(null);
 
-    // Keep track of how many listeners are still waiting for their first snapshot.
     let activeListeners = 2;
 
     const handleInitialLoad = () => {
         activeListeners--;
         if (activeListeners === 0) {
-            // This will only be called once both listeners have loaded.
             setLoading(false);
         }
     };
@@ -58,7 +56,7 @@ export default function RegistrosFirebasePage() {
       (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
         setProductionRecords(data);
-        if (activeListeners > 0) handleInitialLoad(); // Decrement counter on first load
+        if (activeListeners > 0) handleInitialLoad();
       }, 
       (serverError) => {
         handleError(serverError, "production entries");
@@ -76,7 +74,7 @@ export default function RegistrosFirebasePage() {
       (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
         setLossRecords(data);
-        if (activeListeners > 0) handleInitialLoad(); // Decrement counter on first load
+        if (activeListeners > 0) handleInitialLoad();
       }, 
       (serverError) => {
         handleError(serverError, "production losses");
