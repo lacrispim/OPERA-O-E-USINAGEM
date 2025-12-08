@@ -1,15 +1,14 @@
-
 'use client';
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp, doc, deleteDoc } from 'firebase/firestore';
+import { Timestamp, doc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { parseISO } from "date-fns";
-import { useCollection } from "@/firebase/firestore/use-collection";
 import { useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,10 +40,27 @@ const formatDate = (timestamp: Timestamp | string) => {
 export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { data: entries } = useCollection<ProductionLossInput>(
-    'production-losses',
-    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 10}] }
-  );
+  const [entries, setEntries] = useState<ProductionLossInput[]>([]);
+
+  useEffect(() => {
+    if (!firestore) return;
+
+    const q = query(collection(firestore, 'production-losses'), orderBy('timestamp', 'desc'), limit(10));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
+        setEntries(data);
+    }, (error) => {
+        console.error("Error fetching recent losses: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao carregar perdas',
+            description: 'Não foi possível buscar os registros de perdas recentes.'
+        })
+    });
+
+    return () => unsubscribe();
+  }, [firestore, toast]);
+
 
   const handleDelete = async (id: string) => {
     if (onDelete) {

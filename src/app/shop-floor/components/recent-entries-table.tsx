@@ -1,6 +1,6 @@
-
 'use client';
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Timestamp, doc, updateDoc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
-import { useCollection } from "@/firebase/firestore/use-collection";
 import { useFirestore } from '@/firebase';
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,10 +56,28 @@ const formatDate = (timestamp: Timestamp | string) => {
 export function RecentEntriesTable() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { data: entries } = useCollection<OperatorProductionInput>(
-    'production-entries',
-    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 10}] }
-  );
+  const [entries, setEntries] = useState<OperatorProductionInput[]>([]);
+
+  useEffect(() => {
+    if (!firestore) return;
+
+    const q = query(collection(firestore, 'production-entries'), orderBy('timestamp', 'desc'), limit(10));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
+        setEntries(data);
+    }, (error) => {
+        console.error("Error fetching recent entries: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao carregar registros',
+            description: 'Não foi possível buscar as entradas recentes.'
+        })
+    });
+
+    return () => unsubscribe();
+  }, [firestore, toast]);
+
 
   const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
     if (!firestore) return;

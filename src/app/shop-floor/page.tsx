@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PageHeader } from "@/components/page-header";
@@ -12,9 +11,10 @@ import { RecentLossesTable } from "./components/recent-losses-table";
 import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { MonthlyHoursChart } from "./components/monthly-hours-chart";
-import { useCollection } from "@/firebase/firestore/use-collection";
 import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFirestore } from "@/firebase";
+import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 
 
 const TOTAL_MONTHLY_HOURS = 540;
@@ -23,15 +23,31 @@ const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 
 
 export default function ShopFloorPage() {
-  const { data: recentEntries } = useCollection<OperatorProductionInput>(
-    'production-entries',
-    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 500}] }
-  );
+    const firestore = useFirestore();
+    const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>([]);
+    const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
 
-  const { data: recentLosses } = useCollection<ProductionLossInput>(
-      'production-losses',
-      { constraints: [ {type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 200} ] }
-  );
+    useEffect(() => {
+        if (!firestore) return;
+
+        const entriesQuery = query(collection(firestore, "production-entries"), orderBy("timestamp", "desc"), limit(500));
+        const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
+            setRecentEntries(data);
+        });
+
+        const lossesQuery = query(collection(firestore, "production-losses"), orderBy("timestamp", "desc"), limit(200));
+        const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
+            setRecentLosses(data);
+        });
+
+        return () => {
+            entriesUnsubscribe();
+            lossesUnsubscribe();
+        };
+    }, [firestore]);
+
 
   const { stopReasonsSummary, totalLostMinutes } = useMemo(() => {
     if (!recentLosses || recentLosses.length === 0) {
