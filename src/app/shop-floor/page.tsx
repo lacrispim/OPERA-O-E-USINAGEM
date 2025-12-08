@@ -32,7 +32,9 @@ const TOTAL_MONTHLY_HOURS = 540;
 
 const generateWeekOptions = () => {
     const today = new Date();
-    const weeks = getISOWeeksInYear(today);
+    // Ensure we are getting weeks for the correct year, especially around year end/start
+    const year = today.getFullYear();
+    const weeks = getISOWeeksInYear(new Date(year, 11, 28)); // Use a date late in Dec to be safe
     const options = [];
     for (let i = 1; i <= weeks; i++) {
         options.push({
@@ -47,7 +49,7 @@ const generateWeekOptions = () => {
 export default function ShopFloorPage() {
   const { toast } = useToast();
   const today = new Date();
-  const currentWeek = getWeek(today, { weekStartsOn: 1 });
+  const currentWeek = getWeek(today, { weekStartsOn: 1, firstWeekContainsDate: 4 });
   
   const [selectedWeek, setSelectedWeek] = useState(currentWeek);
   const weekOptions = useMemo(() => generateWeekOptions(), []);
@@ -67,7 +69,13 @@ export default function ShopFloorPage() {
     if (!recentEntries) return [];
 
     const year = new Date().getFullYear();
-    const startOfTheWeek = startOfWeek(new Date(year, 0, 4 + (selectedWeek - 1) * 7), { weekStartsOn: 1 });
+    // Make sure we are calculating the start of the week correctly as per ISO 8601
+    const firstDayOfYear = new Date(year, 0, 1);
+    const daysOffset = (firstDayOfYear.getDay() + 6) % 7;
+    const firstMonday = new Date(year, 0, 1 + (4 - (firstDayOfYear.getDay() || 7)) % 7);
+
+    const startOfTheSelectedWeek = new Date(firstMonday.getTime() + (selectedWeek - 1) * 7 * 24 * 60 * 60 * 1000);
+    const startOfTheWeek = startOfWeek(startOfTheSelectedWeek, { weekStartsOn: 1 });
     const endOfTheWeek = endOfWeek(startOfTheWeek, { weekStartsOn: 1 });
     
     return recentEntries.filter(entry => {
@@ -76,6 +84,12 @@ export default function ShopFloorPage() {
             entryDate = entry.timestamp.toDate();
         } else if (typeof entry.timestamp === 'string') {
             entryDate = parseISO(entry.timestamp);
+        } else if (entry.timestamp && typeof (entry.timestamp as any).seconds === 'number') {
+            try {
+                entryDate = new Date((entry.timestamp as any).seconds * 1000);
+            } catch {
+                return false;
+            }
         } else {
            return false;
         }

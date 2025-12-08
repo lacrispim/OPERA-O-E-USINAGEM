@@ -30,19 +30,22 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
     if (entries) {
         entries.forEach(entry => {
           let entryDate: Date;
+          // Robust timestamp parsing
           if (entry.timestamp instanceof Timestamp) {
             entryDate = entry.timestamp.toDate();
           } else if (typeof entry.timestamp === 'string') {
             entryDate = parseISO(entry.timestamp);
-          } else {
-            // If the entry comes from a server render before hydration, it might be an object
-            // This is a workaround to handle that case.
+          } else if (entry.timestamp && typeof (entry.timestamp as any).seconds === 'number') {
+            // Handle plain object from server render before hydration
             try {
                 entryDate = new Date((entry.timestamp as any).seconds * 1000);
             } catch (e) {
                  console.error("Invalid timestamp format for entry:", entry.id, entry.timestamp);
                  return; // Skip if timestamp is invalid
             }
+          } else {
+             console.error("Unknown timestamp format for entry:", entry.id, entry.timestamp);
+             return; // Skip if timestamp is unknown
           }
           
           const dayOfWeek = getDayOfWeek(entryDate);
