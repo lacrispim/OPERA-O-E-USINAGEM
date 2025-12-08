@@ -18,11 +18,13 @@ import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
 import { MachineHoursSummary } from './components/machine-hours-summary';
+import { TotalHoursCard } from './components/total-hours-card';
 
 
 // OEE Calculation Constants
 const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
 const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
+const TOTAL_MONTHLY_HOURS = 540;
 
 export default function ShopFloorPage() {
   const { toast } = useToast();
@@ -51,7 +53,7 @@ export default function ShopFloorPage() {
     return Object.entries(summary).map(([name, value]) => ({ name, value }));
   }, [recentLosses]);
 
-  const oeeData = useMemo(() => {
+  const { oeeData, totalUsedHours } = useMemo(() => {
     const machineData: Record<string, { totalProduced: number, totalLost: number, productionTime: number, downTime: number }> = {};
     
     const entries = recentEntries || [];
@@ -68,7 +70,9 @@ export default function ShopFloorPage() {
       };
     });
 
+    let usedSeconds = 0;
     entries.forEach(entry => {
+      usedSeconds += entry.productionTimeSeconds;
       if (machineData[entry.machineId]) {
         machineData[entry.machineId].totalProduced += entry.quantityProduced;
         machineData[entry.machineId].productionTime += entry.productionTimeSeconds;
@@ -107,7 +111,10 @@ export default function ShopFloorPage() {
       };
     });
     
-    return oeeByMachine;
+    return {
+      oeeData: oeeByMachine,
+      totalUsedHours: usedSeconds / 3600
+    };
   }, [recentEntries, recentLosses]);
 
   const handleRegisterProduction = async (newEntry: Omit<OperatorProductionInput, 'timestamp' | 'status' | 'id'>) => {
@@ -225,7 +232,11 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
             <div className="grid gap-6 mt-6 max-w-7xl mx-auto">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <TotalHoursCard 
+                  totalHours={TOTAL_MONTHLY_HOURS} 
+                  usedHours={totalUsedHours} 
+                />
                 <OeeChart data={oeeData} />
                 <StopReasonsPieChart data={stopReasonsSummary} />
                 <MachineHoursSummary entries={recentEntries || []} />
