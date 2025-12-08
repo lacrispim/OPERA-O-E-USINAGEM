@@ -1,28 +1,14 @@
 
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDc-4wulk7iAeKbLs2sH7kuIevYb-VDwn0",
-  authDomain: "fabritrack-a839f.firebaseapp.com",
-  databaseURL: "https://fabritrack-view-default-rtdb.firebaseio.com/",
-  projectId: "fabritrack-a839f",
-  storageBucket: "fabritrack-a839f.appspot.com",
-  messagingSenderId: "1070180776404",
-  appId: "1:1070180776404:web:324d335c9f454282b545ab"
-};
+// This file now acts as a singleton provider for the initialized firebase instances.
+// This prevents multiple initializations and ensures all components use the same SDK instances.
+const { firebaseApp: app, firestore, auth, database } = (() => {
+    const { firebaseApp, firestore, auth } = initializeFirebase();
+    // Assuming you might need the Realtime Database as well, as it was in the original file.
+    const { getDatabase } = require("firebase/database");
+    const database = getDatabase(firebaseApp);
+    return { firebaseApp, firestore, auth, database };
+})();
 
-// Initialize Firebase
-let app: FirebaseApp;
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApps()[0];
-}
-
-const database = getDatabase(app);
-const firestore = getFirestore(app);
-
-export { app, database, firestore };
+export { app, database, firestore, auth };

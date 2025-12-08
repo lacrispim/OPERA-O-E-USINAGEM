@@ -10,7 +10,7 @@ import { Trash2 } from "lucide-react";
 import { Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from "date-fns";
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { firestore } from "@/lib/firebase";
+import { useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 type RecentLossesTableProps = {
@@ -39,6 +39,7 @@ const formatDate = (timestamp: Timestamp | string) => {
 
 
 export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
+  const firestore = useFirestore();
   const { toast } = useToast();
   const { data: entries } = useCollection<ProductionLossInput>(
     'production-losses',
@@ -50,6 +51,7 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
         onDelete(id);
         return;
     }
+    if (!firestore) return;
     const lossRef = doc(firestore, 'production-losses', id);
     try {
       await deleteDoc(lossRef);

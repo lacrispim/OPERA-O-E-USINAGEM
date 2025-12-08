@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, ChangeEvent } from 'react';
-import { database } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 import {
   Table,
@@ -23,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { MultiSelect } from '@/components/ui/multi-select';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { database } from '@/lib/firebase';
 
 
 const PREFERRED_COLUMN_ORDER = [
@@ -371,4 +371,3 @@ export function FirebaseRecordsTable() {
     </TooltipProvider>
   );
 }
-

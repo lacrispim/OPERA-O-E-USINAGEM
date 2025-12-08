@@ -17,6 +17,7 @@ let auth: Auth | null = null;
 
 export function FirebaseClientProvider({ children }: Props) {
   const firebaseContext = useMemo(() => {
+    // This ensures that Firebase is initialized only once on the client.
     if (!app) {
       const { firebaseApp, firestore: fs, auth: au } = initializeFirebase();
       app = firebaseApp;

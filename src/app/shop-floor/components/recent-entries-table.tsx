@@ -12,7 +12,7 @@ import { Trash2 } from "lucide-react";
 import { Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { firestore } from "@/lib/firebase";
+import { useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 const formatTime = (totalSeconds: number) => {
@@ -55,6 +55,7 @@ const formatDate = (timestamp: Timestamp | string) => {
 
 
 export function RecentEntriesTable() {
+  const firestore = useFirestore();
   const { toast } = useToast();
   const { data: entries } = useCollection<OperatorProductionInput>(
     'production-entries',
@@ -62,6 +63,7 @@ export function RecentEntriesTable() {
   );
 
   const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
+    if (!firestore) return;
     const entryRef = doc(firestore, 'production-entries', id);
     try {
       await updateDoc(entryRef, { status: newStatus });
@@ -76,6 +78,7 @@ export function RecentEntriesTable() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!firestore) return;
     const entryRef = doc(firestore, 'production-entries', id);
     try {
       await deleteDoc(entryRef);

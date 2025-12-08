@@ -10,10 +10,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
-import type { OperatorProductionInput } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
+import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
@@ -38,6 +37,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function OperatorInputForm() {
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -87,6 +87,14 @@ export function OperatorInputForm() {
 
 
   async function onSubmit(values: FormData) {
+    if (!firestore) {
+      toast({
+        variant: 'destructive',
+        title: "Erro de Conexão",
+        description: "Não foi possível conectar ao banco de dados.",
+      });
+      return;
+    }
     setIsLoading(true);
     
     try {
