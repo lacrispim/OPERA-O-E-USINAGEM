@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Timestamp } from 'firebase/firestore';
+import { parseISO } from 'date-fns';
 
 type RecentEntriesTableProps = {
   entries: OperatorProductionInput[];
@@ -44,13 +45,15 @@ const getStatusBadgeVariant = (status: ProductionStatus) => {
 
 const formatDate = (timestamp: Timestamp | string) => {
   if (!timestamp) return 'N/A';
+  let date: Date;
   if (typeof timestamp === 'string') {
-    return new Date(timestamp).toLocaleString('pt-BR');
+    date = parseISO(timestamp);
+  } else if (timestamp.toDate) {
+    date = timestamp.toDate();
+  } else {
+    return 'Data inválida';
   }
-  if (timestamp.toDate) {
-    return timestamp.toDate().toLocaleString('pt-BR');
-  }
-  return 'Data inválida';
+  return date.toLocaleString('pt-BR');
 }
 
 
@@ -138,3 +141,5 @@ export function RecentEntriesTable({ entries, onUpdateStatus, onDelete }: Recent
     </Card>
   );
 }
+
+    

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Line, LineChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { OperatorProductionInput } from '@/lib/types';
 import { Timestamp } from 'firebase/firestore';
+import { parseISO } from 'date-fns';
 
 type MachineHoursSummaryProps = {
   entries: OperatorProductionInput[];
@@ -20,9 +21,9 @@ const getDayOfWeek = (date: Date): string => {
 
 export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
   const chartData = useMemo(() => {
-    const dataByDay: Record<string, Record<string, number>> = {
-      'Dom': {}, 'Seg': {}, 'Ter': {}, 'Qua': {}, 'Qui': {}, 'Sex': {}, 'Sáb': {}
-    };
+    const dayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const dataByDay: Record<string, Record<string, number>> = {};
+    dayOrder.forEach(day => { dataByDay[day] = {}; });
 
     const machineIds = new Set<string>();
 
@@ -32,7 +33,7 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
           if (entry.timestamp instanceof Timestamp) {
             entryDate = entry.timestamp.toDate();
           } else if (typeof entry.timestamp === 'string') {
-            entryDate = new Date(entry.timestamp);
+            entryDate = parseISO(entry.timestamp);
           } else {
             return; // Skip if timestamp is invalid
           }
@@ -48,16 +49,13 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
         });
     }
     
-    const formattedData = Object.entries(dataByDay).map(([day, machineData]) => {
+    const formattedData = dayOrder.map(day => {
         const dayData: { day: string, [key: string]: any } = { day };
         machineIds.forEach(id => {
-            dayData[id] = machineData[id] || 0;
+            dayData[id] = dataByDay[day][id] || 0;
         });
         return dayData;
     });
-
-    const dayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    formattedData.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
 
     return {
         data: formattedData,
@@ -69,15 +67,15 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
-        <CardTitle>Horas Consumidas por Máquina</CardTitle>
-        <CardDescription>Total de horas de usinagem registradas por equipamento ao longo da semana.</CardDescription>
+        <CardTitle>Horas Consumidas por Máquina na Semana</CardTitle>
+        <CardDescription>Total de horas de usinagem por equipamento para a semana selecionada.</CardDescription>
       </CardHeader>
       <CardContent>
         {chartData.machines.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
               <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
-              <YAxis unit="h" domain={[0, 'dataMax + 2']} allowDecimals={false} tick={{ fontSize: 12 }} />
+              <YAxis unit="h" domain={[0, 24]} allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value.toFixed(1)}h`, name]}
                 contentStyle={{
@@ -104,7 +102,7 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
         ) : (
           <div className="flex items-center justify-center h-[300px]">
             <p className="text-sm text-muted-foreground">
-              Nenhum tempo de produção registrado ainda para gerar o gráfico.
+              Nenhum tempo de produção registrado na semana selecionada.
             </p>
           </div>
         )}
@@ -112,3 +110,5 @@ export function MachineHoursSummary({ entries }: MachineHoursSummaryProps) {
     </Card>
   );
 }
+
+    

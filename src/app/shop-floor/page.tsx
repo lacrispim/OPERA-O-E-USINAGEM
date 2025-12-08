@@ -12,13 +12,17 @@ import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
-import { Monitor, Tablet } from "lucide-react";
+import { Monitor, Tablet, Calendar } from "lucide-react";
 import type { OperatorProductionInput, ProductionLossInput, ProductionStatus, MachineOEE } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
 import { MachineHoursSummary } from './components/machine-hours-summary';
 import { TotalHoursCard } from './components/total-hours-card';
+import { getISOWeeksInYear, getWeek, startOfWeek, endOfWeek, format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Timestamp } from 'firebase/firestore';
 
 
 // OEE Calculation Constants
@@ -26,16 +30,59 @@ const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
 const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 const TOTAL_MONTHLY_HOURS = 540;
 
+const generateWeekOptions = () => {
+    const today = new Date();
+    const weeks = getISOWeeksInYear(today);
+    const options = [];
+    for (let i = 1; i <= weeks; i++) {
+        options.push({
+            value: i,
+            label: `Semana ${i}`,
+        });
+    }
+    return options;
+};
+
+
 export default function ShopFloorPage() {
   const { toast } = useToast();
+  const today = new Date();
+  const currentWeek = getWeek(today, { weekStartsOn: 1 });
+  
+  const [selectedWeek, setSelectedWeek] = useState(currentWeek);
+  const weekOptions = useMemo(() => generateWeekOptions(), []);
+
   
   const { data: recentEntries, loading: loadingEntries } = useCollection<OperatorProductionInput>('production-entries', {
-    constraints: [orderBy('timestamp', 'desc'), limit(50)]
+    constraints: [orderBy('timestamp', 'desc'), limit(200)] // Fetch more entries for filtering
   });
 
   const { data: recentLosses, loading: loadingLosses } = useCollection<ProductionLossInput>('production-losses', {
     constraints: [orderBy('timestamp', 'desc'), limit(50)]
   });
+
+  const filteredEntriesForWeek = useMemo(() => {
+    if (!recentEntries) return [];
+
+    const year = new Date().getFullYear();
+    // Week numbers in date-fns are tricky. We create a date in the middle of the year
+    // and then set the week.
+    const startOfTheWeek = startOfWeek(new Date(year, 0, 4 + (selectedWeek - 1) * 7), { weekStartsOn: 1 });
+    const endOfTheWeek = endOfWeek(startOfTheWeek, { weekStartsOn: 1 });
+    
+    return recentEntries.filter(entry => {
+        let entryDate: Date;
+         if (entry.timestamp instanceof Timestamp) {
+            entryDate = entry.timestamp.toDate();
+        } else if (typeof entry.timestamp === 'string') {
+            entryDate = parseISO(entry.timestamp);
+        } else {
+           return false;
+        }
+        return entryDate >= startOfTheWeek && entryDate <= endOfTheWeek;
+    });
+
+  }, [recentEntries, selectedWeek]);
 
 
   const stopReasonsSummary = useMemo(() => {
@@ -231,16 +278,44 @@ export default function ShopFloorPage() {
           </TabsList>
           
           <TabsContent value="supervisor">
-            <div className="grid gap-6 mt-6 max-w-7xl mx-auto">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                <TotalHoursCard 
-                  totalHours={TOTAL_MONTHLY_HOURS} 
-                  usedHours={totalUsedHours} 
-                />
-                <OeeChart data={oeeData} />
-                <StopReasonsPieChart data={stopReasonsSummary} />
-                <MachineHoursSummary entries={recentEntries || []} />
-              </div>
+             <div className="max-w-7xl mx-auto mt-6 space-y-4">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Filtros de Análise</CardTitle>
+                                <CardDescription>Selecione a semana para visualizar os dados de produção.</CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-5 w-5 text-muted-foreground" />
+                                <Select
+                                    value={String(selectedWeek)}
+                                    onValueChange={(value) => setSelectedWeek(Number(value))}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Selecione a semana" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {weekOptions.map(option => (
+                                            <SelectItem key={option.value} value={String(option.value)}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </CardHeader>
+                </Card>
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                     <TotalHoursCard 
+                      totalHours={TOTAL_MONTHLY_HOURS} 
+                      usedHours={totalUsedHours} 
+                    />
+                    <OeeChart data={oeeData} />
+                    <StopReasonsPieChart data={stopReasonsSummary} />
+                    <MachineHoursSummary entries={filteredEntriesForWeek || []} />
+                 </div>
             </div>
           </TabsContent>
 
@@ -268,7 +343,7 @@ export default function ShopFloorPage() {
                 </div>
                 <div className="space-y-8">
                     <RecentEntriesTable entries={recentEntries || []} onUpdateStatus={handleUpdateStatus} onDelete={handleDeleteProduction} />
-                    <RecentLossesTable entries={recentEntries || []} onDelete={handleDeleteLoss} />
+                    <RecentLossesTable entries={recentLosses || []} onDelete={handleDeleteLoss} />
                 </div>
             </div>
           </TabsContent>

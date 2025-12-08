@@ -8,6 +8,7 @@ import type { ProductionLossInput } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Timestamp } from 'firebase/firestore';
+import { parseISO } from "date-fns";
 
 type RecentLossesTableProps = {
   entries: ProductionLossInput[];
@@ -23,13 +24,15 @@ const formatTime = (totalMinutes: number) => {
 
 const formatDate = (timestamp: Timestamp | string) => {
   if (!timestamp) return 'N/A';
+  let date: Date;
   if (typeof timestamp === 'string') {
-    return new Date(timestamp).toLocaleString('pt-BR');
+    date = parseISO(timestamp);
+  } else if (timestamp.toDate) {
+    date = timestamp.toDate();
+  } else {
+    return 'Data inválida';
   }
-  if (timestamp.toDate) {
-    return timestamp.toDate().toLocaleString('pt-BR');
-  }
-  return 'Data inválida';
+  return date.toLocaleString('pt-BR');
 }
 
 
@@ -91,3 +94,5 @@ export function RecentLossesTable({ entries, onDelete }: RecentLossesTableProps)
     </Card>
   );
 }
+
+    
