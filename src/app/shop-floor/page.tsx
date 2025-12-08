@@ -18,10 +18,6 @@ import { useToast } from '@/hooks/use-toast';
 import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
 import { TotalHoursCard } from './components/total-hours-card';
-import { MachineHoursSummary } from './components/machine-hours-summary';
-import { getISOWeeksInYear, getWeek, startOfWeek, endOfWeek, parseISO, startOfISOWeek, endOfISOWeek } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // OEE Calculation Constants
 const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
@@ -29,63 +25,18 @@ const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 const TOTAL_MONTHLY_HOURS = 540;
 
 
-const safeParseDate = (timestamp: Timestamp | string | Date): Date | null => {
-    if (!timestamp) return null;
-    if (timestamp instanceof Date) return timestamp;
-    if (typeof timestamp === 'string') {
-        try {
-            return parseISO(timestamp);
-        } catch (e) {
-            return null;
-        }
-    }
-    if (timestamp && typeof timestamp.toDate === 'function') {
-        return timestamp.toDate();
-    }
-    return null;
-};
-
-
 export default function ShopFloorPage() {
   const { toast } = useToast();
 
-  const [currentYear] = useState(new Date().getFullYear());
-  const [currentWeek, setCurrentWeek] = useState(getWeek(new Date(), { weekStartsOn: 1, firstWeekContainsDate: 4 }));
-  
-  const weeksInYear = getISOWeeksInYear(new Date(currentYear, 0, 1));
-  const weekOptions = Array.from({ length: weeksInYear }, (_, i) => i + 1);
-
-
   const { data: recentEntries, loading: loadingEntries } = useCollection<OperatorProductionInput>(
     'production-entries',
-    { constraints: [orderBy('timestamp', 'desc'), limit(500)] } // Increased limit for weekly filtering
+    { constraints: [orderBy('timestamp', 'desc'), limit(500)] }
   );
 
   const { data: recentLosses, loading: loadingLosses } = useCollection<ProductionLossInput>(
       'production-losses',
       { constraints: [orderBy('timestamp', 'desc'), limit(200)] }
   );
-
-  const weeklyFilteredEntries = useMemo(() => {
-    if (!recentEntries) return [];
-    
-    // Create a date for the first day of the year
-    const firstDayOfYear = new Date(currentYear, 0, 1);
-    // Calculate the date of the Monday of the selected week
-    const firstDayOfWeek = startOfWeek(firstDayOfYear, { weekStartsOn: 1 });
-    const targetMonday = new Date(firstDayOfWeek.setDate(firstDayOfWeek.getDate() + (currentWeek - 1) * 7));
-
-    const weekStart = startOfISOWeek(targetMonday);
-    const weekEnd = endOfISOWeek(targetMonday);
-    
-    return recentEntries.filter(entry => {
-      const entryDate = safeParseDate(entry.timestamp);
-      if (!entryDate) return false;
-      return entryDate >= weekStart && entryDate <= weekEnd;
-    });
-
-  }, [recentEntries, currentWeek, currentYear]);
-
 
   const stopReasonsSummary = useMemo(() => {
     if (!recentLosses || recentLosses.length === 0) {
@@ -289,33 +240,6 @@ export default function ShopFloorPage() {
                     <OeeChart data={oeeData} />
                     <StopReasonsPieChart data={stopReasonsSummary} />
                  </div>
-                 <Card className="col-span-1 lg:col-span-3">
-                    <CardHeader>
-                        <div className="flex flex-col sm:flex-row justify-between sm:items-center">
-                            <div>
-                                <CardTitle>Horas de Usinagem por Equipamento</CardTitle>
-                                <CardDescription>Total de horas de usinagem por equipamento para a semana selecionada.</CardDescription>
-                            </div>
-                            <div className="mt-4 sm:mt-0">
-                                <Select value={String(currentWeek)} onValueChange={(val) => setCurrentWeek(Number(val))}>
-                                    <SelectTrigger className="w-full sm:w-[180px]">
-                                        <SelectValue placeholder="Selecione a semana" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {weekOptions.map(week => (
-                                            <SelectItem key={week} value={String(week)}>
-                                                Semana {week}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                      <MachineHoursSummary data={weeklyFilteredEntries} />
-                    </CardContent>
-                </Card>
             </div>
           </TabsContent>
 
@@ -352,5 +276,7 @@ export default function ShopFloorPage() {
     </>
   );
 }
+
+    
 
     
