@@ -22,6 +22,8 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { FileDown } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const TRUNCATE_COLUMNS = ["Nº Forms"];
 const TRUNCATE_LENGTH = 25;
@@ -210,16 +212,58 @@ export function FirebaseRecordsTable({ initialData }: FirebaseRecordsTableProps)
     }
     return stringValue;
   };
+  
+  const handleExport = () => {
+    const dataToExport = filteredData.map(item => {
+        const row: Record<string, any> = {};
+        headers.forEach(header => {
+            const headerText = COLUMN_HEADERS[header] || String(header);
+            const value = item[header];
+             if (header === 'timestamp') {
+                const date = value instanceof Timestamp ? value.toDate() : new Date(value as string);
+                row[headerText] = format(date, 'dd/MM/yyyy HH:mm');
+            } else if (header === 'productionTimeSeconds') {
+                const totalSeconds = Number(value);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const secs = totalSeconds % 60;
+                row[headerText] = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            } else {
+                 row[headerText] = item[header as keyof OperatorProductionInput] ?? '-';
+            }
+        });
+        return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dados de Produção");
+
+    // Auto-size columns
+    const max_width = dataToExport.reduce((w, r) => Math.max(w, ...Object.values(r).map(val => String(val).length)), 10);
+    worksheet["!cols"] = headers.map(() => ({ wch: max_width + 2 }));
+
+    XLSX.writeFile(workbook, "DadosDeProducao.xlsx");
+};
+
 
   return (
     <TooltipProvider>
         <div className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Dados de Produção</CardTitle>
-                    <CardDescription>
-                        Visualização dos dados de produção salvos no Firestore. Atualizado em: {new Date().toLocaleString('pt-BR')}
-                    </CardDescription>
+                    <div className='flex justify-between items-start'>
+                        <div>
+                            <CardTitle>Dados de Produção</CardTitle>
+                            <CardDescription>
+                                Visualização dos dados de produção salvos no Firestore. Atualizado em: {new Date().toLocaleString('pt-BR')}
+                            </CardDescription>
+                        </div>
+                        <Button variant="outline" onClick={handleExport}>
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Exportar para Excel
+                        </Button>
+                    </div>
                     <div className="flex flex-col gap-4 pt-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <Input
