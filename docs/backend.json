@@ -41,7 +41,7 @@
         },
         "status": {
           "type": "string",
-          "enum": ["Fila de produção", "Rejeitado", "Em produção", "Encerrado", "Enviado"],
+          "enum": ["Fila de produção", "Em produção", "Encerrado", "Rejeitado", "Enviado"],
           "description": "The status of the production."
         }
       },

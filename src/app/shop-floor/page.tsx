@@ -15,13 +15,15 @@ import { MonthlyHoursChart } from "./components/monthly-hours-chart";
 import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, where, Timestamp } from "firebase/firestore";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
+import { startOfDay, endOfDay } from 'date-fns';
 
 
 const TOTAL_MONTHLY_HOURS = 540;
-const TOTAL_AVAILABLE_TIME_SECONDS = 8 * 60 * 60; // 8 hours shift
+// Same as in OEE calculation
+const TOTAL_SHIFT_SECONDS = 8 * 60 * 60; // 8 hours shift in seconds
 const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 
 
@@ -30,33 +32,51 @@ export default function ShopFloorPage() {
     const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>([]);
     const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!firestore) return;
 
         setIsLoading(true);
+        setError(null);
+        let activeListeners = 2;
 
-        const entriesQuery = query(collection(firestore, "production-entries"), orderBy("timestamp", "desc"), limit(500));
+        const handleLoad = () => {
+            activeListeners--;
+            if (activeListeners === 0) {
+                setIsLoading(false);
+            }
+        };
+        
+        const handleError = (err: any, type: string) => {
+            const permissionError = new FirestorePermissionError({ path: `Query for ${type}`, operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
+            console.error(`Error fetching ${type}:`, err);
+            setError(`Failed to load ${type}.`);
+            setIsLoading(false);
+        };
+
+        const entriesQuery = query(collection(firestore, "production-entries"), orderBy("timestamp", "desc"));
         const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
             setRecentEntries(data);
-            setIsLoading(false); 
-        }, (serverError) => {
-            const permissionError = new FirestorePermissionError({ path: entriesQuery.toString(), operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-            console.error("Error fetching entries:", serverError);
-            setIsLoading(false);
-        });
+            handleLoad();
+        }, (err) => handleError(err, 'production entries'));
 
-        const lossesQuery = query(collection(firestore, "production-losses"), orderBy("timestamp", "desc"), limit(200));
+        const now = new Date();
+        const startOfToday = startOfDay(now);
+        
+        // Query for losses in the last 24 hours
+        const lossesQuery = query(
+            collection(firestore, "production-losses"),
+            where("timestamp", ">=", Timestamp.fromDate(startOfToday)),
+            orderBy("timestamp", "desc")
+        );
         const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
             setRecentLosses(data);
-        }, (serverError) => {
-            const permissionError = new FirestorePermissionError({ path: lossesQuery.toString(), operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-            console.error("Error fetching losses:", serverError);
-        });
+            handleLoad();
+        }, (err) => handleError(err, 'production losses'));
 
         return () => {
             entriesUnsubscribe();
@@ -72,11 +92,12 @@ export default function ShopFloorPage() {
     const summary: Record<string, number> = {};
     let totalMinutes = 0;
     recentLosses.forEach(loss => {
+      const reason = loss.reason || 'Desconhecido';
       const minutes = loss.timeLostMinutes || 0;
-      if (summary[loss.reason]) {
-        summary[loss.reason] += minutes;
+      if (summary[reason]) {
+        summary[reason] += minutes;
       } else {
-        summary[loss.reason] = minutes;
+        summary[reason] = minutes;
       }
       totalMinutes += minutes;
     });
@@ -86,60 +107,63 @@ export default function ShopFloorPage() {
   }, [recentLosses]);
 
   const { oeeData, totalUsedHours } = useMemo(() => {
-    const machineData: Record<string, { totalProduced: number, totalLost: number, productionTime: number, downTime: number }> = {};
+    const machineData: Record<string, { totalProduced: number, totalLost: number, runTime: number, downTime: number }> = {};
     
-    const entries = recentEntries || [];
-    const losses = recentLosses || [];
+    const now = new Date();
+    const startOfToday = startOfDay(now);
+    const endOfToday = endOfDay(now);
 
-    const machines = new Set([...entries.map(e => e.machineId), ...losses.map(l => l.machineId)]);
+    const entriesToday = recentEntries.filter(e => {
+        const ts = e.timestamp;
+        if (!ts) return false;
+        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+        return date >= startOfToday && date <= endOfToday;
+    });
+    
+    const lossesToday = recentLosses; // Already filtered by query
+
+    const machines = new Set([...entriesToday.map(e => e.machineId), ...lossesToday.map(l => l.machineId)]);
 
     machines.forEach(machineId => {
       if (!machineId) return;
       machineData[machineId] = {
         totalProduced: 0,
         totalLost: 0,
-        productionTime: 0,
+        runTime: 0,
         downTime: 0,
       };
     });
 
     let usedSeconds = 0;
-    entries.forEach(entry => {
+    entriesToday.forEach(entry => {
       usedSeconds += entry.productionTimeSeconds;
       if (machineData[entry.machineId]) {
         machineData[entry.machineId].totalProduced += entry.quantityProduced;
-        if(machineData[entry.machineId].productionTime) {
-            machineData[entry.machineId].productionTime += entry.productionTimeSeconds;
-        } else {
-            machineData[entry.machineId].productionTime = entry.productionTimeSeconds;
-        }
+        machineData[entry.machineId].runTime += entry.productionTimeSeconds;
       }
     });
 
-    losses.forEach(loss => {
+    lossesToday.forEach(loss => {
       if (machineData[loss.machineId]) {
         machineData[loss.machineId].totalLost += loss.quantityLost;
-        if(machineData[loss.machineId].downTime) {
-            machineData[loss.machineId].downTime += loss.timeLostMinutes * 60;
-        } else {
-            machineData[loss.machineId].downTime = loss.timeLostMinutes * 60;
-        }
+        machineData[loss.machineId].downTime += loss.timeLostMinutes * 60;
       }
     });
 
-    const oeeByMachine: any[] = Object.entries(machineData).map(([machineId, data]) => {
-      const plannedProductionTime = TOTAL_AVAILABLE_TIME_SECONDS - data.downTime;
+    const oeeByMachine = Object.entries(machineData).map(([machineId, data]) => {
+      const { totalProduced, totalLost, runTime, downTime } = data;
       
-      const availability = (plannedProductionTime / TOTAL_AVAILABLE_TIME_SECONDS) * 100;
+      const plannedProductionTime = TOTAL_SHIFT_SECONDS;
+      const operatingTime = plannedProductionTime - downTime;
       
-      const performance = (data.totalProduced > 0 && data.productionTime > 0)
-        ? ((data.totalProduced * IDEAL_CYCLE_TIME_SECONDS) / data.productionTime) * 100
+      const availability = operatingTime > 0 ? (operatingTime / plannedProductionTime) * 100 : 0;
+      
+      const performance = runTime > 0
+        ? ((totalProduced * IDEAL_CYCLE_TIME_SECONDS) / runTime) * 100
         : 0;
 
-      const totalParts = data.totalProduced + data.totalLost;
-      const quality = (totalParts > 0)
-        ? (data.totalProduced / totalParts) * 100
-        : 0;
+      const totalParts = totalProduced + totalLost;
+      const quality = totalParts > 0 ? (totalProduced / totalParts) * 100 : 0;
       
       const oee = (availability / 100) * (performance / 100) * (quality / 100) * 100;
       
@@ -185,6 +209,10 @@ export default function ShopFloorPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="ml-4 text-muted-foreground">Carregando dados do dashboard...</p>
                   </div>
+                ) : error ? (
+                   <div className="flex justify-center items-center h-64 bg-destructive/10 rounded-lg">
+                      <p className="text-destructive">{error}</p>
+                   </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       <MonthlyHoursChart 
@@ -231,5 +259,3 @@ export default function ShopFloorPage() {
     </>
   );
 }
-
-    
