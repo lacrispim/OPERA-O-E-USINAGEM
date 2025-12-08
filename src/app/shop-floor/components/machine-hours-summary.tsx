@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import type { OperatorProductionInput } from '@/lib/types';
 import { Timestamp } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
@@ -30,49 +30,27 @@ const safeParseDate = (timestamp: Timestamp | string | Date): Date | null => {
 const machineColors: { [key: string]: string } = {
   'Torno CNC - Centur 30': 'hsl(var(--chart-1))',
   'Centro de Usinagem D600': 'hsl(var(--chart-2))',
-  // Add more machines and colors as needed
 };
 
 
 export function MachineHoursSummary({ data }: MachineHoursSummaryProps) {
-  const { chartData, machineKeys } = useMemo(() => {
-    const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    
-    const weeklyData: { [day: string]: { [machine: string]: number } } = daysOfWeek.reduce((acc, day) => {
-      acc[day] = {};
-      return acc;
-    }, {} as { [day: string]: { [machine: string]: number } });
-
-    const machines = new Set<string>();
+  const chartData = useMemo(() => {
+    const machineHours: { [machine: string]: number } = {};
 
     data.forEach(entry => {
-      const entryDate = safeParseDate(entry.timestamp);
-      if (entryDate) {
-        const dayName = daysOfWeek[entryDate.getDay()];
-        const machine = entry.machineId;
-        const hours = entry.productionTimeSeconds / 3600;
+      const machine = entry.machineId;
+      const hours = entry.productionTimeSeconds / 3600;
 
-        machines.add(machine);
-
-        if (!weeklyData[dayName][machine]) {
-          weeklyData[dayName][machine] = 0;
-        }
-        weeklyData[dayName][machine] += hours;
+      if (!machineHours[machine]) {
+        machineHours[machine] = 0;
       }
+      machineHours[machine] += hours;
     });
 
-    const finalChartData = daysOfWeek.map(day => {
-      const dayData: { name: string; [key: string]: any } = { name: day };
-      machines.forEach(machine => {
-        dayData[machine] = weeklyData[day][machine] || 0;
-      });
-      return dayData;
-    });
-
-    return {
-      chartData: finalChartData,
-      machineKeys: Array.from(machines)
-    };
+    return Object.entries(machineHours).map(([name, hours]) => ({
+      name,
+      hours
+    }));
 
   }, [data]);
 
@@ -90,15 +68,25 @@ export function MachineHoursSummary({ data }: MachineHoursSummaryProps) {
         <BarChart
           data={chartData}
           margin={{
-            top: 20,
+            top: 30,
             right: 30,
             left: 20,
             bottom: 5,
           }}
+          layout="vertical"
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis unit="h" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" unit="h" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+          <YAxis 
+            type="category" 
+            dataKey="name" 
+            stroke="hsl(var(--muted-foreground))" 
+            fontSize={12} 
+            tickLine={false} 
+            axisLine={false} 
+            width={120}
+            tick={{ textAnchor: 'start' }}
+            />
           <Tooltip
             cursor={{ fill: 'hsl(var(--accent))' }}
             contentStyle={{
@@ -106,18 +94,22 @@ export function MachineHoursSummary({ data }: MachineHoursSummaryProps) {
               borderColor: 'hsl(var(--border))',
               borderRadius: 'var(--radius)',
             }}
-            formatter={(value: number) => [`${value.toFixed(2)} horas`, 'Usinagem']}
+            formatter={(value: number) => [`${value.toFixed(2)} horas`, 'Total da Semana']}
           />
-          <Legend wrapperStyle={{fontSize: "12px"}}/>
-          {machineKeys.map((machineKey, index) => (
-             <Bar 
-                key={machineKey} 
-                dataKey={machineKey} 
-                stackId="a" 
-                fill={machineColors[machineKey] || `hsl(var(--chart-${(index % 5) + 1}))`} 
-                radius={[4, 4, 0, 0]}
-            />
-          ))}
+          <Bar 
+            dataKey="hours" 
+            fill="hsl(var(--primary))" 
+            radius={[0, 4, 4, 0]}
+            barSize={35}
+          >
+             <LabelList 
+                dataKey="hours" 
+                position="right" 
+                offset={8}
+                className="fill-foreground font-bold"
+                formatter={(value: number) => `${value.toFixed(1)}h`}
+             />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
