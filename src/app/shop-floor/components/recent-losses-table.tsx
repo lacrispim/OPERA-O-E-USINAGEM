@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from "date-fns";
-import { useCollection, orderBy, limit } from "@/firebase/firestore/use-collection";
+import { useCollection } from "@/firebase/firestore/use-collection";
 import { firestore } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,7 +42,7 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
   const { toast } = useToast();
   const { data: entries } = useCollection<ProductionLossInput>(
     'production-losses',
-    { constraints: [orderBy('timestamp', 'desc'), limit(10)] }
+    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 10}] }
   );
 
   const handleDelete = async (id: string) => {

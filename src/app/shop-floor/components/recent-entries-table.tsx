@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { parseISO } from 'date-fns';
-import { useCollection, orderBy, limit } from "@/firebase/firestore/use-collection";
+import { useCollection } from "@/firebase/firestore/use-collection";
 import { firestore } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 

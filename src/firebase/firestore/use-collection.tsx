@@ -9,8 +9,6 @@ import {
   DocumentData,
   query,
   where,
-  orderBy,
-  limit,
   startAfter,
   endBefore,
   limitToLast,
@@ -38,13 +36,9 @@ type LimitConstraint = {
 
 type CustomQueryConstraint = OrderByConstraint | LimitConstraint;
 
-interface UseCollectionOptions {
-  constraints?: CustomQueryConstraint[];
-  includeId?: boolean;
-}
-
 // Função para mapear nossas restrições personalizadas para as do Firebase
 const mapConstraints = (constraints: CustomQueryConstraint[]): QueryConstraint[] => {
+  const { orderBy, limit } = require('firebase/firestore');
   return constraints.map(c => {
     switch (c.type) {
       case 'orderBy':
@@ -119,14 +113,7 @@ export function useCollection<T>(
   return { data, loading, error };
 }
 
-export {
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  endBefore,
-  limitToLast,
-  startAt,
-  endAt,
-};
+interface UseCollectionOptions {
+    constraints?: CustomQueryConstraint[];
+    includeId?: boolean;
+}
