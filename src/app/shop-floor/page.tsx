@@ -25,7 +25,7 @@ const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 export default function ShopFloorPage() {
   const { data: recentEntries } = useCollection<OperatorProductionInput>(
     'production-entries',
-    { constraints: [ {type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 500} ] }
+    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 500}] }
   );
 
   const { data: recentLosses } = useCollection<ProductionLossInput>(
@@ -76,14 +76,22 @@ export default function ShopFloorPage() {
       usedSeconds += entry.productionTimeSeconds;
       if (machineData[entry.machineId]) {
         machineData[entry.machineId].totalProduced += entry.quantityProduced;
-        machineData[entry.machineId].productionTime += entry.productionTimeSeconds;
+        if(machineData[entry.machineId].productionTime) {
+            machineData[entry.machineId].productionTime += entry.productionTimeSeconds;
+        } else {
+            machineData[entry.machineId].productionTime = entry.productionTimeSeconds;
+        }
       }
     });
 
     losses.forEach(loss => {
       if (machineData[loss.machineId]) {
         machineData[loss.machineId].totalLost += loss.quantityLost;
-        machineData[loss.machineId].downTime += loss.timeLostMinutes * 60;
+        if(machineData[loss.machineId].downTime) {
+            machineData[loss.machineId].downTime += loss.timeLostMinutes * 60;
+        } else {
+            machineData[loss.machineId].downTime = loss.timeLostMinutes * 60;
+        }
       }
     });
 

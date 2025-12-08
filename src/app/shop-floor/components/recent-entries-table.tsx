@@ -58,7 +58,7 @@ export function RecentEntriesTable() {
   const { toast } = useToast();
   const { data: entries } = useCollection<OperatorProductionInput>(
     'production-entries',
-    { constraints: [orderBy('timestamp', 'desc'), limit(10)] }
+    { constraints: [{type: 'orderBy', field: 'timestamp', direction: 'desc'}, {type: 'limit', value: 10}] }
   );
 
   const handleUpdateStatus = async (id: string, newStatus: ProductionStatus) => {
