@@ -1,8 +1,9 @@
 
+
 'use server';
 
-import { ref, get, Database } from 'firebase/database';
 import type { ProductionRecord } from '@/lib/types';
+import { Database, get, ref } from 'firebase/database';
 
 const STANDARDIZED_STATUS = {
     EM_PRODUCAO: 'Em Produção',
@@ -14,7 +15,7 @@ const STANDARDIZED_STATUS = {
     OUTRO: 'Outro',
 };
 
-const standardizeStatus = (status: string): string => {
+export const standardizeStatus = (status: string): string => {
     if (!status) return STANDARDIZED_STATUS.OUTRO;
     const s = status.toLowerCase().trim();
     if (s.includes('em produçao') || s.includes('em produção')) return STANDARDIZED_STATUS.EM_PRODUCAO;
@@ -27,14 +28,14 @@ const standardizeStatus = (status: string): string => {
     return STANDARDIZED_STATUS.OUTRO; // Keep original if no match
 };
 
-const standardizeFactoryName = (name: string): string => {
+export const standardizeFactoryName = (name: string): string => {
     if (!name) return 'N/A';
     const n = name.trim();
     if (n.toLowerCase().includes('igarass')) return 'Igarassu';
     return n;
 };
 
-function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] {
+export function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] {
   if (!firebaseData) return [];
   
   const records: ProductionRecord[] = firebaseData.map((item, index) => {
@@ -87,28 +88,4 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
   });
   
   return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-}
-
-export async function getFirebaseProductionRecords(database: Database): Promise<ProductionRecord[]> {
-  try {
-    if (!database) {
-      throw new Error("Database instance is not provided.");
-    }
-    const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
-    const nodeRef = ref(database, nodePath);
-    const snapshot = await get(nodeRef);
-
-    if (snapshot.exists()) {
-      const rawData = snapshot.val();
-      const dataArray = Object.keys(rawData).map((key) => ({
-        id: key,
-        ...rawData[key],
-      }));
-      return mapFirebaseToProductionRecord(dataArray);
-    }
-    return [];
-  } catch (error) {
-    console.error("Firebase data fetching error:", error);
-    return [];
-  }
 }
