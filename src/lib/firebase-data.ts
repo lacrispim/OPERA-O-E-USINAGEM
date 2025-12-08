@@ -1,7 +1,5 @@
 
 
-'use server';
-
 import type { ProductionRecord } from '@/lib/types';
 import { Database, get, ref } from 'firebase/database';
 
