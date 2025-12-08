@@ -19,7 +19,7 @@ import { LossInputForm } from './components/loss-input-form';
 import { RecentLossesTable } from './components/recent-losses-table';
 import { TotalHoursCard } from './components/total-hours-card';
 import { MachineHoursSummary } from './components/machine-hours-summary';
-import { getISOWeeksInYear, getWeek, startOfWeek, endOfWeek, format, parseISO } from 'date-fns';
+import { getISOWeeksInYear, getWeek, startOfWeek, endOfWeek, parseISO, startOfISOWeek, endOfISOWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -32,8 +32,16 @@ const TOTAL_MONTHLY_HOURS = 540;
 const safeParseDate = (timestamp: Timestamp | string | Date): Date | null => {
     if (!timestamp) return null;
     if (timestamp instanceof Date) return timestamp;
-    if (typeof timestamp === 'string') return parseISO(timestamp);
-    if (timestamp && typeof timestamp.toDate === 'function') return timestamp.toDate();
+    if (typeof timestamp === 'string') {
+        try {
+            return parseISO(timestamp);
+        } catch (e) {
+            return null;
+        }
+    }
+    if (timestamp && typeof timestamp.toDate === 'function') {
+        return timestamp.toDate();
+    }
     return null;
 };
 
@@ -60,9 +68,15 @@ export default function ShopFloorPage() {
 
   const weeklyFilteredEntries = useMemo(() => {
     if (!recentEntries) return [];
+    
+    // Create a date for the first day of the year
+    const firstDayOfYear = new Date(currentYear, 0, 1);
+    // Calculate the date of the Monday of the selected week
+    const firstDayOfWeek = startOfWeek(firstDayOfYear, { weekStartsOn: 1 });
+    const targetMonday = new Date(firstDayOfWeek.setDate(firstDayOfWeek.getDate() + (currentWeek - 1) * 7));
 
-    const weekStart = startOfWeek(new Date(currentYear, 0, 1 + (currentWeek - 1) * 7), { weekStartsOn: 0 });
-    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 0 });
+    const weekStart = startOfISOWeek(targetMonday);
+    const weekEnd = endOfISOWeek(targetMonday);
     
     return recentEntries.filter(entry => {
       const entryDate = safeParseDate(entry.timestamp);
@@ -267,7 +281,7 @@ export default function ShopFloorPage() {
           
           <TabsContent value="supervisor">
              <div className="max-w-7xl mx-auto mt-6 space-y-6">
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                      <TotalHoursCard 
                       totalHours={TOTAL_MONTHLY_HOURS} 
                       usedHours={totalUsedHours} 
@@ -275,11 +289,11 @@ export default function ShopFloorPage() {
                     <OeeChart data={oeeData} />
                     <StopReasonsPieChart data={stopReasonsSummary} />
                  </div>
-                 <Card className="col-span-1 lg:col-span-2">
+                 <Card className="col-span-1 lg:col-span-3">
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row justify-between sm:items-center">
                             <div>
-                                <CardTitle>Horas de Usinagem por Dia na Semana</CardTitle>
+                                <CardTitle>Horas de Usinagem por Equipamento</CardTitle>
                                 <CardDescription>Total de horas de usinagem por equipamento para a semana selecionada.</CardDescription>
                             </div>
                             <div className="mt-4 sm:mt-0">
@@ -338,3 +352,5 @@ export default function ShopFloorPage() {
     </>
   );
 }
+
+    

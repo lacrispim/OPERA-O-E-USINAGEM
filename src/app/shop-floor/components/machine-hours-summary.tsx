@@ -4,34 +4,10 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import type { OperatorProductionInput } from '@/lib/types';
-import { Timestamp } from 'firebase/firestore';
-import { parseISO } from 'date-fns';
 
 type MachineHoursSummaryProps = {
   data: OperatorProductionInput[];
 };
-
-const safeParseDate = (timestamp: Timestamp | string | Date): Date | null => {
-    if (!timestamp) return null;
-    if (timestamp instanceof Date) return timestamp;
-    if (typeof timestamp === 'string') {
-        try {
-            return parseISO(timestamp);
-        } catch (e) {
-            return null;
-        }
-    }
-    if (timestamp && typeof timestamp.toDate === 'function') {
-        return timestamp.toDate();
-    }
-    return null;
-};
-
-const machineColors: { [key: string]: string } = {
-  'Torno CNC - Centur 30': 'hsl(var(--chart-1))',
-  'Centro de Usinagem D600': 'hsl(var(--chart-2))',
-};
-
 
 export function MachineHoursSummary({ data }: MachineHoursSummaryProps) {
   const chartData = useMemo(() => {
@@ -115,3 +91,5 @@ export function MachineHoursSummary({ data }: MachineHoursSummaryProps) {
     </div>
   );
 }
+
+    
