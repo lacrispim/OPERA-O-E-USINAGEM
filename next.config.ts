@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devIndicators: {
+    allowedDevOrigins: [
+      'https://6000-firebase-fabritrack-view-20-1757701923703.cluster-zhw3w37rxzgkutusbbhib6qhra.cloudworkstations.dev',
+    ],
+  },
 };
 
 export default nextConfig;
