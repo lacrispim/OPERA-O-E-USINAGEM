@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from "@/components/page-header";
@@ -37,6 +38,9 @@ export default function ShopFloorPage() {
         const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
             setRecentEntries(data);
+            setIsLoading(false); // Set loading to false after data is fetched
+        }, (error) => {
+            console.error("Error fetching entries:", error);
             setIsLoading(false);
         });
 
@@ -44,6 +48,8 @@ export default function ShopFloorPage() {
         const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
             setRecentLosses(data);
+        }, (error) => {
+            console.error("Error fetching losses:", error);
         });
 
         return () => {
