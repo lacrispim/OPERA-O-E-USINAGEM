@@ -10,18 +10,21 @@ import {
 import { FirebaseApp } from 'firebase/app';
 import { Auth } from 'firebase/auth';
 import { Firestore } from 'firebase/firestore';
+import { Database } from 'firebase/database';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 type FirebaseContextType = {
   firebaseApp: FirebaseApp | null;
   firestore: Firestore | null;
   auth: Auth | null;
+  database: Database | null;
 };
 
 export const FirebaseContext = createContext<FirebaseContextType>({
   firebaseApp: null,
   firestore: null,
   auth: null,
+  database: null,
 });
 
 export const FirebaseProvider = ({
@@ -29,6 +32,7 @@ export const FirebaseProvider = ({
   firebaseApp,
   firestore,
   auth,
+  database,
 }: {
   children: ReactNode;
 } & FirebaseContextType) => {
@@ -37,8 +41,9 @@ export const FirebaseProvider = ({
       firebaseApp,
       firestore,
       auth,
+      database,
     }),
-    [firebaseApp, firestore, auth]
+    [firebaseApp, firestore, auth, database]
   );
 
   return (

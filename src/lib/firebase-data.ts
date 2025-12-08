@@ -1,8 +1,7 @@
 
 'use server';
 
-import { ref, get } from 'firebase/database';
-import { database } from '@/lib/firebase';
+import { ref, get, Database } from 'firebase/database';
 import type { ProductionRecord } from '@/lib/types';
 
 const STANDARDIZED_STATUS = {
@@ -90,7 +89,7 @@ function mapFirebaseToProductionRecord(firebaseData: any[]): ProductionRecord[] 
   return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-export async function getFirebaseProductionRecords(): Promise<ProductionRecord[]> {
+export async function getFirebaseProductionRecords(database: Database): Promise<ProductionRecord[]> {
   try {
     const nodePath = '12dXywY4L-NXhuKxJe9TuXBo-C4dtvcaWlPm6LdHeP5U/Página1';
     const nodeRef = ref(database, nodePath);

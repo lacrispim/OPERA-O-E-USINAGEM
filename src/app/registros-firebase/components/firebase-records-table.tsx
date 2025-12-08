@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, ChangeEvent } from 'react';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, Database } from 'firebase/database';
 import {
   Table,
   TableBody,
@@ -118,7 +118,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 
 
 export function FirebaseRecordsTable() {
-  const { database } = useFirebase();
+  const { database } = useFirebase() as { database: Database | null };
   const [data, setData] = useState<any[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
