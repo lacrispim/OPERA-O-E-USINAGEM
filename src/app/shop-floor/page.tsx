@@ -38,19 +38,24 @@ export default function ShopFloorPage() {
       { constraints: [orderBy('timestamp', 'desc'), limit(200)] }
   );
 
-  const stopReasonsSummary = useMemo(() => {
+  const { stopReasonsSummary, totalLostMinutes } = useMemo(() => {
     if (!recentLosses || recentLosses.length === 0) {
-      return [{ name: "Nenhuma perda registrada", value: 1 }];
+      return { stopReasonsSummary: [{ name: "Nenhuma perda registrada", value: 1 }], totalLostMinutes: 0 };
     }
     const summary: Record<string, number> = {};
+    let totalMinutes = 0;
     recentLosses.forEach(loss => {
+      const minutes = loss.timeLostMinutes || 0;
       if (summary[loss.reason]) {
-        summary[loss.reason] += loss.timeLostMinutes;
+        summary[loss.reason] += minutes;
       } else {
-        summary[loss.reason] = loss.timeLostMinutes;
+        summary[loss.reason] = minutes;
       }
+      totalMinutes += minutes;
     });
-    return Object.entries(summary).map(([name, value]) => ({ name, value }));
+    
+    const summaryArray = Object.entries(summary).map(([name, value]) => ({ name, value }));
+    return { stopReasonsSummary: summaryArray, totalLostMinutes: totalMinutes };
   }, [recentLosses]);
 
   const { oeeData, totalUsedHours } = useMemo(() => {
@@ -238,7 +243,7 @@ export default function ShopFloorPage() {
                       usedHours={totalUsedHours} 
                     />
                     <OeeChart data={oeeData} />
-                    <StopReasonsPieChart data={stopReasonsSummary} />
+                    <StopReasonsPieChart data={stopReasonsSummary} totalMinutes={totalLostMinutes} />
                  </div>
             </div>
           </TabsContent>
