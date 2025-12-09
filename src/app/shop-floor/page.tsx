@@ -4,7 +4,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Monitor, Tablet } from "lucide-react";
+import { Loader2, Monitor, Tablet, TrendingUp } from "lucide-react";
 import { OperatorInputForm } from "./components/operator-input-form";
 import { LossInputForm } from "./components/loss-input-form";
 import { RecentEntriesTable } from "./components/recent-entries-table";
@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDatabase } from "@/firebase";
 import { ref, onValue, query, orderByChild } from "firebase/database";
 import { startOfDay, endOfDay } from 'date-fns';
+import { ProductionOptimizationView } from "./components/production-optimization-view";
 
 const TOTAL_MONTHLY_HOURS = 540;
 const TOTAL_SHIFT_SECONDS = 8 * 60 * 60; // 8 hours shift in seconds
@@ -69,16 +70,13 @@ export default function ShopFloorPage() {
         const lossesQuery = query(lossesRef, orderByChild("timestamp"));
         const lossesUnsubscribe = onValue(lossesQuery, (snapshot) => {
             const data = snapshot.val();
-            const now = new Date();
-            const startOfToday = startOfDay(now).getTime();
-
+            
             if (data) {
                 const lossesArray: ProductionLossInput[] = Object.keys(data)
                     .map(key => ({
                         id: key,
                         ...data[key]
                     }))
-                    .filter(loss => loss.timestamp >= startOfToday)
                     .sort((a, b) => b.timestamp - a.timestamp);
                 setRecentLosses(lossesArray);
             } else {
@@ -95,12 +93,16 @@ export default function ShopFloorPage() {
 
 
   const { stopReasonsSummary, totalLostMinutes } = useMemo(() => {
-    if (!recentLosses || recentLosses.length === 0) {
+    const now = new Date();
+    const startOfToday = startOfDay(now).getTime();
+    const lossesToday = recentLosses.filter(loss => loss.timestamp >= startOfToday);
+
+    if (!lossesToday || lossesToday.length === 0) {
       return { stopReasonsSummary: [{ name: "Nenhuma perda registrada", value: 1 }], totalLostMinutes: 0 };
     }
     const summary: Record<string, number> = {};
     let totalMinutes = 0;
-    recentLosses.forEach(loss => {
+    lossesToday.forEach(loss => {
       const reason = loss.reason || 'Desconhecido';
       const minutes = loss.timeLostMinutes || 0;
       if (summary[reason]) {
@@ -128,7 +130,11 @@ export default function ShopFloorPage() {
         return ts >= startOfToday && ts <= endOfToday;
     });
     
-    const lossesToday = recentLosses; 
+    const lossesToday = recentLosses.filter(l => {
+        const ts = l.timestamp;
+        if (!ts) return false;
+        return ts >= startOfToday && ts <= endOfToday;
+    });
 
     const machines = new Set([...entriesToday.map(e => e.machineId), ...lossesToday.map(l => l.machineId)]);
 
@@ -143,8 +149,11 @@ export default function ShopFloorPage() {
     });
 
     let usedSeconds = 0;
+    recentEntries.forEach(entry => { // All entries for monthly hours
+        usedSeconds += entry.productionTimeSeconds;
+    });
+
     entriesToday.forEach(entry => {
-      usedSeconds += entry.productionTimeSeconds;
       if (machineData[entry.machineId]) {
         machineData[entry.machineId].totalProduced += entry.quantityProduced;
         machineData[entry.machineId].runTime += entry.productionTimeSeconds;
@@ -199,7 +208,7 @@ export default function ShopFloorPage() {
       />
       <main className="px-4 sm:px-6 lg:px-8 pb-8">
         <Tabs defaultValue="supervisor" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-lg mx-auto">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto">
             <TabsTrigger value="supervisor">
               <Monitor className="mr-2" />
               Visão Supervisor
@@ -207,6 +216,10 @@ export default function ShopFloorPage() {
             <TabsTrigger value="operator">
               <Tablet className="mr-2" />
               Modo Operador
+            </TabsTrigger>
+            <TabsTrigger value="optimization">
+              <TrendingUp className="mr-2" />
+              Otimização
             </TabsTrigger>
           </TabsList>
           
@@ -262,6 +275,23 @@ export default function ShopFloorPage() {
                 </div>
             </div>
           </TabsContent>
+
+           <TabsContent value="optimization">
+                <div className="max-w-7xl mx-auto mt-6 space-y-6">
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                             <p className="ml-4 text-muted-foreground">Carregando dados de otimização...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex justify-center items-center h-64 bg-destructive/10 rounded-lg">
+                            <p className="text-destructive">{error}</p>
+                        </div>
+                    ) : (
+                        <ProductionOptimizationView productionData={recentEntries} lossData={recentLosses} />
+                    )}
+                </div>
+           </TabsContent>
         </Tabs>
       </main>
     </>
