@@ -107,7 +107,8 @@ export function LossInputForm() {
             description: `${values.quantityLost} peças perdidas foram registradas.`,
         });
         form.reset({
-            ...values,
+            operatorId: values.operatorId,
+            factory: values.factory,
             machineId: '',
             quantityLost: 0,
             reason: '',
