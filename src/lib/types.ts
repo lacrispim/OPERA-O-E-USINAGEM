@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 
 export const productionStatuses = ['Fila de produção', 'Em produção', 'Encerrado', 'Rejeitado', 'Enviado'] as const;
 export type ProductionStatus = typeof productionStatuses[number];
@@ -44,7 +43,7 @@ export type OperatorProductionInput = {
   machineId: string;
   quantityProduced: number;
   productionTimeSeconds: number;
-  timestamp: Timestamp | string; // ISO string or Firestore Timestamp
+  timestamp: number; // Realtime DB uses milliseconds since epoch
   formsNumber?: string;
   factory: string;
   operationCount?: number;
@@ -59,7 +58,7 @@ export type ProductionLossInput = {
   quantityLost: number;
   reason: string;
   timeLostMinutes: number;
-  timestamp: Timestamp | string; // ISO string or Firestore Timestamp
+  timestamp: number; // Realtime DB uses milliseconds since epoch
 }
 
 export type MachineOEE = {

@@ -1,3 +1,5 @@
+// This file is specific to Firestore permission errors and is not used by Realtime Database.
+// It can be deleted. It is kept here for reference in case Firestore is re-enabled.
 
 export type SecurityRuleContext = {
   path: string;

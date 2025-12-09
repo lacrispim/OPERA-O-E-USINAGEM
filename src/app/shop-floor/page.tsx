@@ -14,31 +14,23 @@ import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
 import { MonthlyHoursChart } from "./components/monthly-hours-chart";
 import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
-import { useFirestore } from "@/firebase";
-import { collection, onSnapshot, query, orderBy, where, Timestamp } from "firebase/firestore";
-import { FirestorePermissionError } from "@/firebase/errors";
-import { errorEmitter } from "@/firebase/error-emitter";
+import { useDatabase } from "@/firebase";
+import { ref, onValue, query, orderByChild } from "firebase/database";
 import { startOfDay, endOfDay } from 'date-fns';
 
-
 const TOTAL_MONTHLY_HOURS = 540;
-// Same as in OEE calculation
 const TOTAL_SHIFT_SECONDS = 8 * 60 * 60; // 8 hours shift in seconds
 const IDEAL_CYCLE_TIME_SECONDS = 25; // Ideal time to produce one part
 
-
 export default function ShopFloorPage() {
-    const firestore = useFirestore();
+    const database = useDatabase();
     const [recentEntries, setRecentEntries] = useState<OperatorProductionInput[]>([]);
     const [recentLosses, setRecentLosses] = useState<ProductionLossInput[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-      if (!firestore) {
-        // Firestore might not be available on first render, wait for it.
-        return;
-      };
+        if (!database) return;
 
         setIsLoading(true);
         setError(null);
@@ -52,32 +44,46 @@ export default function ShopFloorPage() {
         };
         
         const handleError = (err: any, type: string) => {
-            const permissionError = new FirestorePermissionError({ path: `Query for ${type}`, operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
             console.error(`Error fetching ${type}:`, err);
-            setError(`Failed to load ${type}. Check your Firestore security rules and internet connection.`);
+            setError(`Failed to load ${type}. Check your Realtime Database rules and internet connection.`);
             setIsLoading(false);
         };
 
-        const entriesQuery = query(collection(firestore, "production-entries"), orderBy("timestamp", "desc"));
-        const entriesUnsubscribe = onSnapshot(entriesQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
-            setRecentEntries(data);
+        const entriesRef = ref(database, "production-entries");
+        const entriesQuery = query(entriesRef, orderByChild("timestamp"));
+        const entriesUnsubscribe = onValue(entriesQuery, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const entriesArray = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                })).sort((a, b) => b.timestamp - a.timestamp);
+                setRecentEntries(entriesArray);
+            } else {
+                setRecentEntries([]);
+            }
             handleLoad();
         }, (err) => handleError(err, 'production entries'));
 
-        const now = new Date();
-        const startOfToday = startOfDay(now);
-        
-        // Query for losses in the last 24 hours
-        const lossesQuery = query(
-            collection(firestore, "production-losses"),
-            where("timestamp", ">=", Timestamp.fromDate(startOfToday)),
-            orderBy("timestamp", "desc")
-        );
-        const lossesUnsubscribe = onSnapshot(lossesQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
-            setRecentLosses(data);
+        const lossesRef = ref(database, "production-losses");
+        const lossesQuery = query(lossesRef, orderByChild("timestamp"));
+        const lossesUnsubscribe = onValue(lossesQuery, (snapshot) => {
+            const data = snapshot.val();
+            const now = new Date();
+            const startOfToday = startOfDay(now).getTime();
+
+            if (data) {
+                const lossesArray: ProductionLossInput[] = Object.keys(data)
+                    .map(key => ({
+                        id: key,
+                        ...data[key]
+                    }))
+                    .filter(loss => loss.timestamp >= startOfToday)
+                    .sort((a, b) => b.timestamp - a.timestamp);
+                setRecentLosses(lossesArray);
+            } else {
+                setRecentLosses([]);
+            }
             handleLoad();
         }, (err) => handleError(err, 'production losses'));
 
@@ -85,7 +91,7 @@ export default function ShopFloorPage() {
             entriesUnsubscribe();
             lossesUnsubscribe();
         };
-    }, [firestore]);
+    }, [database]);
 
 
   const { stopReasonsSummary, totalLostMinutes } = useMemo(() => {
@@ -113,17 +119,16 @@ export default function ShopFloorPage() {
     const machineData: Record<string, { totalProduced: number, totalLost: number, runTime: number, downTime: number }> = {};
     
     const now = new Date();
-    const startOfToday = startOfDay(now);
-    const endOfToday = endOfDay(now);
+    const startOfToday = startOfDay(now).getTime();
+    const endOfToday = endOfDay(now).getTime();
 
     const entriesToday = recentEntries.filter(e => {
         const ts = e.timestamp;
         if (!ts) return false;
-        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
-        return date >= startOfToday && date <= endOfToday;
+        return ts >= startOfToday && ts <= endOfToday;
     });
     
-    const lossesToday = recentLosses; // Already filtered by query
+    const lossesToday = recentLosses; 
 
     const machines = new Set([...entriesToday.map(e => e.machineId), ...lossesToday.map(l => l.machineId)]);
 

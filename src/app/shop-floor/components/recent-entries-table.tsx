@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from "react";
@@ -10,12 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp, doc, updateDoc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { parseISO } from 'date-fns';
-import { useFirestore } from '@/firebase';
+import { ref, update, remove, query, orderByChild, limitToLast, onValue } from 'firebase/database';
+import { useDatabase } from '@/firebase';
 import { useToast } from "@/hooks/use-toast";
-import { FirestorePermissionError } from "@/firebase/errors";
-import { errorEmitter } from "@/firebase/error-emitter";
 
 const formatTime = (totalSeconds: number) => {
     if (totalSeconds === undefined || totalSeconds === null) return '-';
@@ -42,62 +38,54 @@ const getStatusBadgeVariant = (status: ProductionStatus) => {
     }
 }
 
-const formatDate = (timestamp: Timestamp | string) => {
+const formatDate = (timestamp: number | string) => {
   if (!timestamp) return 'N/A';
-  let date: Date;
-  if (typeof timestamp === 'string') {
-    date = parseISO(timestamp);
-  } else if (timestamp.toDate) {
-    date = timestamp.toDate();
-  } else {
-    return 'Data inválida';
-  }
+  // Timestamps from Realtime DB are numbers (milliseconds since epoch)
+  const date = new Date(timestamp);
   return date.toLocaleString('pt-BR');
 }
 
 
 export function RecentEntriesTable() {
-  const firestore = useFirestore();
+  const database = useDatabase();
   const { toast } = useToast();
   const [entries, setEntries] = useState<OperatorProductionInput[]>([]);
 
   useEffect(() => {
-    if (!firestore) return;
+    if (!database) return;
 
-    const q = query(collection(firestore, 'production-entries'), orderBy('timestamp', 'desc'), limit(10));
+    const entriesRef = ref(database, 'production-entries');
+    const q = query(entriesRef, orderByChild('timestamp'), limitToLast(10));
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
-        setEntries(data);
-    }, (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: q.toString(),
-          operation: 'list',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        console.error("Error fetching recent entries: ", serverError);
+    const unsubscribe = onValue(q, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const entriesArray = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).sort((a, b) => b.timestamp - a.timestamp); // sort descending
+            setEntries(entriesArray);
+        } else {
+            setEntries([]);
+        }
+    }, (error) => {
+        console.error("Error fetching recent entries: ", error);
         toast({
             variant: 'destructive',
             title: 'Erro ao carregar registros',
-            description: serverError.message || 'Não foi possível buscar as entradas recentes.'
+            description: error.message || 'Não foi possível buscar as entradas recentes.'
         })
     });
 
     return () => unsubscribe();
-  }, [firestore, toast]);
+  }, [database, toast]);
 
 
   const handleUpdateStatus = (id: string, newStatus: ProductionStatus) => {
-    if (!firestore) return;
-    const entryRef = doc(firestore, 'production-entries', id);
-    updateDoc(entryRef, { status: newStatus })
+    if (!database || !id) return;
+    const entryRef = ref(database, `production-entries/${id}`);
+    update(entryRef, { status: newStatus })
       .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: entryRef.path,
-          operation: 'update',
-          requestResourceData: { status: newStatus },
-        });
-        errorEmitter.emit('permission-error', permissionError);
         console.error("Error updating document: ", serverError);
         toast({
           variant: 'destructive',
@@ -108,9 +96,9 @@ export function RecentEntriesTable() {
   };
 
   const handleDelete = (id: string) => {
-    if (!firestore) return;
-    const entryRef = doc(firestore, 'production-entries', id);
-    deleteDoc(entryRef)
+    if (!database || !id) return;
+    const entryRef = ref(database, `production-entries/${id}`);
+    remove(entryRef)
       .then(() => {
         toast({
           variant: 'destructive',
@@ -119,11 +107,6 @@ export function RecentEntriesTable() {
         });
       })
       .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: entryRef.path,
-          operation: 'delete',
-        });
-        errorEmitter.emit('permission-error', permissionError);
         console.error("Error deleting document: ", serverError);
         toast({
           variant: 'destructive',
@@ -216,5 +199,3 @@ export function RecentEntriesTable() {
     </Card>
   );
 }
-
-    

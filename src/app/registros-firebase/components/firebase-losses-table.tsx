@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -18,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FileDown } from 'lucide-react';
@@ -120,11 +118,7 @@ export function FirebaseLossesTable({ initialData }: FirebaseLossesTableProps) {
         
         let itemDate: Date | null = null;
         if (item.timestamp) {
-            if (item.timestamp instanceof Timestamp) {
-                itemDate = item.timestamp.toDate();
-            } else if (typeof item.timestamp === 'string') {
-                itemDate = new Date(item.timestamp);
-            }
+            itemDate = new Date(item.timestamp);
         }
 
         const matchesMonth = monthFilter === 'all' || (itemDate && itemDate.getMonth() === parseInt(monthFilter));
@@ -150,7 +144,7 @@ export function FirebaseLossesTable({ initialData }: FirebaseLossesTableProps) {
 
     if (header === 'timestamp') {
         if (!value) return 'N/A';
-        const date = value instanceof Timestamp ? value.toDate() : new Date(value as string);
+        const date = new Date(value);
         return format(date, 'dd/MM/yyyy HH:mm');
     }
 
@@ -177,7 +171,7 @@ export function FirebaseLossesTable({ initialData }: FirebaseLossesTableProps) {
         return isNaN(num) ? '-' : num;
     }
 
-    if (typeof value === 'object' && value !== null && !(value instanceof Timestamp)) {
+    if (typeof value === 'object' && value !== null) {
       return JSON.stringify(value);
     }
     return stringValue;
@@ -190,7 +184,7 @@ export function FirebaseLossesTable({ initialData }: FirebaseLossesTableProps) {
             const headerText = COLUMN_HEADERS[header] || String(header);
             const value = item[header];
              if (header === 'timestamp') {
-                const date = value instanceof Timestamp ? value.toDate() : new Date(value as string);
+                const date = new Date(value);
                 row[headerText] = format(date, 'dd/MM/yyyy HH:mm');
             } else if (header === 'timeLostMinutes') {
                 const totalMinutes = Number(value);
@@ -224,7 +218,7 @@ export function FirebaseLossesTable({ initialData }: FirebaseLossesTableProps) {
                         <div>
                             <CardTitle>Dados de Perdas de Produção</CardTitle>
                             <CardDescription>
-                                Visualização dos dados de perdas salvos no Firestore. Atualizado em: {new Date().toLocaleString('pt-BR')}
+                                Visualização dos dados de perdas salvos no Realtime Database. Atualizado em: {new Date().toLocaleString('pt-BR')}
                             </CardDescription>
                         </div>
                         <Button variant="outline" onClick={handleExport}>

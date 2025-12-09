@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "OperatorProductionInput": {
@@ -23,9 +22,8 @@
           "description": "The time taken for production in seconds."
         },
         "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The server timestamp of the entry."
+          "type": "number",
+          "description": "The server timestamp of the entry (milliseconds since epoch)."
         },
         "formsNumber": {
           "type": "string",
@@ -77,9 +75,8 @@
           "description": "The downtime in minutes due to the loss."
         },
         "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The server timestamp of the loss entry."
+          "type": "number",
+          "description": "The server timestamp of the loss entry (milliseconds since epoch)."
         }
       },
       "required": ["operatorId", "factory", "machineId", "quantityLost", "reason", "timeLostMinutes", "timestamp"]
@@ -87,19 +84,5 @@
   },
   "auth": {
     "providers": []
-  },
-  "firestore": {
-    "/production-entries/{entryId}": {
-      "schema": {
-        "$ref": "#/entities/OperatorProductionInput"
-      },
-      "description": "Stores records of production entries from operators."
-    },
-    "/production-losses/{lossId}": {
-      "schema": {
-        "$ref": "#/entities/ProductionLossInput"
-      },
-      "description": "Stores records of production losses."
-    }
   }
 }

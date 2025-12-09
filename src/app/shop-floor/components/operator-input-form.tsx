@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,11 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Play, Pause, TimerReset } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useDatabase } from '@/firebase';
+import { ref, push, set, serverTimestamp } from 'firebase/database';
 import { useToast } from '@/hooks/use-toast';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import type { ProductionStatus } from '@/lib/types';
 
 const formSchema = z.object({
@@ -41,7 +38,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function OperatorInputForm() {
-  const firestore = useFirestore();
+  const database = useDatabase();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -92,7 +89,7 @@ export function OperatorInputForm() {
 
 
   async function onSubmit(values: FormData) {
-    if (!firestore) {
+    if (!database) {
       toast({
         variant: 'destructive',
         title: "Erro de Conexão",
@@ -102,7 +99,9 @@ export function OperatorInputForm() {
     }
     setIsLoading(true);
 
-    const entriesCollection = collection(firestore, 'production-entries');
+    const entriesRef = ref(database, 'production-entries');
+    const newEntryRef = push(entriesRef);
+
     const dataToSave = {
       ...values,
       productionTimeSeconds: seconds,
@@ -113,7 +112,7 @@ export function OperatorInputForm() {
     // Remove the temporary client-side field
     delete (dataToSave as any).productionTimeMinutes;
     
-    addDoc(entriesCollection, dataToSave)
+    set(newEntryRef, dataToSave)
       .then(() => {
         toast({
           title: "Produção Registrada!",
@@ -133,13 +132,7 @@ export function OperatorInputForm() {
         setIsRunning(false);
       })
       .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: entriesCollection.path,
-          operation: 'create',
-          requestResourceData: dataToSave,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        console.error("Error adding document: ", serverError); // Keep for debugging
+        console.error("Error adding document: ", serverError);
         toast({
           variant: "destructive",
           title: "Erro ao registrar",

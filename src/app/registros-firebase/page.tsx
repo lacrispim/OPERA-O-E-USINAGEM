@@ -1,22 +1,19 @@
-
 'use client';
 
 import { PageHeader } from "@/components/page-header";
 import { FirebaseRecordsTable } from "./components/firebase-records-table";
 import { FirebaseLossesTable } from "./components/firebase-losses-table";
-import { useFirestore } from "@/firebase";
+import { useDatabase } from "@/firebase";
 import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { ref, onValue, query, orderByChild } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 
 export default function RegistrosFirebasePage() {
-  const firestore = useFirestore();
+  const database = useDatabase();
   const { toast } = useToast();
   const [productionRecords, setProductionRecords] = useState<OperatorProductionInput[]>([]);
   const [lossRecords, setLossRecords] = useState<ProductionLossInput[]>([]);
@@ -24,10 +21,7 @@ export default function RegistrosFirebasePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!firestore) {
-      // Firestore might not be available on first render, wait for it.
-      return;
-    }
+    if (!database) return;
     
     setLoading(true);
     setError(null);
@@ -42,47 +36,48 @@ export default function RegistrosFirebasePage() {
     };
     
     const handleError = (err: any, type: string) => {
-        const permissionError = new FirestorePermissionError({ path: `Query for ${type}`, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
         console.error(`Error fetching ${type}:`, err);
         setError(`Failed to load ${type}. Ensure you have the correct permissions.`);
         setLoading(false); // Stop loading on error
+        toast({
+            variant: "destructive",
+            title: `Erro ao carregar dados de ${type}`,
+            description: err.message || `Não foi possível buscar os registros de ${type}.`
+        })
     };
 
     // --- Listener for production entries ---
-    const productionQuery = query(collection(firestore, 'production-entries'), orderBy('timestamp', 'desc'));
-    const productionUnsubscribe = onSnapshot(productionQuery, 
+    const productionRef = ref(database, 'production-entries');
+    const productionQuery = query(productionRef, orderByChild('timestamp'));
+    const productionUnsubscribe = onValue(productionQuery, 
       (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OperatorProductionInput));
-        setProductionRecords(data);
+        const data = snapshot.val();
+        if (data) {
+            const records = Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a,b) => b.timestamp - a.timestamp);
+            setProductionRecords(records);
+        } else {
+            setProductionRecords([]);
+        }
         if (activeListeners > 0) handleInitialLoad();
       }, 
-      (serverError) => {
-        handleError(serverError, "production entries");
-        toast({
-            variant: "destructive",
-            title: "Erro ao carregar dados de produção",
-            description: serverError.message || "Não foi possível buscar os registros do Firestore."
-        })
-      }
+      (err) => handleError(err, "produção")
     );
 
     // --- Listener for production losses ---
-    const lossesQuery = query(collection(firestore, 'production-losses'), orderBy('timestamp', 'desc'));
-    const lossesUnsubscribe = onSnapshot(lossesQuery, 
+    const lossesRef = ref(database, 'production-losses');
+    const lossesQuery = query(lossesRef, orderByChild('timestamp'));
+    const lossesUnsubscribe = onValue(lossesQuery, 
       (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
-        setLossRecords(data);
+        const data = snapshot.val();
+        if (data) {
+            const records = Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a,b) => b.timestamp - a.timestamp);
+            setLossRecords(records);
+        } else {
+            setLossRecords([]);
+        }
         if (activeListeners > 0) handleInitialLoad();
       }, 
-      (serverError) => {
-        handleError(serverError, "production losses");
-        toast({
-            variant: "destructive",
-            title: "Erro ao carregar dados de perdas",
-            description: serverError.message || "Não foi possível buscar os registros de perdas."
-        })
-      }
+      (err) => handleError(err, "perdas")
     );
 
     // Cleanup function to detach listeners on component unmount
@@ -90,7 +85,7 @@ export default function RegistrosFirebasePage() {
       productionUnsubscribe();
       lossesUnsubscribe();
     };
-  }, [firestore, toast]);
+  }, [database, toast]);
 
 
   if (loading) {
@@ -105,7 +100,7 @@ export default function RegistrosFirebasePage() {
                     <CardContent className="pt-6">
                         <div className="flex flex-col items-center justify-center h-96">
                             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                            <p className="mt-4 text-muted-foreground">Carregando dados do Firestore...</p>
+                            <p className="mt-4 text-muted-foreground">Carregando dados do Realtime Database...</p>
                         </div>
                     </CardContent>
                 </Card>

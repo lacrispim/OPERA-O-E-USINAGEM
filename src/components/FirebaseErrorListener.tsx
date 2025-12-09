@@ -1,5 +1,7 @@
-
 'use client';
+
+// This component is no longer used with Realtime Database as the error handling is simpler.
+// It can be deleted. It is kept here for reference in case Firestore is re-enabled.
 
 import { useEffect } from 'react';
 import { errorEmitter } from '@/firebase/error-emitter';

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from "react";
@@ -8,12 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import type { ProductionLossInput } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Timestamp, doc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { parseISO } from "date-fns";
-import { useFirestore } from "@/firebase";
+import { ref, remove, query, orderByChild, limitToLast, onValue } from 'firebase/database';
+import { useDatabase } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { FirestorePermissionError } from "@/firebase/errors";
-import { errorEmitter } from "@/firebase/error-emitter";
 
 type RecentLossesTableProps = {
   onDelete?: (id: string) => void;
@@ -26,48 +22,45 @@ const formatTime = (totalMinutes: number) => {
     return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
 };
 
-const formatDate = (timestamp: Timestamp | string) => {
+const formatDate = (timestamp: number | string) => {
   if (!timestamp) return 'N/A';
-  let date: Date;
-  if (typeof timestamp === 'string') {
-    date = parseISO(timestamp);
-  } else if (timestamp.toDate) {
-    date = timestamp.toDate();
-  } else {
-    return 'Data inválida';
-  }
+  const date = new Date(timestamp);
   return date.toLocaleString('pt-BR');
 }
 
 
 export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
-  const firestore = useFirestore();
+  const database = useDatabase();
   const { toast } = useToast();
   const [entries, setEntries] = useState<ProductionLossInput[]>([]);
 
   useEffect(() => {
-    if (!firestore) return;
+    if (!database) return;
 
-    const q = query(collection(firestore, 'production-losses'), orderBy('timestamp', 'desc'), limit(10));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionLossInput));
-        setEntries(data);
-    }, (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: q.toString(),
-          operation: 'list',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        console.error("Error fetching recent losses: ", serverError);
+    const lossesRef = ref(database, 'production-losses');
+    const q = query(lossesRef, orderByChild('timestamp'), limitToLast(10));
+    const unsubscribe = onValue(q, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const lossesArray = Object.keys(data).map(key => ({ 
+                id: key, 
+                ...data[key] 
+            })).sort((a, b) => b.timestamp - a.timestamp);
+            setEntries(lossesArray);
+        } else {
+            setEntries([]);
+        }
+    }, (error) => {
+        console.error("Error fetching recent losses: ", error);
         toast({
             variant: 'destructive',
             title: 'Erro ao carregar perdas',
-            description: serverError.message || 'Não foi possível buscar os registros de perdas recentes.'
+            description: error.message || 'Não foi possível buscar os registros de perdas recentes.'
         })
     });
 
     return () => unsubscribe();
-  }, [firestore, toast]);
+  }, [database, toast]);
 
 
   const handleDelete = (id: string) => {
@@ -75,9 +68,9 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
         onDelete(id);
         return;
     }
-    if (!firestore) return;
-    const lossRef = doc(firestore, 'production-losses', id);
-    deleteDoc(lossRef)
+    if (!database || !id) return;
+    const lossRef = ref(database, `production-losses/${id}`);
+    remove(lossRef)
       .then(() => {
         toast({
             variant: 'destructive',
@@ -86,11 +79,6 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
         });
       })
       .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: lossRef.path,
-          operation: 'delete',
-        });
-        errorEmitter.emit('permission-error', permissionError);
         console.error("Error deleting document: ", serverError);
         toast({
           variant: 'destructive',
@@ -158,5 +146,3 @@ export function RecentLossesTable({ onDelete }: RecentLossesTableProps) {
     </Card>
   );
 }
-
-    

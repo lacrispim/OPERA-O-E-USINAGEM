@@ -1,17 +1,11 @@
-
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Permite que qualquer pessoa leia e escreva na coleção 'production-entries'.
-    // Isso é necessário para que a aplicação possa listar os registros e criar novas entradas.
-    match /production-entries/{entryId=**} {
-      allow read, write: if true;
-    }
-
-    // Permite que qualquer pessoa leia e escreva na coleção 'production-losses'.
-    match /production-losses/{lossId=**} {
-      allow read, write: if true;
-    }
+// Este arquivo de regras era para o Firestore e não se aplica ao Realtime Database.
+// As regras para o Realtime Database são definidas no Console do Firebase, na seção do Realtime Database.
+// Para permitir leitura e escrita públicas, você pode usar as seguintes regras no console:
+/*
+{
+  "rules": {
+    ".read": "true",
+    ".write": "true"
   }
 }
+*/
