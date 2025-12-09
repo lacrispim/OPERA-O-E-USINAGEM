@@ -59,16 +59,6 @@ export function TimeEstimator() {
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
         <div className='space-y-4'>
-            <div className='text-sm p-4 bg-muted/50 rounded-lg'>
-                <h4 className='font-semibold mb-2'>Características consideradas:</h4>
-                <ul className='space-y-2 text-muted-foreground list-disc list-inside'>
-                    <li>Placa e contraponto manuais</li>
-                    <li>Baixa disponibilidade de ferramentas</li>
-                    <li>Operador com ritmo reduzido</li>
-                    <li>Programação em pé de máquina</li>
-                    <li>Sob-metal de 5mm (diâmetro e comprimento)</li>
-                </ul>
-            </div>
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
