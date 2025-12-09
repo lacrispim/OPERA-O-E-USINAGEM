@@ -5,7 +5,7 @@ export const ai = genkit({
   plugins: [
     googleAI({
       models: {
-        'gemini-pro': {model: 'gemini-1.5-flash-latest'},
+        'gemini-pro': {model: 'gemini-1.5-pro-latest'},
       },
     }),
   ],
