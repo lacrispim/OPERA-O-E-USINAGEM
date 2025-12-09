@@ -7,7 +7,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 
 export const metadata: Metadata = {
-  title: 'FabriTrack',
+  title: 'OPERAÇÃO E USINAGEM',
   description: 'Aplicativo de relatório de produção industrial',
 };
 

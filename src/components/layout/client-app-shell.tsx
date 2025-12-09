@@ -31,7 +31,7 @@ export function ClientAppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <Logo className="size-7 text-primary" />
             <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-              FabriTrack
+              OPERAÇÃO E USINAGEM
             </span>
           </div>
         </SidebarHeader>
