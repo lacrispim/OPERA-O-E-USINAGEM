@@ -4,7 +4,8 @@
 import { useMemo } from 'react';
 import type { OperatorProductionInput, ProductionLossInput } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, ChevronsRight, AlertTriangle, User, Factory, Bot } from 'lucide-react';
+import { TrendingUp, AlertTriangle, User, Factory, Bot } from 'lucide-react';
+import { TimeEstimator } from './time-estimator';
 
 interface ProductionOptimizationViewProps {
     productionData: OperatorProductionInput[];
@@ -193,6 +194,7 @@ export function ProductionOptimizationView({ productionData, lossData }: Product
                     </ul>
                 </CardContent>
             </Card>
+            <TimeEstimator />
         </div>
     )
 }
