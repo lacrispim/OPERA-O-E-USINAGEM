@@ -54,10 +54,7 @@ const timeEstimatorFlow = ai.defineFlow(
     outputSchema: EstimateProductionTimeOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('A IA não conseguiu gerar uma estimativa.');
-    }
-    return output;
+    const response = await prompt(input);
+    return response.output!;
   }
 );
