@@ -25,8 +25,7 @@ export default function RegistrosFirebasePage() {
 
   useEffect(() => {
     if (!firestore) {
-      setError("A conexão com o Firebase não está disponível.");
-      setLoading(false);
+      // Firestore might not be available on first render, wait for it.
       return;
     }
     

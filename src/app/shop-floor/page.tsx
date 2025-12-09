@@ -36,8 +36,7 @@ export default function ShopFloorPage() {
 
     useEffect(() => {
       if (!firestore) {
-        setIsLoading(false);
-        setError("A conexão com o Firebase não está disponível. Os dados não serão salvos ou carregados.");
+        // Firestore might not be available on first render, wait for it.
         return;
       };
 
@@ -56,7 +55,7 @@ export default function ShopFloorPage() {
             const permissionError = new FirestorePermissionError({ path: `Query for ${type}`, operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
             console.error(`Error fetching ${type}:`, err);
-            setError(`Failed to load ${type}.`);
+            setError(`Failed to load ${type}. Check your Firestore security rules and internet connection.`);
             setIsLoading(false);
         };
 
