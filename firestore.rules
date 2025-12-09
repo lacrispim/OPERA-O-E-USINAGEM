@@ -3,13 +3,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite acesso total de leitura e escrita à coleção de registros de produção.
-    match /production-entries/{entryId} {
+    // Permite que qualquer pessoa leia e escreva na coleção 'production-entries'.
+    // Isso é necessário para que a aplicação possa listar os registros e criar novas entradas.
+    match /production-entries/{entryId=**} {
       allow read, write: if true;
     }
 
-    // Permite acesso total de leitura e escrita à coleção de registros de perdas.
-    match /production-losses/{lossId} {
+    // Permite que qualquer pessoa leia e escreva na coleção 'production-losses'.
+    match /production-losses/{lossId=**} {
       allow read, write: if true;
     }
   }
