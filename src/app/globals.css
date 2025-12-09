@@ -23,11 +23,11 @@
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 202 69% 83%;
-    --chart-1: 340 82% 52%;
-    --chart-2: 160 82% 42%;
-    --chart-3: 45 93% 47%;
-    --chart-4: 260 82% 57%;
-    --chart-5: 210 93% 57%;
+    --chart-1: 220 80% 60%; /* Blue */
+    --chart-2: 160 70% 45%; /* Green */
+    --chart-3: 40 90% 55%;  /* Yellow */
+    --chart-4: 280 80% 65%; /* Purple */
+    --chart-5: 0 85% 60%;   /* Red */
     --chart-neutral: 0 0% 90%; /* Light gray for charts */
     
     --chart-status-fila: 190 85% 35%; /* Darker Teal */
@@ -60,11 +60,11 @@
     --border: 0 0% 30%;
     --input: 0 0% 30%;
     --ring: 202 69% 83%;
-    --chart-1: 340 92% 62%;
-    --chart-2: 160 92% 52%;
-    --chart-3: 45 100% 57%;
-    --chart-4: 260 92% 67%;
-    --chart-5: 210 100% 67%;
+    --chart-1: 220 80% 70%; /* Blue */
+    --chart-2: 160 70% 55%; /* Green */
+    --chart-3: 40 90% 65%;  /* Yellow */
+    --chart-4: 280 80% 75%; /* Purple */
+    --chart-5: 0 85% 70%;   /* Red */
     --chart-neutral: 0 0% 60%; /* Lighter gray for dark mode charts */
 
     --chart-status-fila: 190 85% 45%; /* Darker Teal */

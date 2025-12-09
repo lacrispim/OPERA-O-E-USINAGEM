@@ -11,13 +11,13 @@ import { RecentEntriesTable } from "./components/recent-entries-table";
 import { RecentLossesTable } from "./components/recent-losses-table";
 import { OeeChart } from "./components/oee-chart";
 import { StopReasonsPieChart } from "./components/stop-reasons-pie-chart";
-import { MonthlyHoursChart } from "./components/monthly-hours-chart";
 import type { OperatorProductionInput, ProductionLossInput } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
 import { useDatabase } from "@/firebase";
 import { ref, onValue, query, orderByChild } from "firebase/database";
 import { startOfDay, endOfDay } from 'date-fns';
 import { ProductionOptimizationView } from "./components/production-optimization-view";
+import { TotalHoursCard } from "./components/total-hours-card";
 
 const TOTAL_MONTHLY_HOURS = 540;
 const TOTAL_SHIFT_SECONDS = 8 * 60 * 60; // 8 hours shift in seconds
@@ -236,7 +236,7 @@ export default function ShopFloorPage() {
                    </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      <MonthlyHoursChart 
+                      <TotalHoursCard 
                         totalHours={TOTAL_MONTHLY_HOURS} 
                         usedHours={totalUsedHours} 
                       />
