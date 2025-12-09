@@ -35,6 +35,7 @@ export function TimeEstimator() {
       quantity: 1,
       material: '',
       tolerance: '',
+      roughness: '',
     },
   });
 
@@ -63,6 +64,7 @@ export function TimeEstimator() {
                 technicalDrawingDataUri: dataUri,
                 material: values.material,
                 tolerance: values.tolerance,
+                roughness: values.roughness,
             });
             setEstimation({ time: result.totalTimeMinutes, justification: result.justification });
         } catch (error) {
@@ -171,6 +173,20 @@ export function TimeEstimator() {
                       <FormLabel>Tolerância Necessária</FormLabel>
                       <FormControl>
                         <Input placeholder="Ex: +/- 0.05mm" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="roughness"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rugosidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: N6, Ra 0.8" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

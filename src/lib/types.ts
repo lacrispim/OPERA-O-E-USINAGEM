@@ -82,6 +82,7 @@ export const EstimateProductionTimeInputSchema = z.object({
     ),
   material: z.string().describe('O material a ser utilizado na fabricação da peça (ex: Aço 1045, Alumínio 6061).'),
   tolerance: z.string().describe('A tolerância dimensional exigida para a peça (ex: +/- 0.05mm).'),
+  roughness: z.string().describe('A rugosidade superficial exigida para a peça (ex: N6, Ra 0.8).'),
 });
 export type EstimateProductionTimeInput = z.infer<typeof EstimateProductionTimeInputSchema>;
 

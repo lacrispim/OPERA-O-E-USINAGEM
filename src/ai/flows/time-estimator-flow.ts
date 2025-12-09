@@ -30,9 +30,9 @@ Considere as seguintes limitações conhecidas desta máquina e do ambiente de t
 - A programação é feita 'em pé de máquina', aumentando o tempo de preparação inicial.
 - O material sempre vem com um sobre-metal de 5 mm no diâmetro e no comprimento, exigindo mais passes de desbaste.
 
-Com base no desenho técnico, no material, na tolerância e na quantidade, você deve determinar um "Tempo de Setup e Programação" (fixo) e um "Tempo de Ciclo por Peça".
+Com base no desenho técnico, no material, na tolerância e na rugosidade, você deve determinar um "Tempo de Setup e Programação" (fixo) e um "Tempo de Ciclo por Peça".
 
-Analise o desenho para inferir a complexidade da peça. Peças mais complexas com mais detalhes, roscas ou tolerâncias apertadas exigirão um tempo de ciclo maior.
+Analise o desenho para inferir a complexidade da peça. Peças mais complexas com mais detalhes, roscas, tolerâncias apertadas e rugosidade baixa (acabamento fino) exigirão um tempo de ciclo maior.
 
 O tempo total de fabricação será: (Tempo de Setup e Programação) + (Quantidade de Peças * Tempo de Ciclo por Peça).
 
@@ -42,6 +42,7 @@ Dados da Peça:
 - Quantidade: {{{quantity}}}
 - Material: {{{material}}}
 - Tolerância: {{{tolerance}}}
+- Rugosidade: {{{roughness}}}
 - Desenho Técnico: {{media url=technicalDrawingDataUri}}
 `,
 });
