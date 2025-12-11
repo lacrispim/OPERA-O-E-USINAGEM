@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Database, Monitor, LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -55,13 +56,13 @@ export default function ClientAppShell({ children }: { children: React.ReactNode
     <SidebarProvider>
       <div className="flex h-full w-full">
         <Sidebar collapsible="icon" className="border-r">
-          <SidebarHeader className="p-4">
-            <div className="flex items-center gap-3">
+          <SidebarHeader className="p-2">
+             <Link href="/shop-floor" className="flex items-center gap-3 p-2 rounded-lg hover:bg-sidebar-accent transition-colors">
               <Logo className="size-7 text-primary" />
               <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
                 OPERAÇÃO E USINAGEM
               </span>
-            </div>
+            </Link>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
@@ -93,9 +94,12 @@ export default function ClientAppShell({ children }: { children: React.ReactNode
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <div className="min-h-screen">
-            {children}
-          </div>
+            <header className="sticky top-0 z-10 hidden h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:flex">
+                <SidebarTrigger />
+            </header>
+            <div className="min-h-screen">
+                {children}
+            </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
