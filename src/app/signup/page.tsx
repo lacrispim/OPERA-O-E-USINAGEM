@@ -40,7 +40,7 @@ export default function SignupPage() {
   
   // This is a simplified authorization check.
   // In a production app, you would use custom claims or a database role check.
-  const isAuthorizedToSignUp = user && user.email === 'larissa.melo@exemplo.com';
+  const isAuthorizedToSignUp = user && user.email === 'larissa.crispim@unilever.com';
 
   async function onSubmit(values: FormData) {
     if (!auth) {

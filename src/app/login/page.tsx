@@ -75,7 +75,7 @@ export default function LoginPage() {
       });
       router.push('/shop-floor');
     } catch (error: any) {
-        if (error.code === 'auth/user-not-found' && values.email === 'seu-email@exemplo.com' && values.password === '123456') {
+        if (error.code === 'auth/user-not-found' && values.email === 'larissa.crispim@unilever.com' && values.password === '123456') {
              await handleFirstUserCreation(values);
         } else {
              toast({
