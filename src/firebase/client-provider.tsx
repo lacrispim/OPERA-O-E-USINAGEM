@@ -29,16 +29,19 @@ export const FirebaseClientProvider = ({ children }: { children: ReactNode }) =>
     // If user is logged in and tries to access a public route (login/signup), redirect them to the main app.
     if (isAuthenticated && isPublicRoute) {
       router.replace('/shop-floor');
-      return; // Early return to prevent further checks
     }
 
     // If user is NOT logged in and is trying to access a protected route, redirect to login.
     if (!isAuthenticated && !isPublicRoute) {
       router.replace('/login');
-      return; // Early return
     }
 
   }, [user, loading, router, pathname, isPublicRoute]);
+
+  // While loading, or if we are about to redirect, we can show nothing or a loader
+  if (loading || (!user && !isPublicRoute) || (user && isPublicRoute)) {
+    return null; // Or a loading spinner component
+  }
 
   return (
     <FirebaseProvider
