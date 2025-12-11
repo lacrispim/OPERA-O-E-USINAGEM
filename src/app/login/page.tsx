@@ -52,7 +52,7 @@ export default function LoginPage() {
       toast({
         title: 'Login bem-sucedido!',
       });
-      router.push('/shop-floor');
+      router.push('/shop-floor'); // Redireciona para a página de Registro de Produção
     } catch (error: any) {
         let description = 'E-mail ou senha incorretos. Por favor, tente novamente.';
         if (error.code === 'auth/user-not-found') {
