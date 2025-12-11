@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const protectedRoutes = ['/shop-floor', '/registros-firebase'];
-const authRoutes = ['/login', '/signup'];
+// All routes inside /app are protected by default
+// You can add public routes to this array
+const publicRoutes = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,11 +12,17 @@ export function middleware(request: NextRequest) {
   // For this client-side prototype, we check for a client-set flag in cookies.
   const isAuthenticated = request.cookies.get('firebaseAuth.authenticated')?.value === 'true';
 
-  if (isAuthenticated && authRoutes.includes(pathname)) {
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  // If the user is authenticated and tries to access a public route, redirect them to the main app page.
+  if (isAuthenticated && isPublicRoute) {
     return NextResponse.redirect(new URL('/shop-floor', request.url));
   }
 
-  if (!isAuthenticated && protectedRoutes.includes(pathname)) {
+  // If the user is not authenticated and is trying to access a protected route, redirect to login.
+  if (!isAuthenticated && !isPublicRoute && pathname.startsWith('/')) {
+    // allow root page to redirect to login
+    if (pathname === '/') return NextResponse.next();
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
