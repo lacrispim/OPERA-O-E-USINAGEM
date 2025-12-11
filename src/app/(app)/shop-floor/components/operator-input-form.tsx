@@ -231,7 +231,7 @@ export function OperatorInputForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Torno CNC - Centur 30">Torno CNC - Centur 30</SelectItem>
+                  <SelectItem value="Torno CNC - Centur 30">Torno CNC- Centur 30</SelectItem>
                   <SelectItem value="Centro de Usinagem D600">Centro de Usinagem D600</SelectItem>
                 </SelectContent>
               </Select>

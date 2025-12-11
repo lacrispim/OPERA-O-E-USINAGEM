@@ -1,20 +1,37 @@
 
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { initializeFirebase } from './index';
 import { FirebaseProvider } from './provider';
-import dynamic from 'next/dynamic';
+import { useUser } from './auth/use-user';
+import { useRouter, usePathname } from 'next/navigation';
 
 // Initialize Firebase on the client
 const { firebaseApp, firestore, auth, database } = initializeFirebase();
 
-const ClientAppShell = dynamic(() => import('@/components/layout/client-app-shell'), {
-  ssr: false,
-});
-
-
 export const FirebaseClientProvider = ({ children }: { children: ReactNode }) => {
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const protectedRoutes = ['/shop-floor', '/registros-firebase'];
+  const authRoutes = ['/login', '/signup'];
+
+  useEffect(() => {
+    if (!loading) {
+      const isAuthenticated = !!user;
+      
+      if (isAuthenticated && authRoutes.includes(pathname)) {
+        router.replace('/shop-floor');
+      }
+      
+      if (!isAuthenticated && protectedRoutes.some(p => pathname.startsWith(p))) {
+        router.replace('/login');
+      }
+    }
+  }, [user, loading, router, pathname]);
+
   return (
     <FirebaseProvider
       firebaseApp={firebaseApp}
@@ -22,7 +39,7 @@ export const FirebaseClientProvider = ({ children }: { children: ReactNode }) =>
       auth={auth}
       database={database}
     >
-      <ClientAppShell>{children}</ClientAppShell>
+      {children}
     </FirebaseProvider>
   );
 };
