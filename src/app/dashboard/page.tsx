@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
-  return null;
+  // This page is not used, redirect to the main operational page.
+  redirect('/shop-floor');
 }
