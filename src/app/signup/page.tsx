@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useUser } from '@/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
@@ -29,6 +29,33 @@ export default function SignupPage() {
   const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFirstUser, setIsFirstUser] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    async function checkFirstUser() {
+        if (!auth) return;
+        // A simple way to check if any user exists is to use a common but not-guessable email
+        // and see if it returns 'auth/user-not-found'. A more robust solution might involve
+        // a server-side check or a callable function, but this works for many scenarios.
+        // As we can't query all users client-side, we check for the admin email specifically.
+        try {
+            const methods = await fetchSignInMethodsForEmail(auth, 'larissa.crispim@unilever.com');
+            // If no methods are returned, it implies the user doesn't exist, so this is the first setup.
+            setIsFirstUser(methods.length === 0);
+        } catch (error: any) {
+            if(error.code === 'auth/user-not-found') {
+                setIsFirstUser(true);
+            } else {
+                 // Any other error, we assume it's not the first user for safety.
+                setIsFirstUser(false);
+            }
+        }
+    }
+
+    if (!userLoading) {
+      checkFirstUser();
+    }
+  }, [auth, userLoading]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -37,10 +64,8 @@ export default function SignupPage() {
       password: '',
     },
   });
-  
-  // This is a simplified authorization check.
-  // In a production app, you would use custom claims or a database role check.
-  const isAuthorizedToSignUp = user && user.email === 'larissa.crispim@unilever.com';
+
+  const canSignUp = isFirstUser === true || (user && user.email === 'larissa.crispim@unilever.com');
 
   async function onSubmit(values: FormData) {
     if (!auth) {
@@ -51,6 +76,18 @@ export default function SignupPage() {
       });
       return;
     }
+    
+    // Explicitly check for the first user credentials
+    if (isFirstUser && values.email !== 'larissa.crispim@unilever.com' && values.password !== '123456') {
+        toast({
+            variant: 'destructive',
+            title: 'Primeiro Cadastro Inválido',
+            description: 'O primeiro usuário deve ser larissa.crispim@unilever.com.',
+        });
+        return;
+    }
+
+
     setIsLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -59,7 +96,11 @@ export default function SignupPage() {
         description: `O usuário ${values.email} foi cadastrado com sucesso.`,
       });
       form.reset();
-      router.push('/shop-floor'); 
+      // If the admin is creating another user, they stay on the page.
+      // If it's the first user signing up, redirect them.
+      if (isFirstUser) {
+        router.push('/shop-floor');
+      }
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -73,7 +114,7 @@ export default function SignupPage() {
     }
   }
 
-  if (userLoading) {
+  if (userLoading || isFirstUser === null) {
      return (
       <div className="flex min-h-screen items-center justify-center bg-muted/40">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -81,7 +122,7 @@ export default function SignupPage() {
      )
   }
 
-  if (!isAuthorizedToSignUp && !userLoading) {
+  if (!canSignUp) {
     return (
        <div className="flex min-h-screen items-center justify-center bg-muted/40">
         <Card className="w-full max-w-sm text-center">
@@ -91,7 +132,7 @@ export default function SignupPage() {
             </CardHeader>
             <CardContent>
                  <Button asChild>
-                    <Link href="/login">Voltar para o Login</Link>
+                    <Link href="/shop-floor">Voltar para o Painel</Link>
                 </Button>
             </CardContent>
         </Card>
@@ -106,9 +147,14 @@ export default function SignupPage() {
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-3 mb-4">
                  <Logo className="size-8 text-primary" />
-                 <CardTitle className="text-2xl">Cadastrar Novo Usuário</CardTitle>
+                 <CardTitle className="text-2xl">{isFirstUser ? "Criar Conta de Administrador" : "Cadastrar Novo Usuário"}</CardTitle>
             </div>
-          <CardDescription>Preencha os dados para criar uma nova conta.</CardDescription>
+          <CardDescription>
+            {isFirstUser 
+                ? 'Esta será a conta principal para gerenciar o sistema.'
+                : 'Preencha os dados para criar uma nova conta de usuário.'
+            }
+            </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -118,9 +164,14 @@ export default function SignupPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>E-mail do Novo Usuário</FormLabel>
+                    <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="novo-usuario@exemplo.com" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder={isFirstUser ? "larissa.crispim@unilever.com" : "novo-usuario@exemplo.com"} 
+                        {...field} 
+                        defaultValue={isFirstUser ? "larissa.crispim@unilever.com" : ""}
+                        />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,7 +184,12 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        {...field}
+                        defaultValue={isFirstUser ? "123456" : ""}
+                        />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -141,7 +197,7 @@ export default function SignupPage() {
               />
               <Button type="submit" disabled={isLoading} className="w-full">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Cadastrar Usuário
+                {isFirstUser ? "Criar Conta e Entrar" : "Cadastrar Usuário"}
               </Button>
             </form>
           </Form>

@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
@@ -37,27 +37,6 @@ export default function LoginPage() {
     },
   });
 
-  const handleFirstUserCreation = async (values: FormData) => {
-    if (!auth) return;
-    try {
-      // This is a simplified check. In a real app, you'd have a more secure way
-      // to determine if the first user can be created (e.g., a server-side check or a secret key).
-      // For this prototype, we assume if the login fails with 'auth/user-not-found', we can create the first user.
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: 'Bem-vindo!',
-        description: 'Sua conta de administrador foi criada. Você já está logado.',
-      });
-      router.push('/shop-floor');
-    } catch (error: any) {
-       toast({
-        variant: 'destructive',
-        title: 'Erro ao criar primeiro usuário',
-        description: error.message || 'Ocorreu um erro desconhecido.',
-      });
-    }
-  }
-
   async function onSubmit(values: FormData) {
     if (!auth) {
       toast({
@@ -75,15 +54,15 @@ export default function LoginPage() {
       });
       router.push('/shop-floor');
     } catch (error: any) {
-        if (error.code === 'auth/user-not-found' && values.email === 'larissa.crispim@unilever.com' && values.password === '123456') {
-             await handleFirstUserCreation(values);
-        } else {
-             toast({
-                variant: 'destructive',
-                title: 'Erro no Login',
-                description: 'E-mail ou senha incorretos. Por favor, tente novamente.',
-             });
+        let description = 'E-mail ou senha incorretos. Por favor, tente novamente.';
+        if (error.code === 'auth/user-not-found') {
+            description = 'Usuário não encontrado. Se este é o seu primeiro acesso, por favor, cadastre-se.';
         }
+         toast({
+            variant: 'destructive',
+            title: 'Erro no Login',
+            description: description,
+         });
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +114,7 @@ export default function LoginPage() {
             </form>
           </Form>
            <div className="mt-4 text-center text-sm">
-            Quer cadastrar um novo usuário?{' '}
+            Não tem uma conta?{' '}
             <Link href="/signup" className="underline">
               Cadastre-se
             </Link>
