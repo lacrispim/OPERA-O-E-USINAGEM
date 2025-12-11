@@ -59,8 +59,6 @@ export default function SignupPage() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    // Set default values based on whether it's the first user.
-    // This is the correct way to handle initial values in react-hook-form.
     defaultValues: {
       email: '',
       password: '',
