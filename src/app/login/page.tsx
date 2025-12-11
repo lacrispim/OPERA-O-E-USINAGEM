@@ -15,11 +15,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useDatabase } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, set, serverTimestamp, get } from 'firebase/database';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, set, serverTimestamp } from 'firebase/database';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -42,6 +42,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -60,7 +61,6 @@ export default function LoginPage() {
       lastLogin: serverTimestamp(),
     }).catch((error) => {
       console.error("Failed to save user data to Realtime DB:", error);
-      // Non-critical error, so we don't show a toast
     });
   };
 
@@ -82,10 +82,9 @@ export default function LoginPage() {
         title: 'Login bem-sucedido!',
         description: `Bem-vinda, ${userCredential.user.email!}`,
       });
-      router.push('/shop-floor');
+      setLoginSuccess(true);
     } catch (error: any) {
       if (error.code === 'auth/user-not-found') {
-        // If user not found, redirect to signup
          router.push(`/signup?email=${encodeURIComponent(values.email)}`);
       } else {
         toast({
@@ -110,46 +109,67 @@ export default function LoginPage() {
           <CardDescription>Faça login para acessar o painel de produção.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input placeholder="seu.nome@unilever.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="********" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Entrar
-              </Button>
-            </form>
-          </Form>
-           <div className="mt-4 text-center text-sm">
-            Não tem uma conta?{' '}
-            <Link href="/signup" className="underline">
-              Cadastre-se
-            </Link>
-          </div>
+          {loginSuccess ? (
+            <div className="flex flex-col items-center justify-center text-center space-y-6">
+                <CheckCircle className="h-16 w-16 text-green-500" />
+                <div className="space-y-2">
+                    <h2 className="text-2xl font-bold">Login bem-sucedido!</h2>
+                    <p className="text-muted-foreground">
+                        Você está autenticada. Clique no botão abaixo para ir para o painel.
+                    </p>
+                </div>
+                <Button
+                    className="w-full"
+                    onClick={() => router.push('/shop-floor')}
+                >
+                    Ir para OPERAÇÃO E USINAGEM
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </div>
+          ) : (
+            <>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-mail</FormLabel>
+                        <FormControl>
+                          <Input placeholder="seu.nome@unilever.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="********" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={isLoading} className="w-full">
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Entrar
+                  </Button>
+                </form>
+              </Form>
+              <div className="mt-4 text-center text-sm">
+                Não tem uma conta?{' '}
+                <Link href="/signup" className="underline">
+                  Cadastre-se
+                </Link>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
