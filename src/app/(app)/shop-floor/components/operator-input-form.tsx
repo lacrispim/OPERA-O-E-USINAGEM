@@ -13,11 +13,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useDatabase } from '@/firebase';
 import { ref, push, set, serverTimestamp } from 'firebase/database';
 import { useToast } from '@/hooks/use-toast';
-import type { ProductionStatus } from '@/lib/types';
+import { activityTypes, type ProductionStatus } from '@/lib/types';
 
 const formSchema = z.object({
   operatorId: z.string().min(1, 'ID do operador é obrigatório.'),
   machineId: z.string().min(1, 'Máquina é obrigatória.'),
+  activityType: z.enum(activityTypes, { required_error: 'O tipo de atividade é obrigatório.' }),
   quantityProduced: z.preprocess(
     (a) => parseInt(z.string().parse(String(a)), 10),
     z.number().positive('A quantidade deve ser positiva.')
@@ -49,6 +50,7 @@ export function OperatorInputForm() {
     defaultValues: {
       operatorId: '',
       machineId: '',
+      activityType: 'USINAGEM',
       quantityProduced: 0,
       formsNumber: '',
       factory: '',
@@ -70,10 +72,25 @@ export function OperatorInputForm() {
     };
   }, [isRunning]);
 
-  useEffect(() => {
-    form.setValue('productionTimeMinutes', Math.floor(seconds / 60));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seconds]);
+  const handleManualTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const minutes = value === '' ? 0 : parseInt(value, 10);
+    if (!isNaN(minutes)) {
+      setIsRunning(false); // Stop timer if user manually changes time
+      setSeconds(minutes * 60);
+      form.setValue('productionTimeMinutes', minutes);
+    }
+  };
+
+  const handleTimerToggle = () => {
+    setIsRunning(!isRunning);
+  };
+
+  const handleTimerReset = () => {
+    setSeconds(0);
+    setIsRunning(false);
+    form.setValue('productionTimeMinutes', 0);
+  };
 
 
   async function onSubmit(values: FormData) {
@@ -109,6 +126,7 @@ export function OperatorInputForm() {
         form.reset({
             operatorId: values.operatorId,
             machineId: '',
+            activityType: 'USINAGEM',
             quantityProduced: 0,
             formsNumber: '',
             factory: values.factory,
@@ -138,16 +156,6 @@ export function OperatorInputForm() {
     const secs = totalSeconds % 60;
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
-
-  const handleManualTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const minutes = value === '' ? 0 : parseInt(value, 10);
-    if (!isNaN(minutes)) {
-        setIsRunning(false); // Stop timer if user manually changes time
-        setSeconds(minutes * 60);
-        form.setValue('productionTimeMinutes', minutes);
-    }
-  }
 
 
   return (
@@ -202,6 +210,28 @@ export function OperatorInputForm() {
               <FormControl>
                 <Input placeholder="Ex: F-1024" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="activityType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Atividade</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a atividade" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {activityTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -263,7 +293,12 @@ export function OperatorInputForm() {
             <FormItem>
               <FormLabel>Tempo de Usinagem (minutos)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={handleManualTimeChange} placeholder="Digite os minutos ou use o cronômetro"/>
+                <Input 
+                  type="number" 
+                  value={Math.floor(seconds / 60)} 
+                  onChange={handleManualTimeChange} 
+                  placeholder="Digite os minutos ou use o cronômetro"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -279,11 +314,11 @@ export function OperatorInputForm() {
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                    <Button type="button" variant={isRunning ? "destructive" : "default"} onClick={() => setIsRunning(!isRunning)}>
+                    <Button type="button" variant={isRunning ? "destructive" : "default"} onClick={handleTimerToggle}>
                         {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                         {isRunning ? 'Pausar' : 'Iniciar'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); }}>
+                    <Button type="button" variant="outline" onClick={handleTimerReset}>
                         <TimerReset className="mr-2 h-4 w-4" />
                         Zerar
                     </Button>

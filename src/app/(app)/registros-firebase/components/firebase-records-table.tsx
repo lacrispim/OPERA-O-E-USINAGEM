@@ -78,6 +78,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 const PREFERRED_COLUMN_ORDER: (keyof OperatorProductionInput)[] = [
     "operatorId",
     "factory",
+    "activityType",
     "machineId",
     "formsNumber",
     "quantityProduced",
@@ -89,6 +90,7 @@ const PREFERRED_COLUMN_ORDER: (keyof OperatorProductionInput)[] = [
 const COLUMN_HEADERS: Record<string, string> = {
     operatorId: "Operador",
     factory: "Fábrica",
+    activityType: "Atividade",
     machineId: "Máquina",
     formsNumber: "Nº Forms",
     quantityProduced: "Produzido",

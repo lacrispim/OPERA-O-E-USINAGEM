@@ -62,9 +62,14 @@
           "type": "string",
           "description": "The current status of the production entry.",
           "enum": ["Fila de produção", "Em produção", "Encerrado", "Rejeitado", "Enviado"]
+        },
+        "activityType": {
+          "type": "string",
+          "description": "The type of activity performed.",
+          "enum": ["USINAGEM", "PROGRAMAÇÃO"]
         }
       },
-      "required": ["operatorId", "machineId", "quantityProduced", "productionTimeSeconds", "timestamp", "factory", "status"]
+      "required": ["operatorId", "machineId", "quantityProduced", "productionTimeSeconds", "timestamp", "factory", "status", "activityType"]
     },
     "ProductionLossInput": {
       "title": "Production Loss Input",

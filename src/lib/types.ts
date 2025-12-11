@@ -4,6 +4,9 @@ import { z } from 'zod';
 export const productionStatuses = ['Fila de produção', 'Em produção', 'Encerrado', 'Rejeitado', 'Enviado'] as const;
 export type ProductionStatus = typeof productionStatuses[number];
 
+export const activityTypes = ['USINAGEM', 'PROGRAMAÇÃO'] as const;
+export type ActivityType = typeof activityTypes[number];
+
 
 export type ProductionRecord = {
   id: string;
@@ -50,6 +53,7 @@ export type OperatorProductionInput = {
   factory: string;
   operationCount?: number;
   status: ProductionStatus;
+  activityType: ActivityType;
 };
 
 export type ProductionLossInput = {

@@ -129,6 +129,7 @@ export function RecentEntriesTable() {
               <TableRow>
                 <TableHead>Operador</TableHead>
                 <TableHead>Fábrica</TableHead>
+                <TableHead>Atividade</TableHead>
                 <TableHead>Máquina</TableHead>
                 <TableHead>Nº Forms</TableHead>
                 <TableHead className="text-center">Nº Operações</TableHead>
@@ -145,6 +146,7 @@ export function RecentEntriesTable() {
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.operatorId}</TableCell>
                     <TableCell>{entry.factory}</TableCell>
+                    <TableCell>{entry.activityType || '-'}</TableCell>
                     <TableCell>{entry.machineId}</TableCell>
                     <TableCell className="text-muted-foreground">{entry.formsNumber || '-'}</TableCell>
                     <TableCell className="text-center">{entry.operationCount || '-'}</TableCell>
@@ -187,7 +189,7 @@ export function RecentEntriesTable() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center">
+                  <TableCell colSpan={11} className="h-24 text-center">
                     Nenhum registro recente.
                   </TableCell>
                 </TableRow>
