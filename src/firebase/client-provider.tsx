@@ -15,22 +15,30 @@ export const FirebaseClientProvider = ({ children }: { children: ReactNode }) =>
   const router = useRouter();
   const pathname = usePathname();
 
-  const protectedRoutes = ['/shop-floor', '/registros-firebase'];
-  const authRoutes = ['/login', '/signup'];
-
+  const publicRoutes = ['/login', '/signup'];
+  const isPublicRoute = publicRoutes.includes(pathname);
+  
   useEffect(() => {
-    if (!loading) {
-      const isAuthenticated = !!user;
-      
-      if (isAuthenticated && authRoutes.includes(pathname)) {
-        router.replace('/shop-floor');
-      }
-      
-      if (!isAuthenticated && protectedRoutes.some(p => pathname.startsWith(p))) {
-        router.replace('/login');
-      }
+    // Wait until authentication status is resolved
+    if (loading) {
+      return;
     }
-  }, [user, loading, router, pathname]);
+
+    const isAuthenticated = !!user;
+
+    // If user is logged in and tries to access a public route (login/signup), redirect them to the main app.
+    if (isAuthenticated && isPublicRoute) {
+      router.replace('/shop-floor');
+      return; // Early return to prevent further checks
+    }
+
+    // If user is NOT logged in and is trying to access a protected route, redirect to login.
+    if (!isAuthenticated && !isPublicRoute) {
+      router.replace('/login');
+      return; // Early return
+    }
+
+  }, [user, loading, router, pathname, isPublicRoute]);
 
   return (
     <FirebaseProvider
