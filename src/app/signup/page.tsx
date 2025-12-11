@@ -52,18 +52,28 @@ export default function SignupPage() {
         }
     }
 
-    if (!userLoading) {
+    if (!userLoading && auth) {
       checkFirstUser();
     }
   }, [auth, userLoading]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    // Set default values based on whether it's the first user.
+    // This is the correct way to handle initial values in react-hook-form.
     defaultValues: {
       email: '',
       password: '',
     },
   });
+
+  // Use useEffect to set form values once isFirstUser is determined.
+  useEffect(() => {
+    if (isFirstUser === true) {
+      form.setValue('email', 'larissa.crispim@unilever.com');
+      form.setValue('password', '123456');
+    }
+  }, [isFirstUser, form]);
 
   const canSignUp = isFirstUser === true || (user && user.email === 'larissa.crispim@unilever.com');
 
@@ -77,17 +87,6 @@ export default function SignupPage() {
       return;
     }
     
-    // Explicitly check for the first user credentials
-    if (isFirstUser && values.email !== 'larissa.crispim@unilever.com' && values.password !== '123456') {
-        toast({
-            variant: 'destructive',
-            title: 'Primeiro Cadastro Inválido',
-            description: 'O primeiro usuário deve ser larissa.crispim@unilever.com.',
-        });
-        return;
-    }
-
-
     setIsLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -95,11 +94,13 @@ export default function SignupPage() {
         title: 'Usuário Criado!',
         description: `O usuário ${values.email} foi cadastrado com sucesso.`,
       });
-      form.reset();
-      // If the admin is creating another user, they stay on the page.
-      // If it's the first user signing up, redirect them.
+      
+      // If the admin is creating another user, they stay on the page and the form is cleared.
+      // If it's the first user signing up, redirect them to the panel.
       if (isFirstUser) {
         router.push('/shop-floor');
+      } else {
+         form.reset({email: '', password: ''});
       }
     } catch (error: any) {
       toast({
@@ -170,7 +171,6 @@ export default function SignupPage() {
                         type="email" 
                         placeholder={isFirstUser ? "larissa.crispim@unilever.com" : "novo-usuario@exemplo.com"} 
                         {...field} 
-                        defaultValue={isFirstUser ? "larissa.crispim@unilever.com" : ""}
                         />
                     </FormControl>
                     <FormMessage />
@@ -188,7 +188,6 @@ export default function SignupPage() {
                         type="password" 
                         placeholder="••••••••" 
                         {...field}
-                        defaultValue={isFirstUser ? "123456" : ""}
                         />
                     </FormControl>
                     <FormMessage />
