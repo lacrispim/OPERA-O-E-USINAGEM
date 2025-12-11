@@ -84,7 +84,7 @@ export default function LoginPage() {
       });
       setLoginSuccess(true);
     } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
          router.push(`/signup?email=${encodeURIComponent(values.email)}`);
       } else {
         toast({
