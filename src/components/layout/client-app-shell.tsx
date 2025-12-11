@@ -13,14 +13,10 @@ import {
   SidebarFooter,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Database, Monitor, LogOut } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { Database, Monitor } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
-import { useAuth, useUser } from '@/firebase';
-import { Button } from '../ui/button';
-import { signOut } from 'firebase/auth';
-import { useToast } from '@/hooks/use-toast';
 
 const navItems = [
   { href: '/shop-floor', icon: Monitor, label: 'Registro de Produção' },
@@ -29,28 +25,6 @@ const navItems = [
 
 export default function ClientAppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user } = useUser();
-  const auth = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
-
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      await signOut(auth);
-      toast({
-        title: 'Logout realizado com sucesso!',
-      });
-      router.push('/login');
-    } catch (error) {
-       toast({
-        variant: 'destructive',
-        title: 'Erro ao fazer logout',
-        description: 'Ocorreu um problema ao tentar sair da sua conta.',
-      });
-    }
-  };
 
   return (
     <SidebarProvider>
@@ -83,14 +57,7 @@ export default function ClientAppShell({ children }: { children: React.ReactNode
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className='p-4'>
-             <div className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground space-y-1">
-                <p className="font-semibold text-foreground truncate">{user?.email}</p>
-                <p>Logado</p>
-             </div>
-             <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleLogout}>
-                <LogOut className="size-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Sair</span>
-             </Button>
+             {/* Authentication has been removed, so user info and logout are no longer needed. */}
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>

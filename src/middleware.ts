@@ -1,23 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED_ROUTES = ['/shop-floor', '/registros-firebase'];
-const AUTH_ROUTES = ['/login', '/signup'];
-
+// This middleware is now simplified to allow all requests through.
+// Authentication has been removed at the user's request.
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isAuthenticated = request.cookies.has('firebaseAuth.authenticated');
-
-  // If user is authenticated and tries to access login/signup, redirect to shop-floor
-  if (isAuthenticated && AUTH_ROUTES.includes(pathname)) {
+  // If the user navigates to the root, redirect them to the main shop-floor page.
+  if (request.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/shop-floor', request.url));
   }
-
-  // If user is not authenticated and tries to access a protected route, redirect to login
-  if (!isAuthenticated && PROTECTED_ROUTES.includes(pathname)) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
+  
   return NextResponse.next();
 }
 
