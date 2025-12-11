@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -23,6 +23,7 @@ import { Loader2, CheckCircle, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   email: z.string().email('Formato de e-mail inválido.').refine(
@@ -118,13 +119,13 @@ export default function LoginPage() {
                         Você está autenticada. Clique no botão abaixo para ir para o painel.
                     </p>
                 </div>
-                <Button
-                    className="w-full"
-                    onClick={() => router.push('/shop-floor')}
+                <Link
+                    href="/shop-floor"
+                    className={cn(buttonVariants({ className: 'w-full' }))}
                 >
                     Ir para OPERAÇÃO E USINAGEM
                     <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                </Link>
             </div>
           ) : (
             <>
