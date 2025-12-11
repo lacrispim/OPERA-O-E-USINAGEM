@@ -58,8 +58,6 @@ export function OperatorInputForm() {
     },
   });
 
-  const productionTimeMinutes = form.watch('productionTimeMinutes');
-
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
@@ -73,19 +71,9 @@ export function OperatorInputForm() {
   }, [isRunning]);
 
   useEffect(() => {
-    if (!isRunning) {
-        form.setValue('productionTimeMinutes', Math.floor(seconds / 60));
-    }
+    form.setValue('productionTimeMinutes', Math.floor(seconds / 60));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunning, seconds]);
-
-
-  useEffect(() => {
-    // When manual input changes, stop the timer and update seconds
-    if (productionTimeMinutes !== undefined && !isRunning) {
-        setSeconds(productionTimeMinutes * 60);
-    }
-  }, [productionTimeMinutes, isRunning]);
+  }, [seconds]);
 
 
   async function onSubmit(values: FormData) {
@@ -155,7 +143,7 @@ export function OperatorInputForm() {
     const value = e.target.value;
     const minutes = value === '' ? 0 : parseInt(value, 10);
     if (!isNaN(minutes)) {
-        setIsRunning(false);
+        setIsRunning(false); // Stop timer if user manually changes time
         setSeconds(minutes * 60);
         form.setValue('productionTimeMinutes', minutes);
     }
@@ -295,7 +283,7 @@ export function OperatorInputForm() {
                         {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                         {isRunning ? 'Pausar' : 'Iniciar'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); form.setValue('productionTimeMinutes', 0); }}>
+                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); }}>
                         <TimerReset className="mr-2 h-4 w-4" />
                         Zerar
                     </Button>

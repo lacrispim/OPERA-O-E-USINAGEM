@@ -50,8 +50,6 @@ export function LossInputForm() {
     },
   });
 
-  const timeLostMinutes = form.watch('timeLostMinutes');
-
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
@@ -65,18 +63,10 @@ export function LossInputForm() {
   }, [isRunning]);
 
   useEffect(() => {
-    if (!isRunning) {
-        form.setValue('timeLostMinutes', Math.floor(seconds / 60));
-    }
+    form.setValue('timeLostMinutes', Math.floor(seconds / 60));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunning, seconds]);
+  }, [seconds]);
 
-
-  useEffect(() => {
-    if (timeLostMinutes !== undefined && !isRunning) {
-        setSeconds(timeLostMinutes * 60);
-    }
-  }, [timeLostMinutes, isRunning]);
 
   async function onSubmit(values: FormData) {
     if (!database) {
@@ -140,7 +130,7 @@ export function LossInputForm() {
     const value = e.target.value;
     const minutes = value === '' ? 0 : parseInt(value, 10);
     if (!isNaN(minutes)) {
-        setIsRunning(false);
+        setIsRunning(false); // Stop timer if user manually changes time
         setSeconds(minutes * 60);
         form.setValue('timeLostMinutes', minutes);
     }
@@ -264,7 +254,7 @@ export function LossInputForm() {
                         {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                         {isRunning ? 'Pausar' : 'Iniciar'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); form.setValue('timeLostMinutes', 0); }}>
+                    <Button type="button" variant="outline" onClick={() => { setSeconds(0); setIsRunning(false); }}>
                         <TimerReset className="mr-2 h-4 w-4" />
                         Zerar
                     </Button>
